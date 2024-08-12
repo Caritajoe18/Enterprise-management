@@ -1,17 +1,21 @@
-import mongoose from "mongoose";
+import { Sequelize } from "sequelize";
+import fs from "fs";
+import path from "path";
 
-export const DATABASE = async () => {
-  try {
-    const connect = await mongoose.connect(
-      `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@polemaproject.7uxk2.mongodb.net/polema1`
-    );
-    console.log(
-      `database has been connected successfully to ${JSON.stringify(
-        connect.connection.host
-      )}`
-    );
-  } catch (error) {
-    console.error(`Mongodb connection error ${JSON.stringify(error)}`);
-    process.exit(1);
-  }
-};
+// const file = path.join(__dirname, "../..", "certificate.pem");
+// const file2 = path.join(__dirname, "../../", "private-key.pem");
+
+const sequelize = new Sequelize(process.env.DB_NAME as string, process.env.DB_USER as string, process.env.DB_PASSWORD as string, {
+	dialect: "mysql",
+	host: process.env.DB_HOST,
+	port: parseInt(process.env.DB_PORT as string),
+	// //ssl: true,
+	// dialectOptions: {
+	// 	ssl: {
+	// 		key: fs.readFileSync(file2),
+	// 		cert: fs.readFileSync(file),
+	// 	},
+	// },
+});
+
+export default sequelize;

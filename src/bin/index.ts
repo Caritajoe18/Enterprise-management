@@ -1,18 +1,17 @@
-import dotenv from "dotenv"
-dotenv.config()
-import {createServer} from "node:http"
-import app from "../app"
-import { DATABASE } from "../db"
+import dotenv from "dotenv";
+import { createServer } from "node:http";
+dotenv.config();
 
+import app from "../app/index";
+import sequelize from "../db/index";
 
+const server = createServer(app);
+const port = process.env.PORT ?? 5000;
 
+sequelize.sync().then(() => {
+	console.log("Connected to MySql");
+});
 
-const port = process.env.PORT ?? 3000
-DATABASE()
-
-const server = createServer(app)
-
-
-server.listen(port,  () =>{
-    console.log(`Server is running on port ${port}`)
-})
+server.listen(port, () => {
+	console.log(`Server running on port: ${port} `);
+});

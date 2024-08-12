@@ -1,45 +1,58 @@
-import { model, Schema } from "mongoose";
-export interface Iadmin {
-    fullname:string,
-    email:string,
-    phoneNumber:string,
-    department:string,
-    role: string,
-    password:string,
-    active:boolean
+import { DataTypes, Model } from "sequelize";
+import db from "../db";
+export interface AdminAttributes {
+  id: string;
+  fullname: string;
+  email: string;
+  phoneNumber: string;
+  department: string;
+  role: string;
+  password: string;
+  active: boolean;
+}
+export class AdminInstance extends Model<AdminAttributes> {}
 
-     }
-
-const adminModel = new Schema(
+AdminInstance.init(
   {
-    fullame: {
-      type: String,
-      required: true,
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      allowNull: false,
+    },
+
+    fullname: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     email: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
     },
     phoneNumber: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
-    
+
     department: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    role: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     password: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
 
     active: {
-      type: Boolean,
-      default: true,
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
     },
   },
-  { timestamps: true }
+  { sequelize: db, tableName: "admin" }
 );
 
-export const Admin = model<Iadmin>("Admin", adminModel);
+export default AdminInstance;
