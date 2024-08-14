@@ -1,6 +1,6 @@
 import { Sequelize } from "sequelize";
-import fs from "fs";
-import path from "path";
+//import fs from "fs";
+//import path from "path";
 
 // const file = path.join(__dirname, "../..", "certificate.pem");
 // const file2 = path.join(__dirname, "../../", "private-key.pem");

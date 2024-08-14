@@ -6,7 +6,14 @@ export interface AdminAttributes {
   email: string;
   phoneNumber: string;
   department: string;
+  address: string;
   role: string;
+  verificationToken: string;
+  resetPasswordToken: string;
+  otp: string;
+  isAdmin: boolean;
+  otpExpiry: Date;
+  isVerified: boolean;
   password: string;
   active: boolean;
 }
@@ -16,6 +23,7 @@ AdminInstance.init(
   {
     id: {
       type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
       allowNull: false,
     },
@@ -40,11 +48,41 @@ AdminInstance.init(
     },
     role: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
     },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    verificationToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    address: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    resetPasswordToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    otp: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    otpExpiry: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    isVerified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: true,
+    },
+    isAdmin: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
 
     active: {
