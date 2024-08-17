@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import RawMaterialInstance from "../models/rawMaterials";
+import RawMaterialInstance from "../models/products";
 
 
 
