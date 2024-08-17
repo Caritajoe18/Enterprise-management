@@ -9,7 +9,7 @@
     "start": "node dist/bin/index.js",
     "compile": "tsc",
     "build": "tsc --watch",
-    "lint:watch": "eslint --watch ."
+    "lint:watch": "eslint ."
   },
   "author": "Carita",
   "license": "ISC",

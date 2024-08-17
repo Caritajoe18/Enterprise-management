@@ -8,20 +8,22 @@ export interface ProductTuple {
 }
 
 export interface customerAttributes {
-  id: string;
+   customer_id: string;
   name: string;
   date: Date;
+  address: string;
+  category: string;
   product: ProductTuple[];
   amount: number;
-  credit: string;
-  debit: string;
+  credit: number;
+  balance: string;
 }
 
 export class customerInstance extends Model<customerAttributes> {}
 
 customerInstance.init(
   {
-    id: {
+    customer_id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
@@ -36,6 +38,15 @@ customerInstance.init(
       type: DataTypes.DATE,
       allowNull: false,
     },
+    address:{
+        type: DataTypes.STRING,
+        allowNull: true,
+
+    },
+    category:{
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
     product: {
       type: DataTypes.JSON,
       allowNull: false,
@@ -46,10 +57,10 @@ customerInstance.init(
       defaultValue: 0,
     },
     credit: {
-      type: DataTypes.STRING,
+      type: DataTypes.NUMBER,
       allowNull: true,
     },
-    debit: {
+    balance: {
       type: DataTypes.STRING,
       allowNull: false,
     },

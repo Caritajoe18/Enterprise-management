@@ -10,9 +10,7 @@ export interface AdminAttributes {
   role: string;
   verificationToken: string;
   resetPasswordToken: string;
-  otp: string;
-  isAdmin: boolean;
-  otpExpiry: Date;
+  isAdmin?: boolean;
   isVerified: boolean;
   password: string;
   active: boolean;
@@ -65,14 +63,6 @@ AdminInstance.init(
 
     resetPasswordToken: {
       type: DataTypes.STRING,
-      allowNull: true,
-    },
-    otp: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    otpExpiry: {
-      type: DataTypes.DATE,
       allowNull: true,
     },
     isVerified: {

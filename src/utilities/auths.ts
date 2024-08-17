@@ -1,32 +1,49 @@
 import bcryptjs, { genSalt } from "bcryptjs";
 import Jwt from "jsonwebtoken";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
+import OTPInstance from "../models/otps";
 dotenv.config();
 
-export const generateToken = async (input: Record<string, string>) => {
-  console.log(process.env.JWT_SECRET);
-  return Jwt.sign(input, process.env.JWT_SECRET as string, {
+export const generateToken = async (id: string, role: string) => {
+  const payload = { id, role };
+  return Jwt.sign(payload, process.env.JWT_SECRET as string, {
     expiresIn: "1d",
   });
 };
 
+
 export const verifyToken = async (token: string) => {
   try {
-    const verifyy = Jwt.verify(token, process.env.JWT_SECRET as string);
-    return verifyy;
+    const decoded = Jwt.verify(token, process.env.JWT_SECRET as string);
+    return decoded;
   } catch (error) {
-    return "token expired";
+    console.error("Error verifying token:", error);
+    if (error instanceof Jwt.TokenExpiredError) {
+      return "token expired";
+    } else {
+      throw error; // Re-throw the error to handle it in the calling function
+    }
   }
 };
-
 export const bcryptEncode = async (value: { value: string }) => {
-  return bcryptjs.hash(value.value, await genSalt());
+  const salt = await bcryptjs.genSalt(10)
+  return bcryptjs.hash(value.value, salt);
 };
 
-export const bcryptDecode = async (password: string, comparePassword: string) => {
+export const bcryptDecode = async (
+  password: string,
+  comparePassword: string
+) => {
   return bcryptjs.compare(password, comparePassword);
 };
 
-export const generateCode = (): number => {
-  return Math.floor(Math.random() * (9999 - 1000 + 1) + 1000);
+export const generateOtp = ()=> {
+  let otp =  Math.floor(1000+ Math.random()*9000);
+  let expiry = new Date();
+
+  expiry.setTime(new Date().getTime() + 50 * 60 * 1000);
+
+  return {otp, expiry}
 };
+
+ 

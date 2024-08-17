@@ -5,47 +5,45 @@ import dayjs from "dayjs";
 
 export const authenticateAdmin = (roles: string[]) => {
   return async (req: Request | any, res: Response, next: NextFunction) => {
-    try {
-      const token = req.headers["authorization"];
-      console.log('Token:', token);
-      if (!token) {
-        return res.status(401).json({ error: "No token provided" });
-      }
+    const authorization = req.headers["authorization"];
+    
+    if (!authorization) {
+      return res.status(401).json({ error: "No token provided" });
+    }
 
+    const token = authorization.split(" ")[1]; // Better handling of token extraction
+    if (!token) {
+      return res.status(401).json({ error: "Invalid token format" });
+    }
+
+    try {
       const verifying = await verifyToken(token);
       if (verifying === "token expired") {
         return res.status(401).json({ error: "Token expired" });
       }
 
       const { role, id, exp } = verifying as Record<string, string>;
-
       const now = dayjs().unix();
-      console.log('Current time:', now);
 
-      if (Number(exp) < Number(now)) {
-        return res
-          .status(401)
-          .json({ error: "Token expired, please login again" });
+      if (Number(exp) < now) {
+        return res.status(401).json({ error: "Token expired, please login again" });
       }
 
       // Check if the admin exists in the database
       const admin = await AdminInstance.findOne({ where: { id } }) as AdminInstance;
-
       if (!admin) {
-        return res.status(400).json({ error: "Admin not found" });
+        return res.status(404).json({ error: "Admin not found" });
       }
 
       // Check if the user's role is authorized
       if (!roles.includes(role)) {
-        return res.status(401).json({ error: "Unauthorized" });
+        return res.status(403).json({ error: "Unauthorized" });
       }
 
-      console.log("admiiii", admin);
+      // Attach the verified admin details to the request object
+      //req.admin = {id : admin.dataValues.id.toString(), role: admin.dataValues.role};
+      req.admin = verifying;
 
-      // Attach the admin ID to the request object
-      req.admin = admin.dataValues.id.toString();
-
-      // Proceed to the next middleware or route handler
       next();
     } catch (error) {
       console.error('Authentication error:', error);
