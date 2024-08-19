@@ -6,7 +6,7 @@ export interface OTPAttributes {
   userId: string;
   otp: number | null;
   expiry: Date;
-  //status: 'VALID' | 'USED' | 'EXPIRED';
+  
 }
 
 export class OTPInstance extends Model<OTPAttributes> {}
@@ -35,11 +35,7 @@ defaultValue: DataTypes.UUIDV4,
       type: DataTypes.DATE,
       allowNull: false,
     },
-    // status: {
-    //   type: DataTypes.ENUM('VALID', 'USED', 'EXPIRED'),
-    //   defaultValue: 'VALID',
-    //   allowNull: false,
-    // },
+    
   },
   { sequelize: db, tableName: "otps" }
 );

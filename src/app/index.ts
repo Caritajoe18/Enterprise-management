@@ -33,7 +33,7 @@ app.use((req: IRequest, res: Response, next: NextFunction) => {
 });
 
 // General error handler
-app.use((err: createError.HttpError, req: IRequest, res: Response, next: NextFunction) => {
+app.use((err: createError.HttpError, req: IRequest, res: Response) => {
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
 

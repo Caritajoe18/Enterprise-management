@@ -44,7 +44,7 @@ export const signupAdmin = async (req: Request, res: Response) => {
       password: passwordHashed,
       role: "admin",
       isAdmin: true,
-    });
+    }) as unknown as AdminInstance;
     const myOTP = await OTPInstance.create({
       ...req.body,
       userId: admin.dataValues.id,
@@ -67,62 +67,16 @@ export const signupAdmin = async (req: Request, res: Response) => {
         admin,
         myOTP,
       });
-  } catch (error: any) {
+  } catch (error: unknown) { if( error instanceof Error){
+
     res.status(500).json({ error: error.message });
+  }
+  res.status(500).json({error: 'An error occurred'})
   }
 };
 
-export const signupStaff = async (req: Request, res: Response) => {
-  try {
-    const validationResult = signUpSchema.validate(req.body, option);
-    if (validationResult.error) {
-      return res
-        .status(400)
-        .json({ error: validationResult.error.details[0].message });
-    }
+;
 
-    const { email, password, fullname } = req.body;
-
-    const exist = await AdminInstance.findOne({ where: { email } });
-
-    if (exist) {
-      return res.status(400).json({ error: "Email already exists" });
-    }
-    const passwordHashed = await bcryptEncode({ value: password });
-
-    const { otp, expiry } = generateOtp();
-
-    const user = await AdminInstance.create({
-      ...req.body,
-      password: passwordHashed,
-    });
-    console.log(user, "uerrrrr issss");
-
-    const myOTP = await OTPInstance.create({
-      ...req.body,
-      userId: user.dataValues.id,
-      otp,
-      expiry,
-    });
-
-    await sendVerificationMail(
-      email,
-      otp,
-      fullname,
-      generateVerificationEmailHTML
-    );
-
-    console.log(user);
-    return res.status(201).json({
-      message:
-        "Staff created successfully, Check your email to activate your account",
-      user,
-      myOTP,
-    });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-};
 export const resendOTP = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
@@ -153,10 +107,12 @@ export const resendOTP = async (req: Request, res: Response) => {
       generateVerificationEmailHTML
     );
     return res.status(201).json({
-      message: "A new OTP has been sent to your mail",
+      message: "A new OTP has been sent to your mail", newUser
     });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown){
+    if (error instanceof Error){
+      res.status(500).json({ error: error.message });
+    } res.status(500).json({error: "An unexpected error occurred."})
   }
 };
 
@@ -223,28 +179,34 @@ export const loginAdmin = async (req: Request, res: Response) => {
       where: { email },
     })) as AdminInstance;
     if (!admin) {
-      return res.status(400).json({ error: "invalid credentials" });
+      return res.status(401).json({ error: "invalid credentials" });
     }
     console.log("adminnnnnn", admin);
+    if(!admin.dataValues.active){
+      return res.status(403).json({error: "unauthorized access"})
+    }
 
     const isValid = await bcryptDecode(password, admin.dataValues.password);
     if (!isValid) {
-      return res.status(400).json({ error: "invalid credentials" });
+      return res.status(401).json({ error: "invalid credentials" });
     }
     if (!admin.dataValues.isVerified) {
-      return res.status(400).json({
+      return res.status(401).json({
         error: "please verify your email",
       });
     }
-    let { id, role } = admin.dataValues;
+    const { id, role } = admin.dataValues;
     const token = await generateToken(id, role);
 
     console.log(token);
     return res
       .status(200)
       .json({ messages: "login successfull", admin, token });
-  } catch (error) {
-    return res.status(500).json(error);
+  } catch (error: unknown) { if( error instanceof Error){
+
+    res.status(500).json({ error: error.message });
+  }
+  res.status(500).json({error: 'An error occurred'})
   }
 };
 
@@ -255,7 +217,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({ error: "Email not found" });
     }
-    let { id, role, fullname } = user.dataValues;
+    const { id, role, fullname } = user.dataValues;
     const token = await generateToken(id, role);
 
     await user.update({ ...req.body, resetPasswordToken: token });

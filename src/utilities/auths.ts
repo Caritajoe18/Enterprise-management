@@ -1,7 +1,6 @@
-import bcryptjs, { genSalt } from "bcryptjs";
+import bcryptjs from "bcryptjs";
 import Jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import OTPInstance from "../models/otps";
 dotenv.config();
 
 export const generateToken = async (id: string, role: string) => {
@@ -21,7 +20,7 @@ export const verifyToken = async (token: string) => {
     if (error instanceof Jwt.TokenExpiredError) {
       return "token expired";
     } else {
-      throw error; // Re-throw the error to handle it in the calling function
+      throw error;
     }
   }
 };
@@ -38,8 +37,8 @@ export const bcryptDecode = async (
 };
 
 export const generateOtp = ()=> {
-  let otp =  Math.floor(1000+ Math.random()*9000);
-  let expiry = new Date();
+  const otp =  Math.floor(1000+ Math.random()*9000);
+  const expiry = new Date();
 
   expiry.setTime(new Date().getTime() + 50 * 60 * 1000);
 

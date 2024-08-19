@@ -1,15 +1,16 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../db";
+import { validatePrices } from "../validations/prioductValidations";
 
-export interface RawMaterialAttributes {
+export interface ProductsAttributes {
   id: string;
   name: string;
-  price: number;
+  prices: { [category: string]: number };
 }
 
-export class RawMaterialInstance extends Model<RawMaterialAttributes> {}
+export class ProductInstance extends Model<ProductsAttributes> {}
 
-RawMaterialInstance.init(
+ProductInstance.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -22,12 +23,16 @@ RawMaterialInstance.init(
       allowNull: false,
       unique: true,
     },
-    price: {
-      type: DataTypes.FLOAT,
+    prices: {
+      type: DataTypes.JSON,
       allowNull: false,
+      validate: {
+        isValid: validatePrices,
+      },
     },
   },
-  { sequelize: db, tableName: "raw_materials" }
+
+  { sequelize: db, tableName: "products" }
 );
 
-export default RawMaterialInstance;
+export default ProductInstance;

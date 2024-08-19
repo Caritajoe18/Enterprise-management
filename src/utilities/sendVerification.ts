@@ -27,7 +27,7 @@ export const sendVerificationMail = async(email: string,
 
     const transporter = nodemailer.createTransport(MAIL_SETTINGS); 
     const htmlContent = htmlGenerator(fullname, item); 
-// Configure the mailoptions object
+
 const mailOptions = {
     from: MAIL_SETTINGS.auth.user,
     to: email,
@@ -35,7 +35,7 @@ const mailOptions = {
     html: htmlContent,
   };
   
-  // Send the email
+  
   transporter.sendMail(mailOptions, function(error, info){
     if (error) {
       console.log('Error:', error);
