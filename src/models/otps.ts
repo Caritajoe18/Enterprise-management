@@ -26,6 +26,7 @@ defaultValue: DataTypes.UUIDV4,
         model: 'admin', 
         key: 'id',
       },
+      onDelete: 'CASCADE',
     },
     otp: {
       type: DataTypes.INTEGER,

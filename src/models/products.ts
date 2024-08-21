@@ -1,6 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../db";
-import { validatePrices } from "../validations/prioductValidations";
+import { validatePrices } from "../validations/productValidations";
 
 export interface ProductsAttributes {
   id: string;

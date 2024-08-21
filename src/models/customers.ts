@@ -1,35 +1,27 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../db";
+import ProductInstance from "./products";
+import { validateCategory } from "../validations/productValidations";
 
-export interface ProductTuple {
-  item: string;
-  quantity: number;
-  price: number;
-}
-
-export interface customerAttributes {
-   customer_id: string;
+export interface CustomerAttributes {
+  id: string;
   name: string;
   date: Date;
   address: string;
   category: string;
-  product: ProductTuple[];
-  amount: number;
-  credit: number;
-  balance: string;
+  description: string;
 }
 
-export class customerInstance extends Model<customerAttributes> {}
+export class CustomerInstance extends Model<CustomerAttributes> {}
 
-customerInstance.init(
+CustomerInstance.init(
   {
-    customer_id: {
+    id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
       allowNull: false,
     },
-
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -38,46 +30,24 @@ customerInstance.init(
       type: DataTypes.DATE,
       allowNull: false,
     },
-    address:{
-        type: DataTypes.STRING,
-        allowNull: true,
-
-    },
-    category:{
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
-    product: {
-      type: DataTypes.JSON,
-      allowNull: false,
-    },
-    amount: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-      defaultValue: 0,
-    },
-    credit: {
-      type: DataTypes.NUMBER,
+    address: {
+      type: DataTypes.STRING,
       allowNull: true,
     },
-    balance: {
+    category: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
+      validate: {validateCategory},
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
   },
-  { 
-    sequelize: db, 
+  {
+    sequelize: db,
     tableName: "customers",
-    hooks: {
-      beforeSave: (customer: customerInstance) => {
-        if (customer.dataValues.product) {
-          customer.dataValues.amount = customer.dataValues.product.reduce((total, product) => {
-            return total + (product.quantity * product.price);
-          }, 0);
-        }
-      }
-    }
   }
 );
 
-export default customerInstance;
+export default CustomerInstance;

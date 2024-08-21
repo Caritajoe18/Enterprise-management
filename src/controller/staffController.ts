@@ -98,16 +98,18 @@ export const suspendStaff = async (req: Request, res: Response) => {
     const { id } = req.params;
     const staff = await AdminInstance.findByPk(id);
     if (!staff || !staff.dataValues.active) {
-       return res.status(404).json({ error: "staff not found or already suspended" });
+      return res
+        .status(404)
+        .json({ error: "staff not found or already suspended" });
     }
-    if(staff.dataValues.isAdmin ){
-         return res.status(403).json({ message: "Cannont Suspend this user" })
+    if (staff.dataValues.isAdmin) {
+      return res.status(403).json({ message: "Cannont Suspend this user" });
     }
     await AdminInstance.update(
-        { active: false },
-        { where: { id }, returning: true }
-      );
-  
+      { active: false },
+      { where: { id }, returning: true }
+    );
+
     res.status(200).json({ message: "Staff suspended successfully" });
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -126,10 +128,10 @@ export const restoreStaff = async (req: Request, res: Response) => {
     }
 
     await AdminInstance.update(
-        { active: true },
-        { where: { id }, returning: true }
-      );
-  
+      { active: true },
+      { where: { id }, returning: true }
+    );
+
     res.status(200).json({ message: "Staff restored successfully" });
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -146,8 +148,8 @@ export const deleteStaff = async (req: Request, res: Response) => {
     if (!staff) {
       return res.status(404).json({ error: "staff not found" });
     }
-    if(staff.dataValues.role == "MD" || staff.dataValues.role == "Chairman" ){
-        res.status(403).json({ message: "Cannont delete this user" })
+    if (staff.dataValues.role == "MD" || staff.dataValues.role == "Chairman") {
+      res.status(403).json({ message: "Cannont delete this user" });
     }
     const deletedStaff = await staff.destroy();
     res.status(200).json({ message: "Staff deleted successfully" });
@@ -164,7 +166,10 @@ export const getAllStaff = async (req: Request, res: Response) => {
     const staffList = await AdminInstance.findAll({
       order: [["fullname", "ASC"]],
     });
-    res
+    if(staffList.length === 0){
+      return res.status(204).send()
+    }
+     res
       .status(200)
       .json({ message: "Staff retrieved successfully", staffList });
   } catch (error: unknown) {
@@ -176,46 +181,48 @@ export const getAllStaff = async (req: Request, res: Response) => {
 };
 
 export const getSuspendedStaff = async (req: Request, res: Response) => {
-    try {
-      const suspendedStaffList = await AdminInstance.findAll({
-        where: { active: false },
-      });
-  
-      if (suspendedStaffList.length === 0) {
-        return res.status(404).json({ message: "No suspended staff found" });
-      }
-  
-      res.status(200).json({ message: "Suspended staff retrieved successfully", suspendedStaffList });
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        return res.status(500).json({ error: error.message });
-      } else {
-        return res.status(500).json({ error: "An unexpected error occurred" });
-      }
-    }
-  };
-  
-
-export const getStaff = async (req: Request, res: Response) => {
   try {
-    const { fullname, department, role } = req.query;
+    const suspendedStaffList = await AdminInstance.findAll({
+      where: { active: false },
+    });
+
+    if (suspendedStaffList.length === 0) {
+      return res.status(404).json({ message: "No suspended staff found" });
+    }
+
+    res
+      .status(200)
+      .json({
+        message: "Suspended staff retrieved successfully",
+        suspendedStaffList,
+      });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    } else {
+      return res.status(500).json({ error: "An unexpected error occurred" });
+    }
+  }
+};
+
+export const searchStaff = async (req: Request, res: Response) => {
+  try {
+    const { search } = req.query;
 
     const whereClause: {
-      fullname?: { [Op.iLike]: string };
-      department?: { [Op.iLike]: string };
-      role?: { [Op.iLike]: string };
+      [Op.or]?: {
+        fullname?: { [Op.like]: string };
+        department?: { [Op.like]: string };
+        role?: { [Op.like]: string };
+      }[];
     } = {};
 
-    if (fullname) {
-      whereClause.fullname = { [Op.iLike]: `%${fullname}%` };
-    }
-
-    if (department) {
-      whereClause.department = { [Op.iLike]: `%${department}%` };
-    }
-
-    if (role) {
-      whereClause.role = { [Op.iLike]: `%${role}%` };
+    if (search) {
+      whereClause[Op.or] = [
+        { fullname: { [Op.like]: `%${search}%` } },
+        { department: { [Op.like]: `%${search}%` } },
+        { role: { [Op.like]: `%${search}%` } },
+      ];
     }
 
     const staffList = await AdminInstance.findAll({ where: whereClause });
@@ -231,7 +238,7 @@ export const getStaff = async (req: Request, res: Response) => {
       .json({ message: "Staff retrieved successfully", staffList });
   } catch (error: unknown) {
     if (error instanceof Error) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     } else {
       res.status(500).json({ error: "An unexpected error occurred" });
     }

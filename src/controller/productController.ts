@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
 import { ProductInstance } from "../models/products";
-import { createProductSchema } from "../validations/prioductValidations";
+import { createProductSchema } from "../validations/productValidations";
 import { option } from "../validations/userValidation";
+import { Op } from "sequelize";
+import OTPInstance from "../models/otps";
 
-export const createRawMaterial = async (req: Request, res: Response) => {
+export const createProducts = async (req: Request, res: Response) => {
   try {
     const validationResult = createProductSchema.validate(req.body, option);
     if (validationResult.error) {
@@ -35,40 +37,105 @@ export const createRawMaterial = async (req: Request, res: Response) => {
   }
 };
 
-export const updateRawMaterial = async (req: Request, res: Response) => {
+export const updateProducts = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { prices } = req.body;
+    const { prices , name } = req.body;
 
     const product = await ProductInstance.findByPk(id);
     if (!product) {
       return res.status(404).json({ error: "product not found" });
     }
 
-    product.dataValues.prices = { ...product.dataValues.prices, ...prices };
-    await product.save();
+    const updatedPrices = { ...product.dataValues.prices, ...prices };
 
-    res.status(200).json({ message: "Prices updated successfully", product });
-  } catch (error: unknown){
-    if (error instanceof Error){
-        res.status(500).json({ error: error.message });
-      }
-      res.status(500).json({ error: "An unexpected error occurred." });
-  } 
-  
+      const updatedProducts = await ProductInstance.update(
+      { name, prices: updatedPrices },
+      { where: { id } }
+      )
+    //product.dataValues.prices = { ...product.dataValues.prices, ...prices };
+
+    console.log("After update:", product.dataValues);
+    //await product.save();
+
+    res.status(200).json({ message: "Prices updated successfully", updatedProducts});
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred." });
+  }
 };
 
-export const getAllProducts = async (req: Request, res: Response) => {
-    try {
-      const products= await ProductInstance.findAll();
-    
-      res.status(200)
-        .json({ message: "Company's products retrieved successfully", products });
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        res.status(500).json({ error: error.message });
-      }
-      res.status(500).json({ error: "An unexpected error occurred" });
+
+
+
+
+export const searchProducts = async (req: Request, res: Response) => {
+  try {
+    const { name } = req.query;
+    const whereClause: {
+      name?: { [Op.like]: string };
+    } = {};
+
+    if (name) {
+      whereClause.name = { [Op.like]: `%${name}%` };
     }
-  };
-  
+
+    const products = await ProductInstance.findAll({ where: whereClause });
+
+    if (products.length === 0) {
+      return res.status(404).json({ message: "No product found matching the criteria" });
+    }
+
+    res.status(200).json({ message: "Company's products retrieved successfully", products });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred" });
+  }
+};
+
+export const getProducts = async (req: Request, res: Response) => {
+  try {
+    const products = await ProductInstance.findAll();
+    if(products.length === 0){
+       return res.status(204).send()
+    }
+
+     res
+      .status(200)
+      .json({ message: "Company's products retrieved successfully", products });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred" });
+  }
+};
+
+export const deleteProduct = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const product = await ProductInstance.findByPk(id);
+    if (!product) {
+      return res.status(404).json({ message: "No product found" });
+    }
+    await OTPInstance.destroy({
+      where: { userId: id }
+    });
+
+    // Delete the product
+    await product.destroy();
+
+    res.status(200).json({ message: "Product deleted successfully" });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({error: error.message});
+    } else {
+      return res.status(500).json({ error: "An unexpected error occurred." });
+    }
+  }
+};

@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import ProductInstance from '../models/products';
 
 
 
@@ -12,6 +13,15 @@ export const validatePrices = (value: { [key: string]: number }) => {
         throw new Error(`The price for ${key} must be a valid number.`);
       }
     }
+  };
+
+  export const validateCategory = async(value: string)=>{
+ const products = await ProductInstance.findAll();
+ const validCategories = products.flatMap(products => Object.keys(products.dataValues.prices))
+ 
+  if(!validCategories.includes(value)){
+    throw new Error(`Category "${value}" is not valid. Available categories: ${validCategories.join(', ')}`); 
+  }
   };
 
   export const createProductSchema = Joi.object({
