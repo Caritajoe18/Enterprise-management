@@ -8,6 +8,7 @@ export interface AdminAttributes {
   department: string;
   address: string;
   role: string;
+  products:string[];
   verificationToken: string;
   resetPasswordToken: string;
   isAdmin?: boolean;
@@ -46,6 +47,10 @@ AdminInstance.init(
     },
     role: {
       type: DataTypes.STRING,
+      allowNull: false,
+    },
+    products:{
+      type: DataTypes.JSON,
       allowNull: false,
     },
     password: {

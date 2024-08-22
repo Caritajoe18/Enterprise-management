@@ -195,8 +195,8 @@ export const loginAdmin = async (req: Request, res: Response) => {
         error: "please verify your email",
       });
     }
-    const { id, role } = admin.dataValues;
-    const token = await generateToken(id, role);
+    const { id, products } = admin.dataValues;
+    const token = await generateToken(id, products);
 
     console.log(token);
     return res
@@ -217,8 +217,8 @@ export const forgotPassword = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({ error: "Email not found" });
     }
-    const { id, role, fullname } = user.dataValues;
-    const token = await generateToken(id, role);
+    const { id, products, fullname } = user.dataValues;
+    const token = await generateToken(id, products);
 
     await user.update({ ...req.body, resetPasswordToken: token });
 

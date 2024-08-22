@@ -6,6 +6,7 @@ import createError from "http-errors";
 import routes from "../routes"; // Ensure this is your main routing file
 import cookieParser from "cookie-parser";
 import adminRoutes from "../routes/adminRoutes";
+import customerRoutes from "../routes/customerRoutes";
 
 export interface IRequest extends Request {
   user?: string;
@@ -23,6 +24,7 @@ app.use(cookieParser());
 
 // Mount the admin routes
 app.use('/admin', adminRoutes);
+app.use('/customer', customerRoutes);
 
 // Mount the main routes if applicable
 app.use(routes);

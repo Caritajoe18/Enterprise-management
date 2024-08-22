@@ -4,10 +4,10 @@ import { AdminInstance } from "../models/admin";
 import dayjs from "dayjs";
 
 interface AuthRequest extends Request {
-  role?: string
+  products?: string[]
 }
 
-export const authenticateAdmin = (roles: string[]) => {
+export const authenticateAdmin = (products: string[]) => {
   return async (req: AuthRequest | any , res: Response, next: NextFunction) => {
 
     console.log("Request Object:", req);
@@ -29,7 +29,7 @@ export const authenticateAdmin = (roles: string[]) => {
         return res.status(401).json({ error: "Token expired" });
       }
 
-      const { role, id, exp } = verifying as Record<string, string>;
+      const { products, id, exp } = verifying as Record<string, string>;
       const now = dayjs().unix();
 
       if (Number(exp) < now) {
@@ -45,13 +45,16 @@ export const authenticateAdmin = (roles: string[]) => {
         return res.status(404).json({ error: "Admin not found" });
       }
 
-      if (!roles.includes(role)) {
+      if (!products.includes(products)) {
         return res.status(403).json({ error: "Unauthorized" });
       }
 
       req.admin = verifying;
-
+      
       console.log("Updated Request Object:", req)
+      console.log(req.admin.id); // Logs the admin's ID
+console.log(req.admin.role); // Logs the admin's role
+
 
       next();
     } catch (error) {

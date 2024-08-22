@@ -3,8 +3,8 @@ import Jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
 
-export const generateToken = async (id: string, role: string) => {
-  const payload = { id, role };
+export const generateToken = async (id: string, product: string[]) => {
+  const payload = { id, product };
   return Jwt.sign(payload, process.env.JWT_SECRET as string, {
     expiresIn: "1d",
   });
@@ -15,7 +15,7 @@ export const verifyToken = async (token: string) => {
   try {
     const decoded = Jwt.verify(token, process.env.JWT_SECRET as string);
     return decoded;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error verifying token:", error);
     if (error instanceof Jwt.TokenExpiredError) {
       return "token expired";

@@ -52,7 +52,7 @@ export const signupStaff = async (req: Request, res: Response) => {
       generateVerificationEmailHTML
     );
 
-    console.log(user);
+    //console.log(user);
     return res.status(201).json({
       message:
         "Staff created successfully, Check your email to activate your account",
@@ -148,7 +148,7 @@ export const deleteStaff = async (req: Request, res: Response) => {
     if (!staff) {
       return res.status(404).json({ error: "staff not found" });
     }
-    if (staff.dataValues.role == "MD" || staff.dataValues.role == "Chairman") {
+    if (staff.dataValues.isAdmin) {
       res.status(403).json({ message: "Cannont delete this user" });
     }
     const deletedStaff = await staff.destroy();

@@ -39,6 +39,7 @@ export const signUpSchema = Joi.object({
     }),
   department: Joi.string().min(4).max(30),
   role: Joi.string().min(4).max(30).required(),
+  products: Joi.array().items(Joi.string()).required(),
 
   password: passwordSchema,
   confirmPassword: Joi.any()

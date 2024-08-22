@@ -29,6 +29,7 @@ CustomerInstance.init(
     date: {
       type: DataTypes.DATE,
       allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
     address: {
       type: DataTypes.STRING,
@@ -37,7 +38,7 @@ CustomerInstance.init(
     category: {
       type: DataTypes.STRING,
       allowNull: true,
-      validate: {validateCategory},
+      validate: { validateCategory },
     },
     description: {
       type: DataTypes.TEXT,
