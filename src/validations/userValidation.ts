@@ -30,6 +30,8 @@ export const signUpSchema = Joi.object({
     "string.empty": "Email is required",
     "string.email": "Invalid email format",
   }),
+  
+
   phoneNumber: Joi.string()
     .pattern(/^[0-9]+$/)
     .required()

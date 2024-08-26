@@ -5,6 +5,7 @@ export interface AdminAttributes {
   fullname: string;
   email: string;
   phoneNumber: string;
+  profilePic: string;
   department: string;
   address: string;
   role: string;
@@ -41,6 +42,10 @@ AdminInstance.init(
       allowNull: false,
     },
 
+    profilePic: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     department: {
       type: DataTypes.STRING,
       allowNull: true,

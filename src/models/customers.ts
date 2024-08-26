@@ -7,6 +7,7 @@ export interface CustomerAttributes {
   id: string;
   name: string;
   date: Date;
+  profilePic:string
   address: string;
   category: string;
   description: string;
@@ -25,6 +26,10 @@ CustomerInstance.init(
     name: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    profilePic: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     date: {
       type: DataTypes.DATE,
