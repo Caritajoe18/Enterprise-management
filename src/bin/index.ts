@@ -3,7 +3,7 @@ import { createServer } from "node:http";
 dotenv.config();
 
 import app from "../app/index";
-import sequelize from "../db/index";
+import sequelize from "../db";
 
 const server = createServer(app);
 const port = process.env.PORT ?? 5000;

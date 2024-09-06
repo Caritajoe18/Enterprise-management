@@ -1,13 +1,15 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../db";
-import ProductInstance from "./products";
 import { validateCategory } from "../validations/productValidations";
 
 export interface CustomerAttributes {
   id: string;
-  name: string;
+  firstname: string;
+  lastname: string;
   date: Date;
-  profilePic:string
+  email:string;
+  profilePic:string;
+  phoneNumber: number;
   address: string;
   category: string;
   description: string;
@@ -23,7 +25,15 @@ CustomerInstance.init(
       primaryKey: true,
       allowNull: false,
     },
-    name: {
+    firstname: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    lastname: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    email: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -33,17 +43,26 @@ CustomerInstance.init(
     },
     date: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: true,
       defaultValue: DataTypes.NOW,
     },
     address: {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    phoneNumber: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     category: {
       type: DataTypes.STRING,
-      allowNull: true,
-      validate: { validateCategory },
+      allowNull: false,
+      defaultValue: "Regular", 
+      validate: {
+        async isCategory(value: string) {
+          await validateCategory(value);
+        }
+      },
     },
     description: {
       type: DataTypes.TEXT,

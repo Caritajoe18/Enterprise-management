@@ -4,13 +4,11 @@ import {
   option,
   resetPasswordSchema,
   signUpSchema,
-} from "../validations/userValidation";
+} from "../validations/adminValidation";
 import AdminInstance from "../models/admin";
-import OTPInstance from "../models/otps";
 import {
   bcryptDecode,
   bcryptEncode,
-  generateOtp,
   generateToken,
   verifyToken,
 } from "../utilities/auths";
@@ -19,6 +17,9 @@ import {
   generateTokenEmailHTML,
   generateVerificationEmailHTML,
 } from "../utilities/htmls";
+import Role from "../models/role";
+
+export const loginurl = `http/3000/frontend login`;
 
 export const signupAdmin = async (req: Request, res: Response) => {
   try {
@@ -29,148 +30,83 @@ export const signupAdmin = async (req: Request, res: Response) => {
         .json({ error: validationResult.error.details[0].message });
     }
 
-    const { email, password, fullname } = req.body;
+    const { email, password, roleName , firstname} = req.body;
 
     const exist = await AdminInstance.findOne({ where: { email } });
 
     if (exist) {
       return res.status(400).json({ error: "Email already exists" });
     }
+    const role = await Role.findOne({ where: { name: roleName } });
+    if (!role) {
+      return res.status(400).json({ error: "Role does not exist" });
+    }
     const passwordHashed = await bcryptEncode({ value: password });
-    const { otp, expiry } = generateOtp();
 
-    const admin = await AdminInstance.create({
+    const admin = (await AdminInstance.create({
       ...req.body,
       password: passwordHashed,
       role: "admin",
+      roleId: role.dataValues.id,
       isAdmin: true,
-    }) as unknown as AdminInstance;
-    const myOTP = await OTPInstance.create({
-      ...req.body,
-      userId: admin.dataValues.id,
-      otp,
-      expiry,
-    });
+    })) as unknown as AdminInstance;
+
     await sendVerificationMail(
       email,
-      otp,
-      fullname,
+      loginurl,
+      firstname,
       generateVerificationEmailHTML
     );
 
-    console.log(admin);
-    return res
-      .status(201)
-      .json({
-        message:
-          "Admin created successfully, Check your email to activate your account",
-        admin,
-        myOTP,
-      });
-  } catch (error: unknown) { if( error instanceof Error){
-
-    res.status(500).json({ error: error.message });
-  }
-  res.status(500).json({error: 'An error occurred'})
+    //console.log(admin);
+    return res.status(201).json({
+      message:
+        "Admin created successfully, Check your email to activate your account",
+      admin,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An error occurred" });
   }
 };
 
-;
-
-export const resendOTP = async (req: Request, res: Response) => {
+export const loginMial = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
     const user = await AdminInstance.findOne({ where: { email } });
 
     if (!user) {
       return res.status(404).json({
-        error: "user not found",
+        error: "user not found please sign up",
       });
     }
     if (user.dataValues.isVerified) {
       return res.status(400).json({ error: "User already verified" });
     }
-    const fullname = user.dataValues.fullname;
-    const { otp, expiry } = generateOtp();
-    const newUser = await OTPInstance.update(
-      {
-        otp,
-        expiry,
-      },
-      { where: { userId: user.dataValues.id } }
-    );
+    const fullname = user.dataValues.firstname;
 
     await sendVerificationMail(
       email,
-      otp,
+      loginurl,
       fullname,
       generateVerificationEmailHTML
     );
     return res.status(201).json({
-      message: "A new OTP has been sent to your mail", newUser
+      message: "A new login has been sent to your mail",
     });
-  } catch (error: unknown){
-    if (error instanceof Error){
+  } catch (error: unknown) {
+    if (error instanceof Error) {
       res.status(500).json({ error: error.message });
-    } res.status(500).json({error: "An unexpected error occurred."})
-  }
-};
-
-export const verifyEmail = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { code } = req.body;
-    //console.log("Received OTP:", code);
-
-    const userOTP = await OTPInstance.findOne({
-      where: { otp: code, userId: id },
-    });
-
-    if (!userOTP) {
-      return res
-        .status(404)
-        .json({ error: "OTP not found or invalid for this user" });
     }
-
-    const user = await AdminInstance.findOne({
-      where: { id: userOTP.dataValues.userId },
-    });
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    if (user.dataValues.isVerified) {
-      return res.status(400).json({ error: "Email already verified" });
-    }
-
-    const { otp, expiry } = userOTP.dataValues;
-    const now = new Date();
-
-    if (otp !== code || now > new Date(expiry)) {
-      return res.status(400).json({ error: "Invalid or expired code" });
-    }
-
-    await user.update({
-      isVerified: true,
-    });
-
-    await OTPInstance.destroy({
-      where: { id: userOTP.dataValues.id }
-    });
-
-    return res.status(200).json({ message: "Email verified successfully" });
-  } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ error: "Failed to update user verification status" });
+    res.status(500).json({ error: "An unexpected error occurred." });
   }
 };
 
 export const loginAdmin = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
     const valid = loginSchema.validate(req.body, option);
     if (valid.error) {
       return res.status(400).json({ error: valid.error.details[0].message });
@@ -181,9 +117,9 @@ export const loginAdmin = async (req: Request, res: Response) => {
     if (!admin) {
       return res.status(401).json({ error: "invalid credentials" });
     }
-    console.log("adminnnnnn", admin);
-    if(!admin.dataValues.active){
-      return res.status(403).json({error: "unauthorized access"})
+    //console.log("adminnnnnn", admin);
+    if (!admin.dataValues.active) {
+      return res.status(403).json({ error: "unauthorized access" });
     }
 
     const isValid = await bcryptDecode(password, admin.dataValues.password);
@@ -195,18 +131,18 @@ export const loginAdmin = async (req: Request, res: Response) => {
         error: "please verify your email",
       });
     }
-    const { id, products } = admin.dataValues;
-    const token = await generateToken(id, products);
+    const { id, isAdmin } = admin.dataValues;
+    const token = await generateToken(id, isAdmin);
 
     console.log(token);
     return res
       .status(200)
       .json({ messages: "login successfull", admin, token });
-  } catch (error: unknown) { if( error instanceof Error){
-
-    res.status(500).json({ error: error.message });
-  }
-  res.status(500).json({error: 'An error occurred'})
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An error occurred" });
   }
 };
 
@@ -217,12 +153,12 @@ export const forgotPassword = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({ error: "Email not found" });
     }
-    const { id, products, fullname } = user.dataValues;
-    const token = await generateToken(id, products);
+    const { id, isAdmin, firstname } = user.dataValues;
+    const token = await generateToken(id, isAdmin);
 
     await user.update({ ...req.body, resetPasswordToken: token });
 
-    await sendVerificationMail(email, token, fullname, generateTokenEmailHTML);
+    await sendVerificationMail(email, token, firstname, generateTokenEmailHTML);
 
     return res
       .status(200)

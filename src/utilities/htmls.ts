@@ -8,7 +8,7 @@ export const generateVerificationEmailHTML = (
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>OTP Verification</title>
+        <title>Polema Verification Mail</title>
         <style>
           body {
             font-family: Arial, sans-serif;
@@ -68,15 +68,17 @@ export const generateVerificationEmailHTML = (
       <body>
         <div class="container">
           <div class="header">
-            <h1>OTP Verification</h1>
+            <h1>Your Login</h1>
           </div>
           <div class="content">
             <p>Hi ${fullname},</p>
             <p>
-              We've received a request to verify your account. Please use the OTP
-              below to complete the verification process:
+              You have been registered as a staff, Please use link
+              below to login and complete the verification process:
             </p>
-            <p><a href="#" class="otp">${item}</a></p>
+            <p><button style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
+            <a href="http://localhost:5000/admin/reset-password?token=${item}" style="color: white; text-decoration: none;">Login</a>
+          </button></p>
             <p>If you did not request this, please ignore this email.</p>
           </div>
           <div class="footer">

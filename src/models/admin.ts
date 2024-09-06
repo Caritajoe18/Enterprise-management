@@ -1,15 +1,18 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../db";
+import Role from "./role";
+
 export interface AdminAttributes {
   id: string;
-  fullname: string;
+  firstname: string;
+  lastname: string;
   email: string;
   phoneNumber: string;
   profilePic: string;
   department: string;
   address: string;
-  role: string;
-  products:string[];
+  roleName: string;
+  roleId: string;
   verificationToken: string;
   resetPasswordToken: string;
   isAdmin?: boolean;
@@ -17,80 +20,113 @@ export interface AdminAttributes {
   password: string;
   active: boolean;
 }
-export class AdminInstance extends Model<AdminAttributes> {}
 
-AdminInstance.init(
-  {
-    id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      primaryKey: true,
-      allowNull: false,
-    },
 
-    fullname: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    email: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-      unique: true,
-    },
-    phoneNumber: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
+// module.exports = (sequelize, DataTypes) => {
+  class Admins extends Model<AdminAttributes> {
+    /**
+     * Helper method for defining associations.
+     * This method is not a part of Sequelize lifecycle.
+     * The `models/index` file will call this method automatically.
+     */
 
-    profilePic: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    department: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    role: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    products:{
-      type: DataTypes.JSON,
-      allowNull: false,
-    },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    verificationToken: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    address: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
+    public role?: Role;
+    static associate(models: any) {
+      // define association here
 
-    resetPasswordToken: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    isVerified: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-      allowNull: true,
-    },
-    isAdmin: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
+      Admins.belongsTo(models.Role, {
+ foreignKey: 'roleId',
+   as: 'role',  });
 
-    active: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
-    },
-  },
-  { sequelize: db, tableName: "admin" }
-);
-
-export default AdminInstance;
+ Role.hasMany(models.Admins, {
+  foreignKey: 'roleId',
+   as: 'admins',
+});
+    }
+  }
+  Admins.init({
+    
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+        allowNull: false,
+      },
+  
+      firstname: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      lastname: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      email: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+        unique: true,
+      },
+      phoneNumber: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+  
+      profilePic: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      department: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      roleName: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      
+      roleId: {
+        type: DataTypes.UUID,
+        references: {
+          model: 'roles',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
+      },
+      
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      verificationToken: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      address: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+  
+      resetPasswordToken: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      isVerified: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: true,
+      },
+      isAdmin: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
+  
+      active: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+      },
+  }, {
+    sequelize: db,
+    modelName: 'Admins',
+  });
+  export default  Admins;

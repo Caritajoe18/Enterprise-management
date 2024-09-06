@@ -5,12 +5,14 @@ import {
   option,
   signUpSchema,
   updateStaffSchema,
-} from "../validations/userValidation";
-import { bcryptEncode, generateOtp } from "../utilities/auths";
-import OTPInstance from "../models/otps";
+} from "../validations/adminValidation";
+import { bcryptEncode } from "../utilities/auths";
+
 import { sendVerificationMail } from "../utilities/sendVerification";
 import { generateVerificationEmailHTML } from "../utilities/htmls";
 import { Op } from "sequelize";
+import { loginurl } from "./adminController";
+import Role from "../models/role";
 
 export const signupStaff = async (req: Request, res: Response) => {
   try {
@@ -21,43 +23,42 @@ export const signupStaff = async (req: Request, res: Response) => {
         .json({ error: validationResult.error.details[0].message });
     }
 
-    const { email, password, fullname } = req.body;
+    const { email, password, firstname,roleName } = req.body;
 
     const exist = await AdminInstance.findOne({ where: { email } });
 
     if (exist) {
       return res.status(400).json({ error: "Email already exists" });
     }
+
+    const role = await Role.findOne({ where: { name: roleName } });
+    if (!role) {
+      return res.status(400).json({ error: "Role does not exist" });
+    }
     const passwordHashed = await bcryptEncode({ value: password });
 
-    const { otp, expiry } = generateOtp();
-
+  
     const user = await AdminInstance.create({
       ...req.body,
+      roleId: role.dataValues.id,
       password: passwordHashed,
     });
-    console.log(user, "uerrrrr issss");
+    //console.log(user, "uerrrrr issss");
 
-    const myOTP = await OTPInstance.create({
-      ...req.body,
-      userId: user.dataValues.id,
-      otp,
-      expiry,
-    });
+    
 
     await sendVerificationMail(
       email,
-      otp,
-      fullname,
+      loginurl,
+      firstname,
       generateVerificationEmailHTML
     );
 
-    //console.log(user);
+
     return res.status(201).json({
       message:
         "Staff created successfully, Check your email to activate your account",
-      user,
-      myOTP,
+      user
     });
   } catch (error: unknown) {
     if (error instanceof Error) {

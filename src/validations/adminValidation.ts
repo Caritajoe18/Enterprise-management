@@ -20,10 +20,15 @@ const passwordSchema = Joi.string()
   .required();
 
 export const signUpSchema = Joi.object({
-  fullname: Joi.string().min(4).max(30).required().messages({
+  firstname: Joi.string().min(2).max(30).required().messages({
     "string.empty": "First name is required",
     "string.min": "First name should have a minimum length of {#limit}",
     "string.max": "First name should have a maximum length of {#limit}",
+  }),
+  lastname: Joi.string().min(2).max(30).required().messages({
+    "string.empty": "last name is required",
+    "string.min": "Last name should have a minimum length of {#limit}",
+    "string.max": "Last name should have a maximum length of {#limit}",
   }),
 
   email: Joi.string().email().required().messages({
@@ -40,9 +45,7 @@ export const signUpSchema = Joi.object({
       //   "string.length": "Phone number should have a length of {#limit}",
     }),
   department: Joi.string().min(4).max(30),
-  role: Joi.string().min(4).max(30).required(),
-  products: Joi.array().items(Joi.string()).required(),
-
+  roleName: Joi.string().min(4).max(30).required(),
   password: passwordSchema,
   confirmPassword: Joi.any()
     .equal(Joi.ref("password"))
@@ -77,9 +80,6 @@ export const sendVerification = Joi.object().keys({
   email: Joi.string().trim().lowercase().email().required(),
 });
 
-export const verifyCode = Joi.object().keys({
-  otp: Joi.number().required(),
-});
 
 export const updateStaffSchema = Joi.object({
   fullname: Joi.string().min(3).max(30).messages({

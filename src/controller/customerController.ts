@@ -4,7 +4,7 @@ import {
   regCustomerSchema,
   updateCustomerSchema,
 } from "../validations/customerValid";
-import { option } from "../validations/userValidation";
+import { option } from "../validations/adminValidation";
 
 export const createCustomer = async (req: Request, res: Response) => {
   try {
@@ -14,9 +14,9 @@ export const createCustomer = async (req: Request, res: Response) => {
         .status(400)
         .json({ error: validationResult.error.details[0].message });
     }
-    const { name } = req.body;
+    const { email } = req.body;
 
-    const exist = await CustomerInstance.findOne({ where: { name } });
+    const exist = await CustomerInstance.findOne({ where: { email } });
 
     if (exist) {
       return res.status(400).json({ error: "Customer name already exists" });

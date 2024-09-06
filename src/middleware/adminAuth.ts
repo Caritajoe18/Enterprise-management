@@ -1,6 +1,6 @@
 import { NextFunction, Response, Request } from "express";
 import { verifyToken } from "../utilities/auths";
-import { AdminInstance } from "../models/admin";
+import  AdminInstance  from "../models/admin";
 import dayjs from "dayjs";
 
 interface AuthRequest extends Request {

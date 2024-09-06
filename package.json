@@ -9,7 +9,9 @@
     "start": "node dist/bin/index.js",
     "compile": "tsc",
     "build": "tsc --watch",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "migrate": "sequelize-cli db:migrate",
+    "migrate:undo": "sequelize-cli db:migrate:undo"
   },
   "author": "Carita",
   "license": "ISC",
@@ -50,6 +52,7 @@
     "mysql2": "^3.11.0",
     "nodemailer": "^6.9.14",
     "sequelize": "^6.37.3",
+    "sequelize-cli": "^6.6.2",
     "uuid": "^10.0.0"
   }
 }

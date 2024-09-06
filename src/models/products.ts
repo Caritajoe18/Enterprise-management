@@ -5,7 +5,8 @@ import { validatePrices } from "../validations/productValidations";
 export interface ProductsAttributes {
   id: string;
   name: string;
-  prices: { [category: string]: number };
+  price: { [unit: string]: number }; 
+  pricePlan?: { [category: string]: number };
 }
 
 export class ProductInstance extends Model<ProductsAttributes> {}
@@ -23,9 +24,19 @@ ProductInstance.init(
       allowNull: false,
       unique: true,
     },
-    prices: {
+    
+     price: {
       type: DataTypes.JSON,
       allowNull: false,
+      validate: {
+        isValid: validatePrices,
+      },
+      
+    },
+    pricePlan: {
+      type: DataTypes.JSON,
+      defaultValue:{},
+      allowNull: true,
       validate: {
         isValid: validatePrices,
       },
