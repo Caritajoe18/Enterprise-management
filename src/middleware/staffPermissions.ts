@@ -25,6 +25,7 @@ export const authorize = (requiredPermission: string) => {
                     include: [{
                         model: Permission,
                         as: 'permissions',
+                        attributes: ['name']
                     }],
                 }],
             });

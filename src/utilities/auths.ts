@@ -1,6 +1,7 @@
 import bcryptjs from "bcryptjs";
 import Jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import Permission from "../models/permission";
 dotenv.config();
 
 export const generateToken = async (id: string,  isAdmin: boolean| undefined) => {
@@ -9,6 +10,19 @@ export const generateToken = async (id: string,  isAdmin: boolean| undefined) =>
     expiresIn: "1d",
   });
 };
+const generateeToken = async (admin: any) => {
+  const permissions = admin.role.permissions.map((permission: Permission) => permission.dataValues.name);
+
+  console.log(permissions, "permissionss")
+
+  const tokenPayload = {
+    id: admin.id,
+    role: admin.role.name,
+    permissions, // Embed permissions into the token
+  };
+
+  return Jwt.sign(tokenPayload, process.env.JWT_SECRET as string, { expiresIn: '1d' });
+ };
 
 
 export const verifyToken = async (token: string) => {

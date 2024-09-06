@@ -31,6 +31,7 @@ export const signupAdmin = async (req: Request, res: Response) => {
     }
 
     const { email, password, roleName , firstname} = req.body;
+    
 
     const exist = await AdminInstance.findOne({ where: { email } });
 
@@ -54,6 +55,7 @@ export const signupAdmin = async (req: Request, res: Response) => {
     await sendVerificationMail(
       email,
       loginurl,
+
       firstname,
       generateVerificationEmailHTML
     );
