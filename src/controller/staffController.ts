@@ -165,7 +165,7 @@ export const deleteStaff = async (req: Request, res: Response) => {
 export const getAllStaff = async (req: Request, res: Response) => {
   try {
     const staffList = await AdminInstance.findAll({
-      order: [["fullname", "ASC"]],
+      order: [["firstname", "ASC"]],
     });
     if(staffList.length === 0){
       return res.status(204).send()
