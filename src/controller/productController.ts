@@ -13,15 +13,18 @@ export const createProducts = async (req: Request, res: Response) => {
         .json({ error: validationResult.error.details[0].message });
     }
 
-    const { name } = req.body;
+    const { name, price, pricePlan } = req.body;
 
     const exist = await ProductInstance.findOne({ where: { name } });
     if (exist) {
-      const newProduct =  await exist.update({...req.body});
+      const newProduct =  await exist.update({...req.body,
+      });
     }
 
     const product = await ProductInstance.create({
       ...req.body,
+      price,
+      pricePlan: pricePlan || {},
     });
 
     res

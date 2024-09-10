@@ -17,12 +17,16 @@ export interface RoleAttributes {
 
     public permissions?: Permission[];
 
-    static associate() {
-      Role.belongsToMany(Permission, {
+    static associate(models: any) {
+      Role.belongsToMany(models.Permission, {
         through: 'RolePermission',
         as: 'permissions',
           foreignKey: 'roleId',
         otherKey: 'permissionId' 
+        });
+        Role.hasMany(models.Admins, {
+          foreignKey: "roleId",
+          as: "admins",  // Alias used to reference Admins from Role
         });
     }
   }

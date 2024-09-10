@@ -14,10 +14,10 @@ class Permission extends Model<PermissionAttributes> {
    * This method is not a part of Sequelize lifecycle.
    * The `models/index` file will call this method automatically.
    */
-  static associate() {
-    Permission.belongsToMany(Role, {
+  static associate(models: any) {
+    Permission.belongsToMany(models.Role, {
       through: "RolePermission",
-      as: "roles",
+      as: "role",
         foreignKey: 'permissionId',
      otherKey: 'roleId'
     });

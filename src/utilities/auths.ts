@@ -1,11 +1,11 @@
 import bcryptjs from "bcryptjs";
-import Jwt from "jsonwebtoken";
+import Jwt, { JwtPayload } from "jsonwebtoken";
 import dotenv from "dotenv";
 import Permission from "../models/permission";
 dotenv.config();
 
-export const generateToken = async (id: string,  isAdmin: boolean| undefined) => {
-  const payload = { id, isAdmin};
+export const generateToken = async (roleId: string,  isAdmin: boolean| undefined) => {
+  const payload = { roleId, isAdmin};
   return Jwt.sign(payload, process.env.JWT_SECRET as string, {
     expiresIn: "1d",
   });
@@ -25,7 +25,7 @@ const generateeToken = async (admin: any) => {
  };
 
 
-export const verifyToken = async (token: string) => {
+export const verifyToken = async (token: string) : Promise<string | JwtPayload>=> {
   try {
     const decoded = Jwt.verify(token, process.env.JWT_SECRET as string);
     return decoded;

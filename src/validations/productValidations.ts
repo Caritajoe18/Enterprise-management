@@ -25,15 +25,24 @@ export const validateCategory = async (value: string) => {
 export const createProductSchema = Joi.object({
   name: Joi.string().required().messages({
     "string.required": "The name of a product is required",
+    "any.required": "Product name is required",
   }),
-  prices: Joi.object()
+  price: Joi.object()
     .pattern(Joi.string(), Joi.number().positive().required())
     .min(1)
+    .required()
     .messages({
-      "object.base": "Prices must be a valid object with categories as keys.",
-      "object.pattern.base": "Each category must have a valid price.",
-      "object.min": "Prices must contain at least one category.",
-      "any.required":
-        "Prices are required and must include at least one category.",
+      "object.base": "Price must be a valid object with units as keys.",
+      "object.pattern.base": "Each unit must have a valid positive price.",
+      "object.min": "Price must contain at least one unit.",
+      "any.required": "Price is required and must include at least one unit.",
+    }),
+  pricePlan: Joi.object()
+    .pattern(Joi.string(), Joi.number().positive())
+    .optional()
+    .messages({
+      "object.base": "Price plan must be a valid object with categories as keys.",
+      "object.pattern.base": "Each category must have a valid positive price.",
     }),
 });
+

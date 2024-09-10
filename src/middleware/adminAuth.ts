@@ -4,7 +4,7 @@ import  AdminInstance  from "../models/admin";
 import dayjs from "dayjs";
 
 interface AuthRequest extends Request {
-  products?: string[]
+  user?: string[]
 }
 
 export const authenticateAdmin = (products: string[]) => {
