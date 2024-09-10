@@ -1,4 +1,4 @@
 *node_modules
 *.env
-/src
+/dist
 *eslint.config.mjs
