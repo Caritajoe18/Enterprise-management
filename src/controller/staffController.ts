@@ -212,17 +212,17 @@ export const searchStaff = async (req: Request, res: Response) => {
 
     const whereClause: {
       [Op.or]?: {
-        fullname?: { [Op.like]: string };
+        firstname?: { [Op.like]: string };
         department?: { [Op.like]: string };
-        role?: { [Op.like]: string };
+        roleName?: { [Op.like]: string };
       }[];
     } = {};
 
     if (search) {
       whereClause[Op.or] = [
-        { fullname: { [Op.like]: `%${search}%` } },
+        { firstname: { [Op.like]: `%${search}%` } },
         { department: { [Op.like]: `%${search}%` } },
-        { role: { [Op.like]: `%${search}%` } },
+        { roleName: { [Op.like]: `%${search}%` } },
       ];
     }
 
