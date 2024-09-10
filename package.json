@@ -38,6 +38,7 @@
     "typescript-eslint": "^8.0.1"
   },
   "dependencies": {
+    "@types/sequelize": "^4.28.20",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",

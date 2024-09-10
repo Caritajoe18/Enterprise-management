@@ -45,56 +45,7 @@ export const addRole = async (req: Request, res: Response) => {
       }
     };
 
-  // export const editRole = async (req: Request, res: Response) => {
-  //   const { roleId } = req.params;
-  //   const { name, permissions } = req.body;
   
-  //   try {
-  //     // Find the role to edit
-  //     const role = await Role.findByPk(roleId);
-  //     if (!role) {
-  //       return res.status(404).json({ message: 'Role not found' });
-  //     }
-  
-  //     // Update role name if provided
-  //     if (name) {
-  //       role.name = name;
-  //       await role.save();
-  //     }
-  
-  //     if (permissions) {
-  //       // Fetch current permissions and new permissions in bulk
-  //       const [currentPermissions, permissionsInstances] = await Promise.all([
-  //         role.getPermissions(), // Fetch current permissions
-  //         Permission.findAll({ where: { id: permissions } }), // Fetch new permissions
-  //       ]);
-  
-  //       // Convert to sets for easy comparison
-  //       const currentPermissionIds = new Set(currentPermissions.map(p => p.id));
-  //       const newPermissionIds = new Set(permissions);
-  
-  //       // Determine permissions to add and remove
-  //       // const permissionsToAdd = permissionsInstances.filter(p => !currentPermissionIds.has(p.id));
-  //       // const permissionsToRemove = currentPermissions.filter(p => !newPermissionIds.has(p.id));
-  
-  //       // // Perform bulk operations
-  //       // await Promise.all([
-  //       //   role.addPermissions(permissionsToAdd),
-  //       //   role.removePermissions(permissionsToRemove),
-  //       // ]);
-  //     }
-  
-  //     // Optionally include permissions in response
-  //     const updatedRole = await Role.findByPk(roleId, { include: 'permissions' });
-  
-  //     return res.status(200).json({ role: updatedRole });
-  //   } catch (error) {
-  //     console.error('Error editing role:', error);
-  //     return res.status(500).json({ message: 'Internal Server Error' });
-  //   }
-  // };
-
-// Assign a role to an admin
 export const assignRoleToAdmin = async (req: Request, res: Response) => {
     try {
         const { adminId, roleId } = req.body;

@@ -1,10 +1,12 @@
 import Joi from 'joi';
 export const regCustomerSchema = Joi.object({
-    name: Joi.string().min(4).max(30).required().messages({
+    firstname: Joi.string().min(2).max(30).required().messages({
         "string.empty": "name is required",
         "string.min": "name should have a minimum length of {#limit}",
         "string.max": "First name should have a maximum length of {#limit}",
       }),
+      lastname:Joi.string().required(),
+      email: Joi.string().email().required(),
       address: Joi.string().required(),
       phonenumber:Joi.string(),
       category:Joi.string(),

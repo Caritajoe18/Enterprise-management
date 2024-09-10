@@ -25,7 +25,8 @@ import {
   updateStaff,
 } from "../controller/staffController";
 import {addRole} from "../controller/roleController";
-import { createPermissions } from "../controller/permissionController";
+import { addPermissionsToRole, createPermissions, removePermissionsFromRole } from "../controller/permissionController";
+import { authorize } from "../middleware/staffPermissions";
 
 const router = express.Router();
 router.post("/sign-up", signupAdmin);
@@ -42,7 +43,11 @@ router.get("/search-products", searchProducts);
 router.delete("/delete-product/:id", deleteProduct);
 
 //staff
-router.post('/create-role', addRole);
+router.post('/create-role',authorize('admin'), addRole);
+router.patch('/add-permission/:roleId/permissions', addPermissionsToRole);
+router.delete('/remove-permission/:roleId/permissions', removePermissionsFromRole);
+
+
 router.post("/reg-staff", signupStaff);
 router.post("/login-mail", loginMial);
 router.post("/forgot", forgotPassword);

@@ -21,6 +21,7 @@ import Role from "../models/role";
 
 export const loginurl = `http/3000/frontend login`;
 
+
 export const signupAdmin = async (req: Request, res: Response) => {
   try {
     const validationResult = signUpSchema.validate(req.body, option);
@@ -30,49 +31,48 @@ export const signupAdmin = async (req: Request, res: Response) => {
         .json({ error: validationResult.error.details[0].message });
     }
 
-    const { email, password, roleName , firstname} = req.body;
-    
+    const { email, password, roleName, firstname, isAdmin } = req.body;
 
+    // Check if the admin already exists by email
     const exist = await AdminInstance.findOne({ where: { email } });
-
     if (exist) {
       return res.status(400).json({ error: "Email already exists" });
     }
-    const role = await Role.findOne({ where: { name: roleName } });
-    if (!role) {
-      return res.status(400).json({ error: "Role does not exist" });
-    }
+
+    // Hash the password
     const passwordHashed = await bcryptEncode({ value: password });
 
-    const admin = (await AdminInstance.create({
+    // Create the new admin and associate the roleName directly
+    const admin = await AdminInstance.create({
       ...req.body,
       password: passwordHashed,
-      role: "admin",
-      roleId: role.dataValues.id,
-      isAdmin: true,
-    })) as unknown as AdminInstance;
+      roleName,
+      isAdmin: true
+    });
 
+    // Send verification email
     await sendVerificationMail(
       email,
       loginurl,
-
       firstname,
       generateVerificationEmailHTML
     );
 
-    //console.log(admin);
+    // Return response
     return res.status(201).json({
       message:
-        "Admin created successfully, Check your email to activate your account",
+        "Admin created successfully, check your email to activate your account",
       admin,
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
-    res.status(500).json({ error: "An error occurred" });
+    return res.status(500).json({ error: "An error occurred" });
   }
 };
+
+
 
 export const loginMial = async (req: Request, res: Response) => {
   try {
@@ -108,7 +108,7 @@ export const loginMial = async (req: Request, res: Response) => {
 
 export const loginAdmin = async (req: Request, res: Response) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password} = req.body;
     const valid = loginSchema.validate(req.body, option);
     if (valid.error) {
       return res.status(400).json({ error: valid.error.details[0].message });
@@ -128,13 +128,13 @@ export const loginAdmin = async (req: Request, res: Response) => {
     if (!isValid) {
       return res.status(401).json({ error: "invalid credentials" });
     }
-    if (!admin.dataValues.isVerified) {
-      return res.status(401).json({
-        error: "please verify your email",
-      });
-    }
-    const { id, isAdmin } = admin.dataValues;
-    const token = await generateToken(id, isAdmin);
+    // if (!admin.dataValues.isVerified) {
+    //   return res.status(401).json({
+    //     error: "please verify your email",
+    //   });
+    // }
+    const { roleId, isAdmin } = admin.dataValues;
+    const token = await generateToken(roleId, isAdmin);
 
     console.log(token);
     return res

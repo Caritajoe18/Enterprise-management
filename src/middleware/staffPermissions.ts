@@ -1,53 +1,76 @@
-import { Request, Response, NextFunction } from 'express';
-import Admin from '../models/admin'; 
-import Role from '../models/role'; 
-import Permission from '../models/permission'; 
+import { Request, Response, NextFunction } from "express";
+import { verifyToken } from "../utilities/auths";
+import RolePermission from "../models/rolepermission";  
+import Permission from "../models/permission";
+import { JwtPayload } from "jsonwebtoken";  
+
 interface AuthRequest extends Request {
-    user?: any; // Adjust based on how you attach the user to the request
+  admin?: any;  
 }
 
 export const authorize = (requiredPermission: string) => {
-    return async (req: AuthRequest, res: Response, next: NextFunction) => {
-        try {
-            // Assuming the user ID is stored in the request object after authentication
-            const adminId = req.user?.id;
-            console.log('userrrr', adminId)
+  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const authorization = req.headers["authorization"];
+      if (!authorization) {
+        return res.status(401).json({ message: "Unauthorized: No token provided" });
+      }
 
-            if (!adminId) {
-                return res.status(401).json({ message: 'Unauthorized: No admin ID found' });
-            }
+      const token = authorization.split(" ")[1];
+      if (!token) {
+        return res.status(401).json({ message: "Unauthorized: Invalid token format" });
+      }
 
-            // Fetch the admin with their role and permissions
-            const admin = await Admin.findByPk(adminId, {
-                include: [{
-                    model: Role,
-                    as: 'role',
-                    include: [{
-                        model: Permission,
-                        as: 'permissions',
-                        attributes: ['name']
-                    }],
-                }],
-            });
+      
+      const decoded = await verifyToken(token);
 
-            if (!admin || !admin.role || !admin.role.permissions) {
-              return res.status(403).json({ message: 'Access Denied: Insufficient permissions' });
-          }
-            // Extract permissions from the role
-            const rolePermissions = admin.role.permissions.map((permission: Permission) => permission.dataValues.name);
+      
+      if (typeof decoded === "string") {
+        return res.status(401).json({ message: decoded });  
+      }
 
-            // Check if the admin has the required permission
-            const hasPermission = rolePermissions.includes(requiredPermission);
+      const { roleId , isAdmin} = decoded as JwtPayload;  
+      if (!roleId && !isAdmin) {
+        return res.status(401).json({ message: "Unauthorized: No roleId or admin rights found" });
+      }
+      if (isAdmin) {
+        return next();  // Admins bypass the permission check
+      }
 
-            if (!hasPermission) {
-                return res.status(403).json({ message: 'Access Denied: Insufficient permissions' });
-            }
+      if (roleId) {
+        // Find the permissionId from the Permission table
+        const permission = await Permission.findOne({
+          where: { name: requiredPermission },
+        });
 
-            // If authorized, proceed to the next middleware or route handler
-            next();
-        } catch (error) {
-            console.error('Authorization error:', error);
-            res.status(500).json({ message: 'Internal Server Error' });
+      if (!permission) {
+        return res.status(404).json({ message: "Permission not found" });
+      }
+
+      // Check if the role has the required permission
+      const rolePermission = await RolePermission.findOne({
+        where: { roleId, permissionId: permission.dataValues.id },
+      });
+
+      if (!rolePermission) {
+        return res.status(403).json({ message: "Access Denied: Insufficient permissions" });
+      }
+
+      // Proceed if permission is found
+      next();
+    }
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+          res.status(500).json({ error: error.message });
         }
-    };
+        res.status(500).json({ error: "An error occurred" });
+      }
+  };
 };
+
+
+
+
+
+
+    

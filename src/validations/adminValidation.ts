@@ -45,7 +45,7 @@ export const signUpSchema = Joi.object({
       //   "string.length": "Phone number should have a length of {#limit}",
     }),
   department: Joi.string().min(4).max(30),
-  roleName: Joi.string().min(4).max(30).required(),
+  roleName: Joi.string().min(2).max(30).required(),
   password: passwordSchema,
   confirmPassword: Joi.any()
     .equal(Joi.ref("password"))
