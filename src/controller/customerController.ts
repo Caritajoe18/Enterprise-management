@@ -19,7 +19,7 @@ export const createCustomer = async (req: Request, res: Response) => {
     const exist = await CustomerInstance.findOne({ where: { email } });
 
     if (exist) {
-      return res.status(400).json({ error: "Customer name already exists" });
+      return res.status(400).json({ error: "Customer email already exists" });
     }
 
     const customer = await CustomerInstance.create({ ...req.body });

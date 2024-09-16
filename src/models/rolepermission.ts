@@ -1,7 +1,7 @@
 import { Model, DataTypes } from 'sequelize';
 import db from '../db'
-import Permission from './permission';
-import Role from './role';
+// import Permission from './permission';
+// import Role from './role';
 
 
 // module.exports = (sequelize, DataTypes) => {
@@ -19,7 +19,7 @@ import Role from './role';
     roleId: {
             type: DataTypes.UUID,
             references: {
-              model: Role,
+              model: "Roles",
               key: 'id',
             },
             onUpdate: 'CASCADE',
@@ -28,7 +28,7 @@ import Role from './role';
           permissionId: {
             type: DataTypes.UUID,
             references: {
-              model: Permission,
+              model: "Permissions",
               key: 'id',
             },
             onUpdate: 'CASCADE',
@@ -38,7 +38,7 @@ import Role from './role';
 
   }, {
     sequelize: db,
-    modelName: 'RolePermission',
+    modelName: 'RolePermissions',
   });
 
 

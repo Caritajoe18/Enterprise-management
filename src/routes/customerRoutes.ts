@@ -3,8 +3,8 @@ import { createCustomer, getAllCustomers, getCustomer, updateCustomer } from '..
 import { authorize } from '../middleware/staffPermissions';
 const router = express.Router();
 
-router.post('/register',authorize('register-customer') ,createCustomer);
-router.get('/get-customers',authorize('get-customers'), getAllCustomers);
+router.post('/reg-customer',authorize() ,createCustomer);
+router.get('/get-customers',authorize(), getAllCustomers);
 router.get('/get-customer/:id', getCustomer);
 router.patch('/update-customer', updateCustomer);
 

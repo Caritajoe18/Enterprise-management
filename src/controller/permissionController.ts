@@ -3,113 +3,98 @@ import Permission from "../models/permission";
 import Role from "../models/role";
 import RolePermission from "../models/rolepermission";
 import sequelize from "../db";
-import { Op, QueryTypes } from "sequelize";
+import { Op, QueryTypes, ValidationError } from "sequelize";
+import NavParent from "../models/navparent";
 
 export const createPermissions = async (req: Request, res: Response) => {
-  const { permissions } = req.body;
+  const { name, isNav, navParentId } = req.body;
 
   try {
-    if (!Array.isArray(permissions) || permissions.length === 0) {
+    const slug = name.toLowerCase().replace(/ /g, "-");
+
+    
+    const existingPermission = await Permission.findOne({ where: { slug } });
+    if (existingPermission) {
+      return res
+        .status(400)
+        .json({ message: "Permission name already exists" });
+    }
+    let navParent = null;
+
+    if (navParentId) {
+      navParent = await NavParent.findByPk(navParentId);
+      if (!navParent) {
+        return res.status(400).json({ message: "Invalid navParent" });
+      }
+    }
+    const newPermission = await Permission.create({
+      ...req.body,
+      navParentId: navParent ? navParent.dataValues.id : null,
+      url: name,
+      slug
+    });
+
+    return res.status(201).json({ permissions: newPermission });
+  }catch (error: unknown) {
+    
+    if (error instanceof ValidationError) {
+      console.error('Validation error details:', error.errors);
+      return res.status(400).json({ error: error.errors.map(e => e.message) });
+    }
+
+    if (error instanceof Error) {
+      console.error('Error creating permission:', error.message);
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.status(500).json({ error: "An error occurred" });
+  }
+
+};
+
+export const addPermissionsToRole = async (req: Request, res: Response) => {
+  const { roleId } = req.params;
+  const { permissionsId } = req.body;
+  try {
+    if (!Array.isArray(permissionsId) || permissionsId.length === 0) {
       return res
         .status(400)
         .json({ message: "Permissions must be a non-empty array" });
     }
-    const existingPermissions = await Permission.findAll({
-      where: {
-        name: permissions,
-      },
-    });
-    const existingPermissionNames = existingPermissions.map(
-      (perm: any) => perm.name
-    );
-    const duplicates = permissions.filter((perm: string) =>
-      existingPermissionNames.includes(perm)
-    );
 
-    if (duplicates.length > 0) {
-      return res.status(400).json({
-        message: `The following permissions already exist: ${duplicates.join(
-          ", "
-        )}`,
-      });
-    }
-
-    const createdPermissions: any = await Permission.bulkCreate(
-      permissions.map((name: string) => ({ ...req.body, name })),
-      { returning: true }
-    );
-
-    return res.status(201).json({ permissions: createdPermissions });
-  } catch (error) {
-    console.error("Error creating permissions:", error);
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
-};
-
-export const addPermissionsToRole = async (req: Request, res: Response) => {
-  const roleId = req.params.roleId;
-  const { permissions } = req.body;
-  try {
-    // Find the role
     const role = await Role.findByPk(roleId);
+
     console.log("roleid1", roleId);
 
     if (!role) {
       return res.status(404).json({ message: "Role not found" });
     }
 
-    if (!Array.isArray(permissions) || permissions.length === 0) {
-      return res
-        .status(400)
-        .json({ message: "Permissions must be a non-empty array" });
+    const permissions = await Permission.findAll({
+      where: {
+        id: permissionsId,
+      },
+    });
+
+    if (permissions.length === 0) {
+      return res.status(404).json({ message: "Permissions not found" });
     }
-    console.log("roleid2", roleId);
-
-    // const createdPermissions: any = await Permission.bulkCreate(
-    //   permissions.map((name: string) => ({ ...req.body, name })),
-    //   { returning: true }
-    // );
-
-    const createdPermissions = await Promise.all(
-      permissions.map(async (name: string) => {
-        const [permission, created] = await Permission.findOrCreate({
-          ...req.body,
-          where: { name },
-          defaults: { name }
-        });
-        return permission;
-      })
-    );
-
-    // Find the permissions to add
-    // const Permissions = await Permission.findAll({
-    //   where: {
-    //     name: permissions,
-    //   },
-    // });
-    //await role.addPermissions(permissionsToAdd);
-
-    const permissionIds = createdPermissions.map(p => p.dataValues.id);
-
-    console.log("roleid3", roleId);
-    const rolePermissionData = permissionIds.map((permissionId: string) => ({
+    const rolePermissionData = permissions.map((permission) => ({
       roleId,
-      permissionId,
+      permissionId: permission.dataValues.id,
     }));
 
-
-    // Perform bulk insert into RolePermission table
     await RolePermission.bulkCreate(rolePermissionData, { returning: true });
 
-    res
-      .status(200)
-      .json({
-        message: "Permissions added to role successfully",
-        createdPermissions,
-      });
+    console.log("roleid3", roleId);
+
+    res.status(200).json({
+      message: "Permissions added to role successfully",
+      addedPermissions: permissions,
+    });
   } catch (error: unknown) {
     if (error instanceof Error) {
-       return res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
     res.status(500).json({ error: "An unexpected error occurred." });
   }
@@ -166,5 +151,17 @@ export const removePermissionsFromRole = async (
     } else {
       res.status(500).json({ error: "An unexpected error occurred." });
     }
+  }
+};
+
+export const getAllPermissions = async (req: Request, res: Response) => {
+  try {
+    // Fetch all permissions from the database
+    const permissions = await Permission.findAll();
+
+    return res.status(200).json({ permissions });
+  } catch (error) {
+    console.error("Error fetching permissions:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };

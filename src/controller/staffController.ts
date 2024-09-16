@@ -13,6 +13,7 @@ import { generateVerificationEmailHTML } from "../utilities/htmls";
 import { Op } from "sequelize";
 import { loginurl } from "./adminController";
 import Role from "../models/role";
+import { AuthRequest } from "../middleware/staffPermissions";
 
 export const signupStaff = async (req: Request, res: Response) => {
   try {
@@ -23,7 +24,7 @@ export const signupStaff = async (req: Request, res: Response) => {
         .json({ error: validationResult.error.details[0].message });
     }
 
-    const { email, password, firstname,roleName } = req.body;
+    const { email, password, firstname,roleId } = req.body;
 
     const exist = await AdminInstance.findOne({ where: { email } });
 
@@ -31,7 +32,7 @@ export const signupStaff = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Email already exists" });
     }
 
-    const role = await Role.findOne({ where: { name: roleName } });
+    const role = await Role.findOne({ where: { id: roleId } });
     if (!role) {
       return res.status(400).json({ error: "Role does not exist" });
     }
@@ -71,6 +72,7 @@ export const signupStaff = async (req: Request, res: Response) => {
 export const updateStaff = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const{firstname, lastname, phoneNumber, department} = req.body
     const validationResult = updateStaffSchema.validate(req.body, option);
     if (validationResult.error) {
       return res
@@ -82,7 +84,7 @@ export const updateStaff = async (req: Request, res: Response) => {
     if (!staff) {
       return res.status(404).json({ error: "staff not found" });
     }
-    const updatedStaff = await staff.update(req.body);
+    const updatedStaff = await staff.update({firstname, lastname, phoneNumber, department});
     res
       .status(200)
       .json({ message: "Staff updated successfully", updatedStaff });
@@ -106,12 +108,12 @@ export const suspendStaff = async (req: Request, res: Response) => {
     if (staff.dataValues.isAdmin) {
       return res.status(403).json({ message: "Cannont Suspend this user" });
     }
-    await AdminInstance.update(
+     const suspendedStaff = await staff.update(
       { active: false },
       { where: { id }, returning: true }
     );
 
-    res.status(200).json({ message: "Staff suspended successfully" });
+    res.status(200).json({ message: "Staff suspended successfully" , suspendedStaff});
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
@@ -128,12 +130,12 @@ export const restoreStaff = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Staff not found" });
     }
 
-    await AdminInstance.update(
+     const restoredStaff = await staff.update(
       { active: true },
       { where: { id }, returning: true }
     );
 
-    res.status(200).json({ message: "Staff restored successfully" });
+    res.status(200).json({ message: "Staff restored successfully", restoredStaff });
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
@@ -162,10 +164,14 @@ export const deleteStaff = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllStaff = async (req: Request, res: Response) => {
+export const getAllStaff = async (req: AuthRequest , res: Response) => {
   try {
+
+    const currentUserId = req.admin?.dataValues.id;
+    const whereClause = currentUserId ? { id: { [Op.ne]: currentUserId } } : {};
     const staffList = await AdminInstance.findAll({
-      order: [["firstname", "ASC"]],
+      where: whereClause,
+      order: [["createdAt", "ASC"]],
     });
     if(staffList.length === 0){
       return res.status(204).send()
@@ -208,13 +214,13 @@ export const getSuspendedStaff = async (req: Request, res: Response) => {
 
 export const searchStaff = async (req: Request, res: Response) => {
   try {
-    const { search } = req.query;
+    const search = req.query as unknown as string ;
 
     const whereClause: {
       [Op.or]?: {
         firstname?: { [Op.like]: string };
         department?: { [Op.like]: string };
-        roleName?: { [Op.like]: string };
+        roleId?: { [Op.eq]: string };
       }[];
     } = {};
 
@@ -222,7 +228,7 @@ export const searchStaff = async (req: Request, res: Response) => {
       whereClause[Op.or] = [
         { firstname: { [Op.like]: `%${search}%` } },
         { department: { [Op.like]: `%${search}%` } },
-        { roleName: { [Op.like]: `%${search}%` } },
+        { roleId: { [Op.eq]: search } },
       ];
     }
 

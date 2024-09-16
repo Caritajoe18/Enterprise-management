@@ -10,6 +10,7 @@ import {
   bcryptDecode,
   bcryptEncode,
   generateToken,
+  tokenExpiry,
   verifyToken,
 } from "../utilities/auths";
 import { sendVerificationMail } from "../utilities/sendVerification";
@@ -18,9 +19,9 @@ import {
   generateVerificationEmailHTML,
 } from "../utilities/htmls";
 import Role from "../models/role";
+import { Op } from "sequelize";
 
 export const loginurl = `http/3000/frontend login`;
-
 
 export const signupAdmin = async (req: Request, res: Response) => {
   try {
@@ -47,7 +48,7 @@ export const signupAdmin = async (req: Request, res: Response) => {
       ...req.body,
       password: passwordHashed,
       roleName,
-      isAdmin: true
+      isAdmin: true,
     });
 
     // Send verification email
@@ -71,8 +72,6 @@ export const signupAdmin = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "An error occurred" });
   }
 };
-
-
 
 export const loginMial = async (req: Request, res: Response) => {
   try {
@@ -108,7 +107,7 @@ export const loginMial = async (req: Request, res: Response) => {
 
 export const loginAdmin = async (req: Request, res: Response) => {
   try {
-    const { email, password} = req.body;
+    const { email, password } = req.body;
     const valid = loginSchema.validate(req.body, option);
     if (valid.error) {
       return res.status(400).json({ error: valid.error.details[0].message });
@@ -117,7 +116,7 @@ export const loginAdmin = async (req: Request, res: Response) => {
       where: { email },
     })) as AdminInstance;
     if (!admin) {
-      return res.status(401).json({ error: "invalid credentials" });
+      return res.status(401).json({ error: "invalid Email" });
     }
     //console.log("adminnnnnn", admin);
     if (!admin.dataValues.active) {
@@ -126,15 +125,15 @@ export const loginAdmin = async (req: Request, res: Response) => {
 
     const isValid = await bcryptDecode(password, admin.dataValues.password);
     if (!isValid) {
-      return res.status(401).json({ error: "invalid credentials" });
+      return res.status(401).json({ error: "invalid password" });
     }
     // if (!admin.dataValues.isVerified) {
     //   return res.status(401).json({
     //     error: "please verify your email",
     //   });
     // }
-    const { roleId, isAdmin } = admin.dataValues;
-    const token = await generateToken(roleId, isAdmin);
+    const { id, roleId, isAdmin } = admin.dataValues;
+    const token = await generateToken(id, roleId, isAdmin);
 
     console.log(token);
     return res
@@ -155,25 +154,31 @@ export const forgotPassword = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({ error: "Email not found" });
     }
-    const { id, isAdmin, firstname } = user.dataValues;
-    const token = await generateToken(id, isAdmin);
+    const { id, isAdmin, roleId, firstname } = user.dataValues;
+    const token = await generateToken(id, roleId, isAdmin);
+    const hashedToken = await bcryptEncode({ value: token });
 
-    await user.update({ ...req.body, resetPasswordToken: token });
+    await user.update({
+      resetPasswordToken: hashedToken,
+      resetPasswordTokenExpiry: tokenExpiry,
+    });
 
     await sendVerificationMail(email, token, firstname, generateTokenEmailHTML);
 
     return res
       .status(200)
-      .json({ message: "Reset password link sent to your email" });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
+      .json({ message: "If the email exists, a reset link will be sent." });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "An error occurred" });
   }
 };
 
 export const resetPassword = async (req: Request, res: Response) => {
   console.log(req.body);
-  const { token } = req.params;
+  const  {token}  = req.query ;
   const { password } = req.body;
 
   try {
@@ -184,35 +189,46 @@ export const resetPassword = async (req: Request, res: Response) => {
         .json({ error: validatedInput.error.details[0].message });
     }
 
-    const decodedToken = await verifyToken(token);
+    const decodedToken = await verifyToken(token as string);
     if (!decodedToken) {
       return res.status(401).json({
         error: "Invalid or expired token",
       });
     }
 
-    const { id } = decodedToken as unknown as { [key: string]: string };
+    //const { id } = decodedToken as unknown as { [key: string]: string };
+    const { id } = decodedToken as { id: string };
 
-    const user = await AdminInstance.findOne({ where: { id: id } });
+    const user = await AdminInstance.findOne({
+      where: { id, resetPasswordTokenExpiry: { [Op.gt]: Date.now() } },
+    });
     console.log("userrr", user);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
-    } else {
-      const passwordHashed = await bcryptEncode({ value: password });
-      req.body.password = passwordHashed;
+    }
+    const tokenIsValid = await bcryptDecode(
+      token as string,
+      user.dataValues.resetPasswordToken as unknown as string
+    );
+    if (!tokenIsValid) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+    
+       const passwordHashed = await bcryptEncode({ value: password });
+    //   req.body.password = passwordHashed;
 
       const updated = await user.update({
-        ...req.body,
         password: passwordHashed,
-        resetPasswordToken: null,
-      });
+       resetPasswordTokenExpiry: null,
+       resetPasswordToken: null,
+    });
 
       return res
         .status(200)
         .json({ message: "Password reset successful", updated });
-    }
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-};
+    }catch (error: unknown) {
+      if (error instanceof Error) {
+        return res.status(500).json({ error: error.message });
+      }
+      return res.status(500).json({ error: "An error occurred" });
+  }}

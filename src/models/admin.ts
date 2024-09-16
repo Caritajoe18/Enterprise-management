@@ -11,10 +11,11 @@ export interface AdminAttributes {
   profilePic: string;
   department: string;
   address: string;
-  roleName: string;
+  //roleName: string;
   roleId: string;
-  verificationToken: string;
-  resetPasswordToken: string;
+  verificationToken?: string;
+  resetPasswordToken?: string| null;
+  resetPasswordTokenExpiry:number| null;
   isAdmin?: boolean;
   isVerified: boolean;
   password: string;
@@ -34,9 +35,9 @@ export interface AdminAttributes {
     static associate(models: any) {
       // define association here
 
-      Admins.belongsTo(models.Role, {
+      Admins.belongsTo(models.Roles, {
  foreignKey: 'roleId',
-   as: 'role',  });
+   as: 'roles',  });
 
  Role.hasMany(models.Admins, {
   foreignKey: 'roleId',
@@ -79,15 +80,15 @@ export interface AdminAttributes {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      roleName: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
+      // roleName: {
+      //   type: DataTypes.STRING,
+      //   allowNull: true,
+      // },
       
       roleId: {
         type: DataTypes.UUID,
         references: {
-          model: 'roles',
+          model: 'Roles',
           key: 'id',
         },
         onUpdate: 'CASCADE',
@@ -109,6 +110,10 @@ export interface AdminAttributes {
   
       resetPasswordToken: {
         type: DataTypes.STRING,
+        allowNull: true,
+      },
+      resetPasswordTokenExpiry: {
+        type: DataTypes.INTEGER,
         allowNull: true,
       },
       isVerified: {

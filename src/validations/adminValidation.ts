@@ -35,7 +35,6 @@ export const signUpSchema = Joi.object({
     "string.empty": "Email is required",
     "string.email": "Invalid email format",
   }),
-  
 
   phoneNumber: Joi.string()
     .pattern(/^[0-9]+$/)
@@ -45,7 +44,8 @@ export const signUpSchema = Joi.object({
       //   "string.length": "Phone number should have a length of {#limit}",
     }),
   department: Joi.string().min(4).max(30),
-  roleName: Joi.string().min(2).max(30).required(),
+  profilePic:Joi.string(),
+  roleId: Joi.string().min(2).max(50),
   password: passwordSchema,
   confirmPassword: Joi.any()
     .equal(Joi.ref("password"))
@@ -82,7 +82,11 @@ export const sendVerification = Joi.object().keys({
 
 
 export const updateStaffSchema = Joi.object({
-  fullname: Joi.string().min(3).max(30).messages({
+  firstname: Joi.string().min(2).max(30).messages({
+    "string.min": "firstname should have a minimum length of {#limit}",
+    "string.max": "firstname should have a maximum length of {#limit}",
+  }),
+  lastname: Joi.string().min(2).max(30).messages({
     "string.min": "firstname should have a minimum length of {#limit}",
     "string.max": "firstname should have a maximum length of {#limit}",
   }),
@@ -101,10 +105,6 @@ export const updateStaffSchema = Joi.object({
   address: Joi.string().messages({
     "string.length": "phone number should have the length of {#limit}",
   }),
-  role: Joi.string().messages({
-    "string.length": "phone number should have the length of {#limit}",
-  }),
-  active: Joi.boolean(),
   password: passwordSchema,
   confirmPassword: Joi.any()
     .equal(Joi.ref("password"))
@@ -128,3 +128,27 @@ export const changePasswordSchema = Joi.object({
       "any.required": "Password confirmation is required",
     }),
 });
+
+export const permissionValidationSchema = Joi.object({
+  isNav: Joi.boolean()
+    .optional()
+    .default(false),
+  navParentId: Joi.string()
+    .guid({ version: ['uuidv4'] })
+    .allow(null)
+    .optional(),
+  url: Joi.string()
+    .required()
+    .messages({
+      'string.empty': 'URL is required',
+    }),
+  name: Joi.string()
+    .min(3)
+    .max(255)
+    .messages({
+      'string.empty': 'name is required',
+      'string.min': 'name should be at least 3 characters',
+      'string.max': 'name should not exceed 255 characters',
+    }),
+});
+

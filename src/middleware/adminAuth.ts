@@ -1,65 +1,44 @@
-import { NextFunction, Response, Request } from "express";
-import { verifyToken } from "../utilities/auths";
-import  AdminInstance  from "../models/admin";
-import dayjs from "dayjs";
+import { Request, Response, NextFunction } from 'express';
+import { verifyToken } from '../utilities/auths'; // Assuming you have a verifyToken function
+import Admins from '../models/admin'; // Import your Admin model
 
-interface AuthRequest extends Request {
-  user?: string[]
+export interface AuthRequest extends Request {
+  admin?: any;
 }
 
-export const authenticateAdmin = (products: string[]) => {
-  return async (req: AuthRequest | any , res: Response, next: NextFunction) => {
-
-    console.log("Request Object:", req);
-
-    const authorization = req.headers["authorization"];
-
+export const authenticateAdmin = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const authorization = req.headers['authorization'];
     if (!authorization) {
-      return res.status(401).json({ error: "No token provided" });
+      return res.status(401).json({ message: 'Unauthorized: No token provided' });
     }
 
-    const token = authorization.split(" ")[1];
+    const token = authorization.split(' ')[1];
     if (!token) {
-      return res.status(401).json({ error: "Invalid token format" });
+      return res.status(401).json({ message: 'Unauthorized: Invalid token format' });
     }
 
-    try {
-      const verifying = await verifyToken(token);
-      if (verifying === "token expired") {
-        return res.status(401).json({ error: "Token expired" });
-      }
-
-      const { products, id, exp } = verifying as Record<string, string>;
-      const now = dayjs().unix();
-
-      if (Number(exp) < now) {
-        return res
-          .status(401)
-          .json({ error: "Token expired, please login again" });
-      }
-
-      const admin = (await AdminInstance.findOne({
-        where: { id },
-      })) as AdminInstance;
-      if (!admin) {
-        return res.status(404).json({ error: "Admin not found" });
-      }
-
-      if (!products.includes(products)) {
-        return res.status(403).json({ error: "Unauthorized" });
-      }
-
-      req.admin = verifying;
-      
-      console.log("Updated Request Object:", req)
-      console.log(req.admin.id); // Logs the admin's ID
-console.log(req.admin.role); // Logs the admin's role
-
-
-      next();
-    } catch (error) {
-      console.error("Authentication error:", error);
-      return res.status(500).json({ error: "Internal server error" });
+    const decoded = await verifyToken(token);
+    if (typeof decoded === 'string') {
+      return res.status(401).json({ message: decoded });
     }
-  };
+
+    const { id, roleId, isAdmin } = decoded as { id: string, roleId: string, isAdmin: boolean };
+
+    if (!id) {
+      return res.status(401).json({ message: 'Unauthorized: No user ID in token' });
+    }
+
+    // Find the admin by ID
+    const admin = await Admins.findByPk(id);
+    if (!admin) {
+      return res.status(404).json({ message: 'Admin not found' });
+    }
+
+    req.admin = admin;
+    next();
+  } catch (error) {
+    console.error('Error authenticating admin:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
 };
