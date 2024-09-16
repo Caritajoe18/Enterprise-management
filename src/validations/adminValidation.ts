@@ -41,11 +41,11 @@ export const signUpSchema = Joi.object({
     .required()
     .messages({
       "string.empty": "Phone number is required",
-      //   "string.length": "Phone number should have a length of {#limit}",
+      
     }),
   department: Joi.string().min(4).max(30),
   profilePic:Joi.string(),
-  roleId: Joi.string().min(2).max(50),
+  roleId: Joi.string().min(2).max(50).optional(),
   password: passwordSchema,
   confirmPassword: Joi.any()
     .equal(Joi.ref("password"))
