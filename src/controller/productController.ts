@@ -17,11 +17,10 @@ export const createProducts = async (req: Request, res: Response) => {
 
     const exist = await ProductInstance.findOne({ where: { name } });
     if (exist) {
-      const newProduct =  await exist.update({...req.body,
-      });
+      return res.status(400).json({ message: "Product already exists" });
     }
 
-    const product = await ProductInstance.create({
+    let product = await ProductInstance.create({
       ...req.body,
       price,
       pricePlan: pricePlan || {},
@@ -29,7 +28,7 @@ export const createProducts = async (req: Request, res: Response) => {
 
     res
       .status(201)
-      .json({ message: "Raw material added successfully", product });
+      .json({ message: "product added successfully", product });
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
@@ -65,9 +64,9 @@ export const updateProducts = async (req: Request, res: Response) => {
       .json({ message: "Prices updated successfully", updatedProducts });
   } catch (error: unknown) {
     if (error instanceof Error) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
-    res.status(500).json({ error: "An unexpected error occurred." });
+    return res.status(500).json({ error: "An error occurred" });
   }
 };
 

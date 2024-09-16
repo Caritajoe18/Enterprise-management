@@ -1,10 +1,14 @@
 import { Model, DataTypes } from "sequelize";
 import db from "../db";
-import Role from "./role";
+import NavParent from "./navparent";
 
 export interface PermissionAttributes {
   id: string;
   name: string;
+  isNav:boolean;
+  navParentId:string;
+  url:string;
+  slug:string;
 }
 
 // export default (sequelize, DataTypes) => {
@@ -15,6 +19,12 @@ class Permission extends Model<PermissionAttributes> {
    * The `models/index` file will call this method automatically.
    */
   static associate(models: any) {
+
+    Permission.belongsTo(NavParent, {
+      foreignKey: "navParentId",
+      as: "navParent",
+    });
+
     Permission.belongsToMany(models.Role, {
       through: "RolePermission",
       as: "role",
@@ -36,10 +46,33 @@ Permission.init(
       allowNull: false,
       unique: true,
     },
+  isNav:{
+    type:DataTypes.BOOLEAN,
+    defaultValue:false
+  },
+ navParentId:{
+  type: DataTypes.UUID,
+  allowNull: true,
+  references: {
+    model: "NavParents", 
+    key: "id",
+  },
+
+ },
+ url:{
+  type: DataTypes.STRING,
+  allowNull: false,
+  unique:false,
+ },
+ slug:{
+  type: DataTypes.STRING,
+  allowNull: false,
+  unique: true,
+ }
   },
   {
     sequelize: db,
-    modelName: "Permission",
+    modelName: "Permissions",
   }
 );
 

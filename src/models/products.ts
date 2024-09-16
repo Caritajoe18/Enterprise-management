@@ -1,6 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../db";
-import { validatePrices } from "../validations/productValidations";
+import { validatePricePlan, validatePrices } from "../validations/productValidations";
 
 export interface ProductsAttributes {
   id: string;
@@ -38,7 +38,7 @@ ProductInstance.init(
       defaultValue:{},
       allowNull: true,
       validate: {
-        isValid: validatePrices,
+        isValid: validatePricePlan,
       },
     },
   },

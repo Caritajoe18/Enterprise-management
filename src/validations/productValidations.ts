@@ -12,6 +12,13 @@ export const validatePrices = (value: { [key: string]: number }) => {
     }
   }
 };
+export const validatePricePlan = (value: { [key: string]: number })=>{
+  for (const key in value) {
+    if (typeof value[key] !== "number") {
+      throw new Error(`The price for ${key} must be a valid number.`);
+    }
+  }
+}
 
 export const validateCategory = async (value: string) => {
   const products = await ProductInstance.findAll();
@@ -27,8 +34,7 @@ export const createProductSchema = Joi.object({
     "string.required": "The name of a product is required",
     "any.required": "Product name is required",
   }),
-  price: Joi.object()
-    .pattern(Joi.string(), Joi.number().positive().required())
+  price: Joi.object().pattern(Joi.string(), Joi.number().positive().required())
     .min(1)
     .required()
     .messages({
@@ -38,9 +44,7 @@ export const createProductSchema = Joi.object({
       "any.required": "Price is required and must include at least one unit.",
     }),
   pricePlan: Joi.object()
-    .pattern(Joi.string(), Joi.number().positive())
-    .optional()
-    .messages({
+    .pattern(Joi.string(), Joi.number().positive()).messages({
       "object.base": "Price plan must be a valid object with categories as keys.",
       "object.pattern.base": "Each category must have a valid positive price.",
     }),

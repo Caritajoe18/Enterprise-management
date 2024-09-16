@@ -2,7 +2,7 @@ import { QueryInterface, DataTypes } from 'sequelize';
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface: QueryInterface, Sequelize:typeof DataTypes) {
+  async up(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
     await queryInterface.createTable('RolePermissions', {
       id: {
         allowNull: false,
@@ -11,10 +11,20 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       roleId: {
-        type: Sequelize.UUID
+        type: Sequelize.UUID,
+        references: {
+          model: 'Roles',
+          key: 'id'
+        },
+        onDelete: 'CASCADE'
       },
       permissionId: {
-        type: Sequelize.UUID
+        type: Sequelize.UUID,
+        references: {
+          model: 'Permissions',
+          key: 'id'
+        },
+        onDelete: 'CASCADE'
       },
       createdAt: {
         allowNull: false,
@@ -26,7 +36,8 @@ module.exports = {
       }
     });
   },
-  async down(queryInterface : QueryInterface, Sequelize:typeof DataTypes) {
+
+  async down(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
     await queryInterface.dropTable('RolePermissions');
   }
 };
