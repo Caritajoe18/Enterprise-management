@@ -22,7 +22,7 @@ module.exports = {
       navParentId: {
         type: Sequelize.UUID,
         references: {
-          model: "NavParent",
+          model: "NavParents",
           key: "id",
         },
         onDelete: "SET NULL",
