@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utilities/auths'; // Assuming you have a verifyToken function
 import Admins from '../models/admin'; // Import your Admin model
+import { JwtPayload } from 'jsonwebtoken';
 
 export interface AuthRequest extends Request {
-  admin?: any;
+  admin?: Admins;
 }
 
 export const authenticateAdmin = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -23,7 +24,7 @@ export const authenticateAdmin = async (req: AuthRequest, res: Response, next: N
       return res.status(401).json({ message: decoded });
     }
 
-    const { id, roleId, isAdmin } = decoded as { id: string, roleId: string, isAdmin: boolean };
+    const { id, isAdmin } = decoded as { id: string, isAdmin: boolean };
 
     if (!id) {
       return res.status(401).json({ message: 'Unauthorized: No user ID in token' });

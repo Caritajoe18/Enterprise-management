@@ -4,6 +4,7 @@ import Permissions from "../models/permission";
 import { AuthRequest } from "../middleware/staffPermissions";
 import Role from "../models/role";
 import RolePermission from "../models/rolepermission";
+import Admins from "../models/admin";
 
 export const createNavParent = async (req: Request, res: Response) => {
   const { name, iconUrl } = req.body;
@@ -69,11 +70,9 @@ export const getUserNavPermissions = async (
     if (!req.admin || !("roleId" in req.admin)) {
       return res.status(400).json({ message: "No roleId found in user" });
     }
-
-    const { roleId } = req.admin;
-    //console.log(roleId, req.admin, "the user roleId and admin data");
-
-    console.log("this is role id :", roleId, req.admin, "the userr");
+    
+    const { roleId} = req.admin;
+    
     const rolePermissions = await RolePermission.findAll({
       where: { roleId },
     });
@@ -115,7 +114,8 @@ export const getUserNavPermissions = async (
       navParentMap[navParent.id] = {
         navParentName: navParent.name,
         navParentSlug: navParent.slug,
-        permissions: [], // To store associated permissions
+        navParentIcon:navParent.iconUrl,
+        permissions: [], 
       };
     });
 
@@ -129,14 +129,6 @@ export const getUserNavPermissions = async (
     });
 
     const result = Object.values(navParentMap);
-
-    // const result = permissions.map((permission: any) => {
-    //   const associatedNavParent = navParents.find(navParent => navParent.dataValues.id === permission.navParentId);
-    //   return {
-    //     permissionName: permission.name,
-    //     navParentName: associatedNavParent ? associatedNavParent.dataValues.name : null,
-    //   };
-    // });
 
     return res.status(200).json({ navParentsWithPermissions: result });
   } catch (error: unknown) {
