@@ -17,6 +17,8 @@ export const addRole = async (req: Request, res: Response) => {
       }
   
       const role = await Role.create({ ...req.body, name });
+
+      console.log("role", role)
   
       if (permissionsId && permissionsId.length > 0) {
 
@@ -26,6 +28,7 @@ export const addRole = async (req: Request, res: Response) => {
           },
         });
         console.log(permissionsInstances, "permissions instances");
+        
         // for (const permissionInstance of permissionsInstances) {
         //   await RolePermission.create({
         //     roleId: role.dataValues.id,
@@ -50,6 +53,8 @@ export const addRole = async (req: Request, res: Response) => {
           await RolePermission.bulkCreate(rolePermissionData, { returning: true });
           
         }
+
+       
         console.log(RolePermission, "role permission")
   
         return res.status(201).json({ role });

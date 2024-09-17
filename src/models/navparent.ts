@@ -40,7 +40,7 @@ NavParent.init(
     },
     iconUrl: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
   },
   {

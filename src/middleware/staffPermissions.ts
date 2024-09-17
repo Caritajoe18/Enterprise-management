@@ -29,7 +29,7 @@ export const authorize = () => {
         return res.status(401).json({ message: decoded });
       }
 
-      const { id, roleId, isAdmin } = decoded as JwtPayload;
+      const { id, roleId, isAdmin } = decoded  as JwtPayload;
 
       if (!id || (!roleId && !isAdmin)) {
         return res.status(401).json({ message: "Unauthorized: No roleId or admin rights found" });

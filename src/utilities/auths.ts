@@ -5,6 +5,12 @@ import Permission from "../models/permission";
 import rateLimit from 'express-rate-limit';
 dotenv.config();
 
+ export interface AdminJwtPayload extends JwtPayload {
+  id: string;
+  roleId: string;
+  isAdmin: boolean;
+}
+
 export const generateToken = async (id: string, roleId: string,  isAdmin: boolean| undefined) => {
   const payload = { id,roleId, isAdmin};
   return Jwt.sign(payload, process.env.JWT_SECRET as string, {
@@ -26,9 +32,9 @@ const generateeToken = async (admin: any) => {
  };
 
 
-export const verifyToken = async (token: string) : Promise<string | JwtPayload>=> {
+export const verifyToken = async (token: string) : Promise<string | JwtPayload >=> {
   try {
-    const decoded = Jwt.verify(token, process.env.JWT_SECRET as string);
+    const decoded = Jwt.verify(token, process.env.JWT_SECRET as string)
     return decoded;
   } catch (error: unknown) {
     console.error("Error verifying token:", error);
