@@ -68,7 +68,8 @@ export const getAllRoles = async (req: Request, res: Response) => {
   try {
 
     const roles = await Role.findAll({
-      attributes: ["id", "name"], // Fetch role attributes
+      attributes: ["id", "name"], 
+      order: [["name", "ASC"]]
     });
 
     if (!roles.length) {
