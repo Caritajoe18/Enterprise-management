@@ -11,11 +11,12 @@ module.exports = {
         allowNull: false,
       },
       name: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
       },
       product: {
-        type: DataTypes.JSON,
+        type: Sequelize.JSON,
+        allowNull: false,
       },
 
       createdAt: {

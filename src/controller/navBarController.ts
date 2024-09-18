@@ -28,10 +28,67 @@ export const createNavParent = async (req: Request, res: Response) => {
       message: "NavParent created successfully",
       navParent: newNavParent,
     });
-  } catch (error) {
-    console.error("Error creating NavParent:", error);
-    return res.status(500).json({ message: "Internal Server Error" });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "An error occurred" });
   }
+};
+
+export const getAllNavandPerm = async(req:Request, res:Response)=>{
+try {
+  const navParents = await NavParent.findAll({
+    attributes: ['id', 'name', 'slug', 'iconUrl'], 
+  });
+
+  if (navParents.length === 0) {
+    return res.status(404).json({ message: "No NavParents found" });
+  }
+
+
+  const navParentIds = navParents.map(navParent => navParent.dataValues.id);
+  const permissions = await Permissions.findAll({
+    where: {
+      navParentId: navParentIds, 
+    },
+    attributes: ['id', 'name', 'slug', 'url', 'navParentId'], 
+  });
+
+  
+  const navParentMap: Record<number, any> = {};
+
+  navParents.forEach((navParent: any) => {
+    navParentMap[navParent.id] = {
+      navParentName: navParent.name,
+      navParentSlug: navParent.slug,
+      navParentIcon: navParent.iconUrl,
+      permissions: [], 
+    };
+  });
+
+  permissions.forEach((permission: any) => {
+    if (permission.navParentId && navParentMap[permission.navParentId]) {
+      navParentMap[permission.navParentId].permissions.push({
+        id:permission.id,
+        name: permission.name,
+        slug: permission.slug,
+        url: permission.url,
+      });
+    }
+  });
+
+
+  const result = Object.values(navParentMap);
+
+  return res.status(200).json({ navParentsWithPermissions: result });
+  
+} catch (error: unknown) {
+  if (error instanceof Error) {
+    return res.status(500).json({ error: error.message });
+  }
+  return res.status(500).json({ error: "An error occurred" });
+}
 };
 
 export const getNavWithPermissions = async (req: Request, res: Response) => {
@@ -56,9 +113,11 @@ export const getNavWithPermissions = async (req: Request, res: Response) => {
     }
 
     return res.status(200).json(navigations);
-  } catch (error) {
-    console.error("Error fetching navigations with permissions:", error);
-    return res.status(500).json({ message: "Internal Server Error" });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "An error occurred" });
   }
 };
 
@@ -179,3 +238,25 @@ export const getUserNavPermissions = async (
 //       return res.status(500).json({ message: 'Internal Server Error' });
 //     }
 //   };
+
+
+// const getNavParentsWithPermissions = async () => {
+//   try {
+//     const navParents = await NavParent.findAll({
+//       include: [
+//         {
+//           model: Permission,
+//           as: 'permissions', // Alias, if any
+//           attributes: ['id', 'name', 'url', 'slug'] // Select specific fields
+//         }
+//       ],
+//       attributes: ['id', 'name', 'iconUrl', 'slug'] // Select specific fields for NavParent
+//     });
+
+//     return navParents;
+//   } catch (error) {
+//     console.error('Error fetching NavParents and permissions:', error);
+//     throw new Error('Could not fetch NavParents and their permissions');
+//   }
+// };
+

@@ -5,6 +5,7 @@ export interface NavParentAttributes {
   id: string;
   name: string;
   iconUrl: string;
+  isNav:boolean;
   slug: string;
 }
 
@@ -37,6 +38,10 @@ NavParent.init(
       type: DataTypes.STRING,
       allowNull: false,
       unique:true,
+    },
+    isNav:{
+      type:DataTypes.BOOLEAN,
+      defaultValue:false
     },
     iconUrl: {
       type: DataTypes.STRING,
