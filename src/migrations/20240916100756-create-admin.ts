@@ -11,11 +11,11 @@ module.exports = {
         allowNull: false,
       },
       firstname: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
       },
       lastname: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
       },
       email: {
@@ -24,15 +24,15 @@ module.exports = {
         unique: true,
       },
       phoneNumber: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
       },
       profilePic: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: true,
       },
       department: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: true,
       },
       password: {
@@ -45,7 +45,7 @@ module.exports = {
       },
 
       roleId: {
-        type: DataTypes.UUID,
+        type: Sequelize.UUID,
         references: {
           model: "Roles",
           key: "id",
@@ -54,16 +54,16 @@ module.exports = {
         onDelete: "SET NULL",
       },
       verificationToken: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: true,
       },
       address: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: true,
       },
 
       active: {
-        type: DataTypes.BOOLEAN,
+        type: Sequelize.BOOLEAN,
         defaultValue: true,
       },
       resetPasswordToken: {
@@ -75,7 +75,7 @@ module.exports = {
         allowNull: true,
       },
       isVerified: {
-        type: DataTypes.BOOLEAN,
+        type: Sequelize.BOOLEAN,
         defaultValue: false,
         allowNull: true,
       },

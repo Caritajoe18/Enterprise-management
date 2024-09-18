@@ -28,7 +28,7 @@ import {addRole, getAllRoles} from "../controller/roleController";
 import { addPermissionsToRole, createPermissions, getAllPermissions, removePermissionsFromRole } from "../controller/permissionController";
 import { authorize } from "../middleware/staffPermissions";
 import { limiter } from "../utilities/auths";
-import { createNavParent, getNavWithPermissions, getUserNavPermissions } from "../controller/navBarController";
+import { createNavParent, getAllNavandPerm, getNavWithPermissions, getUserNavPermissions } from "../controller/navBarController";
 import { authenticateAdmin } from "../middleware/adminAuth";
 
 const router = express.Router();
@@ -36,6 +36,7 @@ router.post("/sign-up", signupAdmin);
 router.post("/login", loginAdmin);
 
 //permissions
+router.get("/get-all-nav", getAllNavandPerm);
 router.post("/add-permissions", authorize(), createPermissions);
 router.post("/add-nav", authorize(), createNavParent);
 router.get("/get-nav",authenticateAdmin, getUserNavPermissions);

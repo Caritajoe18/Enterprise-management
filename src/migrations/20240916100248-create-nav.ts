@@ -22,6 +22,10 @@ module.exports = {
         type: Sequelize.STRING,
         
       },
+      isNav: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
       createdAt: {
         type: Sequelize.DATE,
         
