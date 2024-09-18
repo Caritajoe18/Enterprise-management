@@ -24,7 +24,7 @@ import {
   suspendStaff,
   updateStaff,
 } from "../controller/staffController";
-import {addRole, getAllRoles} from "../controller/roleController";
+import {addRole, getAllRoles, getRoles} from "../controller/roleController";
 import { addPermissionsToRole, createPermissions, getAllPermissions, removePermissionsFromRole } from "../controller/permissionController";
 import { authorize } from "../middleware/staffPermissions";
 import { limiter } from "../utilities/auths";
@@ -51,7 +51,8 @@ router.delete("/delete-product/:id",authorize(), deleteProduct);
 
 //staff
 router.post('/create-role',authorize(), addRole);
-router.get('/get-roles',authorize, getAllRoles);
+router.get('/get-roles',authorize(), getAllRoles);
+router.get('/get-rolePerm',authorize(), getRoles);
 router.patch('/add-permission/:roleId/permissions',authorize(), addPermissionsToRole);
 router.delete('/remove-permission/:roleId/permissions',authorize(), removePermissionsFromRole);
 

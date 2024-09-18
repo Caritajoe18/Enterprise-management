@@ -18,7 +18,6 @@ import {
   generateTokenEmailHTML,
   generateVerificationEmailHTML,
 } from "../utilities/htmls";
-import Role from "../models/role";
 import { Op } from "sequelize";
 
 export const loginurl = `http/3000/frontend login`;

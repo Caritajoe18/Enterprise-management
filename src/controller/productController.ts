@@ -56,7 +56,7 @@ export const updateProducts = async (req: Request, res: Response) => {
     );
     //product.dataValues.prices = { ...product.dataValues.prices, ...prices };
 
-    console.log("After update:", product.dataValues);
+    // console.log("After update:", product.dataValues);
     //await product.save();
 
     res

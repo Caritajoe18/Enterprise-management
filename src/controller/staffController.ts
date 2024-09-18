@@ -84,7 +84,7 @@ export const updateStaff = async (req: Request, res: Response) => {
     if (!staff) {
       return res.status(404).json({ error: "staff not found" });
     }
-    const updatedStaff = await staff.update({firstname, lastname, phoneNumber, department});
+    const updatedStaff = await staff.update({firstname, lastname, phoneNumber, department}, { where: { id } } );
     res
       .status(200)
       .json({ message: "Staff updated successfully", updatedStaff });

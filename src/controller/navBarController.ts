@@ -2,9 +2,7 @@ import { Request, Response } from "express";
 import NavParent from "../models/navparent";
 import Permissions from "../models/permission";
 import { AuthRequest } from "../middleware/staffPermissions";
-import Role from "../models/role";
 import RolePermission from "../models/rolepermission";
-import Admins from "../models/admin";
 
 export const createNavParent = async (req: Request, res: Response) => {
   const { name, iconUrl } = req.body;
@@ -36,59 +34,53 @@ export const createNavParent = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllNavandPerm = async(req:Request, res:Response)=>{
-try {
-  const navParents = await NavParent.findAll({
-    attributes: ['id', 'name', 'slug', 'iconUrl'], 
-  });
+export const getAllNavandPerm = async (req: Request, res: Response) => {
+  try {
+    const navParents = await NavParent.findAll({
+      attributes: ["id", "name"],
+    });
 
-  if (navParents.length === 0) {
-    return res.status(404).json({ message: "No NavParents found" });
-  }
-
-
-  const navParentIds = navParents.map(navParent => navParent.dataValues.id);
-  const permissions = await Permissions.findAll({
-    where: {
-      navParentId: navParentIds, 
-    },
-    attributes: ['id', 'name', 'slug', 'url', 'navParentId'], 
-  });
-
-  
-  const navParentMap: Record<number, any> = {};
-
-  navParents.forEach((navParent: any) => {
-    navParentMap[navParent.id] = {
-      navParentName: navParent.name,
-      navParentSlug: navParent.slug,
-      navParentIcon: navParent.iconUrl,
-      permissions: [], 
-    };
-  });
-
-  permissions.forEach((permission: any) => {
-    if (permission.navParentId && navParentMap[permission.navParentId]) {
-      navParentMap[permission.navParentId].permissions.push({
-        id:permission.id,
-        name: permission.name,
-        slug: permission.slug,
-        url: permission.url,
-      });
+    if (navParents.length === 0) {
+      return res.status(404).json({ message: "No NavParents found" });
     }
-  });
 
+    const navParentIds = navParents.map((navParent) => navParent.dataValues.id);
+    const permissions = await Permissions.findAll({
+      where: {
+        navParentId: navParentIds,
+      },
+      attributes: ["id", "name", "slug", "url", "navParentId"],
+    });
 
-  const result = Object.values(navParentMap);
+    const navParentMap: Record<number, any> = {};
 
-  return res.status(200).json({ navParentsWithPermissions: result });
-  
-} catch (error: unknown) {
-  if (error instanceof Error) {
-    return res.status(500).json({ error: error.message });
+    navParents.forEach((navParent: any) => {
+      navParentMap[navParent.id] = {
+        navParentName: navParent.name,
+        permissions: [],
+      };
+    });
+
+    permissions.forEach((permission: any) => {
+      if (permission.navParentId && navParentMap[permission.navParentId]) {
+        navParentMap[permission.navParentId].permissions.push({
+          id: permission.id,
+          name: permission.name,
+          slug: permission.slug,
+          url: permission.url,
+        });
+      }
+    });
+
+    const result = Object.values(navParentMap);
+
+    return res.status(200).json({ navParentsWithPermissions: result });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "An error occurred" });
   }
-  return res.status(500).json({ error: "An error occurred" });
-}
 };
 
 export const getNavWithPermissions = async (req: Request, res: Response) => {
@@ -129,9 +121,9 @@ export const getUserNavPermissions = async (
     if (!req.admin || !("roleId" in req.admin)) {
       return res.status(400).json({ message: "No roleId found in user" });
     }
-    
-    const { roleId} = req.admin;
-    
+
+    const { roleId } = req.admin;
+
     const rolePermissions = await RolePermission.findAll({
       where: { roleId },
     });
@@ -173,8 +165,8 @@ export const getUserNavPermissions = async (
       navParentMap[navParent.id] = {
         navParentName: navParent.name,
         navParentSlug: navParent.slug,
-        navParentIcon:navParent.iconUrl,
-        permissions: [], 
+        navParentIcon: navParent.iconUrl,
+        permissions: [],
       };
     });
 
@@ -239,7 +231,6 @@ export const getUserNavPermissions = async (
 //     }
 //   };
 
-
 // const getNavParentsWithPermissions = async () => {
 //   try {
 //     const navParents = await NavParent.findAll({
@@ -259,4 +250,3 @@ export const getUserNavPermissions = async (
 //     throw new Error('Could not fetch NavParents and their permissions');
 //   }
 // };
-
