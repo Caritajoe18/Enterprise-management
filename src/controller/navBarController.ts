@@ -3,6 +3,7 @@ import NavParent from "../models/navparent";
 import Permissions from "../models/permission";
 import { AuthRequest } from "../middleware/staffPermissions";
 import RolePermission from "../models/rolepermission";
+import Role from "../models/role";
 
 export const createNavParent = async (req: Request, res: Response) => {
   const { name, iconUrl } = req.body;
@@ -85,26 +86,26 @@ export const getAllNavandPerm = async (req: Request, res: Response) => {
 
 export const getNavWithPermissions = async (req: Request, res: Response) => {
   try {
-    const navigations = await NavParent.findAll({
+    const permissions = await Permissions.findAll({
+      where: {
+        isNav: true,
+      },
       include: [
         {
-          model: Permissions,
-          as: "permissions",
-          where: {
-            isNav: true,
-          },
+          model: NavParent,
+          as: "navParent",
           attributes: ["id", "name", "slug"],
         },
       ],
     });
 
-    if (!navigations || navigations.length === 0) {
+    if (!permissions || permissions.length === 0) {
       return res
         .status(404)
-        .json({ message: "No navigations with permissions found" });
+        .json({ message: "No permissions found" });
     }
 
-    return res.status(200).json(navigations);
+    return res.status(200).json(permissions);
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
@@ -163,6 +164,7 @@ export const getUserNavPermissions = async (
     const navParentMap: Record<number, any> = {};
     navParents.forEach((navParent: any) => {
       navParentMap[navParent.id] = {
+        navParentId: navParent.id,
         navParentName: navParent.name,
         navParentSlug: navParent.slug,
         navParentIcon: navParent.iconUrl,
@@ -190,63 +192,64 @@ export const getUserNavPermissions = async (
   }
 };
 
-//   export const getUserNavPermissions = async (req: AuthRequest, res: Response) => {
-//     try {
-//       const roleId  = req.admin?.roleId; // Assuming req.user contains roleId
+  // export const getUserNavPermission = async (req: AuthRequest, res: Response) => {
+  //   try {
+  //     const {roleId}  = req.admin? // Assuming req.user contains roleId
 
-//       // Find all permissions associated with the user's role
-//       const role = await Role.findOne({
-//         where: { id: roleId },
-//         include: [
-//           {
-//             model: Permissions,
-//             as: 'permissions', // Ensure this alias matches your associations
-//             include: [
-//               {
-//                 model: NavParent,
-//                 as: 'navParent', // Alias should match your associations
-//                 where: { isNav: true }, // Fetch only those where isNav is true
-//               },
-//             ],
-//           },
-//         ],
-//       });
+  //     // Find all permissions associated with the user's role
+  //     const role = await Role.findOne({
+  //       where: { id: roleId },
+  //       include: [
+  //         {
+  //           model: Permissions,
+  //           as: 'permissions', // Ensure this alias matches your associations
+  //           include: [
+  //             {
+  //               model: NavParent,
+  //               as: 'navParent', // Alias should match your associations
+  //               where: { isNav: true }, // Fetch only those where isNav is true
+  //             },
+  //           ],
+  //         },
+  //       ],
+  //     });
 
-//       if (!role) {
-//         return res.status(404).json({ message: 'Role not found' });
-//       }
+  //     if (!role) {
+  //       return res.status(404).json({ message: 'Role not found' });
+  //     }
 
-//       // Extract permissions and navParents from the role
-//       const navParentsWithPermissions = role.permissions.map((permission: any) => ({
-//         permissionName: permission.name,
-//         navParent: permission.navParent ? permission.navParent.name : null,
-//       }));
+  //     // Extract permissions and navParents from the role
+  //     const navParentsWithPermissions = role.permissions.map((permission: any) => ({
+  //       permissionName: permission.name,
+  //       navParent: permission.navParent ? permission.navParent.name : null,
+  //     }));
 
-//       return res.status(200).json({
-//         navParentsWithPermissions,
-//       });
-//     } catch (error) {
-//       console.error('Error fetching navigations with permissions:', error);
-//       return res.status(500).json({ message: 'Internal Server Error' });
-//     }
-//   };
+  //     return res.status(200).json({
+  //       navParentsWithPermissions,
+  //     });
+  //   } catch (error) {
+  //     console.error('Error fetching navigations with permissions:', error);
+  //     return res.status(500).json({ message: 'Internal Server Error' });
+  //   }
+  // };
 
-// const getNavParentsWithPermissions = async () => {
-//   try {
-//     const navParents = await NavParent.findAll({
-//       include: [
-//         {
-//           model: Permission,
-//           as: 'permissions', // Alias, if any
-//           attributes: ['id', 'name', 'url', 'slug'] // Select specific fields
-//         }
-//       ],
-//       attributes: ['id', 'name', 'iconUrl', 'slug'] // Select specific fields for NavParent
-//     });
-
-//     return navParents;
-//   } catch (error) {
-//     console.error('Error fetching NavParents and permissions:', error);
-//     throw new Error('Could not fetch NavParents and their permissions');
-//   }
-// };
+export const getNavParentsWithPermissions = async (req: Request, res: Response) => {
+  try {
+    const navParents = await NavParent.findAll({
+      include: [
+        {
+          model: Permissions,
+          as: 'permissions', // Alias, if any
+          attributes: ['id', 'name', 'url', 'slug'] // Select specific fields
+        }
+      ],
+      attributes: ['id', 'name', 'iconUrl', 'slug'] // Select specific fields for NavParent
+    });
+    return res.status(200).json({ navParents });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred." });
+  }
+};
