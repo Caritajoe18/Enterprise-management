@@ -42,6 +42,9 @@ router.post("/add-nav", authorize(), createNavParent);
 router.get("/get-nav",authenticateAdmin, getUserNavPermissions);
 router.get("/get-permissions",authorize(), getAllPermissions);
 
+//router.get("/get-permissi",authorize(), getNavWithPermissions ); //testing
+
+
 //products
 router.post("/add-product",authorize(), createProducts);
 router.patch("/edit-product/:id",authorize(), updateProducts);
