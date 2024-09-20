@@ -3,9 +3,16 @@ import Role from "../models/role";
 import Permission from "../models/permission";
 import AdminInstance from "../models/admin";
 import RolePermission from "../models/rolepermission";
+import { createRoleSchema, option } from "../validations/adminValidation";
 
 export const addRole = async (req: Request, res: Response) => {
   try {
+    const validationResult = createRoleSchema.validate(req.body, option);
+    if (validationResult.error) {
+      return res
+      .status(400)
+      .json({ error: validationResult.error.details[0].message });
+    }
     const { name, permissionsId } = req.body;
 
     const existingRole = await Role.findOne({

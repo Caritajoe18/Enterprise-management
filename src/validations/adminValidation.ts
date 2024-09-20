@@ -115,6 +115,15 @@ export const updateStaffSchema = Joi.object({
       "any.required": "Password confirmation is required",
     }),
 });
+export const createRoleSchema = Joi.object({
+  name: Joi.string().min(2).max(30).required().messages({
+    "string.min": "firstname should have a minimum length of {#limit}",
+    "string.max": "firstname should have a maximum length of {#limit}",
+    "string.empty": "name is required",
+  }),
+  
+});
+
 
 export const changePasswordSchema = Joi.object({
   password: passwordSchema,
