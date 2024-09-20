@@ -8,7 +8,7 @@ import sequelize from "../db";
 const server = createServer(app);
 const port = process.env.PORT ?? 5000;
 
-sequelize.sync({alter:false}).then(() => {
+sequelize.sync({alter:true}).then(() => {
 	console.log("Connected to MySql");
 });
 

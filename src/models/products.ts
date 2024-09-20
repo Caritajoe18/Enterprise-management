@@ -1,12 +1,19 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../db";
-import { validatePricePlan, validatePrices } from "../validations/productValidations";
 
+export interface Product {
+  unit: string;
+  amount: number;
+}
+export interface Plan {
+  category: string;
+  amount: number;
+}
 export interface ProductsAttributes {
   id: string;
   name: string;
-  price: { [unit: string]: number }; 
-  pricePlan?: { [category: string]: number };
+  price: Product[]; 
+  pricePlan?: Plan[];
 }
 
 export class ProductInstance extends Model<ProductsAttributes> {}
@@ -28,18 +35,12 @@ ProductInstance.init(
      price: {
       type: DataTypes.JSON,
       allowNull: false,
-      validate: {
-        isValid: validatePrices,
-      },
       
     },
     pricePlan: {
       type: DataTypes.JSON,
       defaultValue:{},
       allowNull: true,
-      validate: {
-        isValid: validatePricePlan,
-      },
     },
   },
 
