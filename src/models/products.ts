@@ -44,7 +44,7 @@ ProductInstance.init(
     },
   },
 
-  { sequelize: db, tableName: "products" }
+  { sequelize: db, tableName: "Products" }
 );
 
 export default ProductInstance;
