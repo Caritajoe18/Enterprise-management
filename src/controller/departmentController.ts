@@ -22,7 +22,7 @@ export const creaetDepartment = async (req: Request, res: Response) => {
     const dept = await Department.create({
       ...req.body,
     });
-
+    console.log("prrrr:",typeof dept.dataValues.product);
     return res.status(201).json({
       message: "Department created successfully",
       dept,
@@ -75,8 +75,16 @@ export const getAllDepartments = async (req: Request, res: Response) => {
       
       const departments = await Department.findAll({order: [["name", "ASC"]],});
 
+const parsedDepartments = departments.map(department => {
+  return {
+      ...department.toJSON(),
+      product: typeof department.dataValues.product === 'string' ? JSON.parse(department.dataValues.product) : department.dataValues.product
+  };
+});
+
+return res.status(200).json({ departments: parsedDepartments });
       
-      return res.status(200).json(departments);
+      
   } catch (error: unknown) {
       if (error instanceof Error) {
           return res.status(500).json({ error: error.message });
