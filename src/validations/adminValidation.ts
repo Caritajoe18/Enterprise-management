@@ -120,8 +120,9 @@ export const createRoleSchema = Joi.object({
     "string.min": "firstname should have a minimum length of {#limit}",
     "string.max": "firstname should have a maximum length of {#limit}",
     "string.empty": "name is required",
+    
   }),
-  
+  permissionsId: Joi.array(),
 });
 
 
