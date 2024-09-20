@@ -107,9 +107,22 @@ export const getProducts = async (req: Request, res: Response) => {
       return res.status(204).send();
     }
 
-    res
-      .status(200)
-      .json({ message: "Company's products retrieved successfully", products });
+    const parsedProducts = products.map(product => {
+      return {
+        ...product.toJSON(),
+        price: typeof product.dataValues.price === 'string' ? JSON.parse(product.dataValues.price) : product.dataValues.price,
+        pricePlan: typeof product.dataValues.pricePlan === 'string' ? JSON.parse(product.dataValues.pricePlan) : product.dataValues.pricePlan,
+      };
+    });
+
+    res.status(200).json({
+      message: "Company's products retrieved successfully",
+      products: parsedProducts,
+    });
+
+    // res
+    //   .status(200)
+    //   .json({ message: "Company's products retrieved successfully", products });
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });

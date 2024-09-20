@@ -81,21 +81,38 @@ export const createProductSchema = Joi.object({
     "string.required": "The name of a product is required",
     "any.required": "Product name is required",
   }),
-  price: Joi.object()
-    .pattern(Joi.string(), Joi.number().positive().required())
+  price: Joi.array()
+    .items(
+      Joi.object({
+        unit: Joi.string().required().messages({
+          "string.required": "Unit is required.",
+        }),
+        amount: Joi.number().positive().required().messages({
+          "number.positive": "Amount must be a positive number.",
+          "any.required": "Amount is required.",
+        }),
+      })
+    )
     .min(1)
     .required()
     .messages({
-      "object.base": "Price must be a valid object with units as keys.",
-      "object.pattern.base": "Each unit must have a valid positive price.",
-      "object.min": "Price must contain at least one unit.",
+      "array.base": "Price must be a valid array of objects.",
+      "array.min": "Price must contain at least one unit.",
       "any.required": "Price is required and must include at least one unit.",
     }),
-  pricePlan: Joi.object()
-    .pattern(Joi.string(), Joi.number().positive())
+  pricePlan: Joi.array()
+    .items(
+      Joi.object({
+        category: Joi.string().required().messages({
+          "string.required": "Unit in PricePlan is required.",
+        }),
+        amount: Joi.number().positive().required().messages({
+          "number.positive": "Amount in pricePlan must be a positive number.",
+          "any.required": "Amount in pricePlan is required.",
+        }),
+      })
+    )
     .messages({
-      "object.base":
-        "Price plan must be a valid object with categories as keys.",
-      "object.pattern.base": "Each category must have a valid positive price.",
+      "array.base": "Price plan must be a valid array of objects.",
     }),
 });
