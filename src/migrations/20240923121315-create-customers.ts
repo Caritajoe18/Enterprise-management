@@ -38,7 +38,7 @@ module.exports = {
       },
       phoneNumber: {
         type: Sequelize.STRING,
-        allowNull: true,
+        allowNull: false,
       },
       description: {
         type: Sequelize.TEXT,
