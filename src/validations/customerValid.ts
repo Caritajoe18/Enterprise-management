@@ -6,10 +6,12 @@ export const regCustomerSchema = Joi.object({
         "string.max": "First name should have a maximum length of {#limit}",
       }),
       lastname:Joi.string().required(),
-      email: Joi.string().email().required(),
+      email: Joi.string().email(),
       address: Joi.string().required(),
-      phonenumber:Joi.string(),
+      phoneNumber:Joi.string().required(),
       profilePic:Joi.string(),
+      date:Joi.date(),
+      description:Joi.string(),
 });
 
 export const updateCustomerSchema = Joi.object({
@@ -29,9 +31,10 @@ export const updateCustomerSchema = Joi.object({
       
     
       address: Joi.string(),
-      phonenumber:Joi.string(),
-      category:Joi.string(),
+      phoneNumber:Joi.string(),
+      date:Joi.date(),
       profilePic:Joi.string(),
+      description:Joi.string()
 });
 
 export const createOrderSchema = Joi.object({
