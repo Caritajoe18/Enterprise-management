@@ -6,7 +6,7 @@ import {
   signUpSchema,
   updateStaffSchema,
 } from "../validations/adminValidation";
-import { bcryptEncode } from "../utilities/auths";
+import { bcryptEncode, toPascalCase } from "../utilities/auths";
 
 import { sendVerificationMail } from "../utilities/sendVerification";
 import { generateVerificationEmailHTML } from "../utilities/htmls";
@@ -24,7 +24,11 @@ export const signupStaff = async (req: Request, res: Response) => {
         .json({ error: validationResult.error.details[0].message });
     }
 
-    const { email, password, firstname,roleId } = req.body;
+    let { email, password, firstname, lastname,roleId, department } = req.body;
+
+    firstname = toPascalCase(firstname);
+    lastname = toPascalCase(lastname);
+    email = email.toLowerCase();
 
     const exist = await AdminInstance.findOne({ where: { email } });
 
@@ -43,6 +47,10 @@ export const signupStaff = async (req: Request, res: Response) => {
       ...req.body,
       roleId: role.dataValues.id,
       password: passwordHashed,
+      firstname,
+      lastname,
+      email,
+      department
     });
     //console.log(user, "uerrrrr issss");
 
@@ -72,7 +80,10 @@ export const signupStaff = async (req: Request, res: Response) => {
 export const updateStaff = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const{firstname, lastname, phoneNumber, department} = req.body
+    let {firstname, lastname, phoneNumber, department} = req.body
+
+    firstname = toPascalCase(firstname);
+    lastname = toPascalCase(lastname);
     const validationResult = updateStaffSchema.validate(req.body, option);
     if (validationResult.error) {
       return res

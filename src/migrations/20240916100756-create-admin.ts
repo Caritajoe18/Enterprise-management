@@ -32,7 +32,7 @@ module.exports = {
         allowNull: true,
       },
       department: {
-        type: Sequelize.STRING,
+        type: Sequelize.JSON,
         allowNull: true,
       },
       password: {

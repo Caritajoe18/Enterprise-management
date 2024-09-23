@@ -5,6 +5,7 @@ import {
   editDepartmentSchema,
 } from "../validations/productValidations";
 import { option } from "../validations/adminValidation";
+import { toPascalCase } from "../utilities/auths";
 
 export const creaetDepartment = async (req: Request, res: Response) => {
   try {
@@ -14,13 +15,15 @@ export const creaetDepartment = async (req: Request, res: Response) => {
         .status(400)
         .json({ error: validationResult.error.details[0].message });
     }
-    const { name } = req.body;
+    let { name } = req.body;
+    name = toPascalCase(name)
     const exist = await Department.findOne({ where: { name } });
     if (exist) {
       return res.status(400).json({ error: "Department already exists" });
     }
     const dept = await Department.create({
       ...req.body,
+      name
     });
     console.log("prrrr:",typeof dept.dataValues.product);
     return res.status(201).json({
@@ -37,7 +40,8 @@ export const creaetDepartment = async (req: Request, res: Response) => {
 
 export const editDepartment = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { name, product } = req.body;
+  let { name, product } = req.body;
+  name = toPascalCase(name)
   try {
     const validationResult = editDepartmentSchema.validate(req.body, option);
     if (validationResult.error) {
