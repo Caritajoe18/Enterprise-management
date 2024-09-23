@@ -4,6 +4,7 @@ import Permission from "../models/permission";
 import AdminInstance from "../models/admin";
 import RolePermission from "../models/rolepermission";
 import { createRoleSchema, option } from "../validations/adminValidation";
+import { toPascalCase } from "../utilities/auths";
 
 export const addRole = async (req: Request, res: Response) => {
   try {
@@ -13,8 +14,8 @@ export const addRole = async (req: Request, res: Response) => {
       .status(400)
       .json({ error: validationResult.error.details[0].message });
     }
-    const { name, permissionsId } = req.body;
-
+    let { name, permissionsId } = req.body;
+    name = toPascalCase(name)
     const existingRole = await Role.findOne({
       where: { name },
     });

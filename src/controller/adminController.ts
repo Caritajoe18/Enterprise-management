@@ -10,6 +10,7 @@ import {
   bcryptDecode,
   bcryptEncode,
   generateToken,
+  toPascalCase,
   tokenExpiry,
   verifyToken,
 } from "../utilities/auths";
@@ -31,9 +32,12 @@ export const signupAdmin = async (req: Request, res: Response) => {
         .json({ error: validationResult.error.details[0].message });
     }
 
-    const { email, password, roleName, firstname, isAdmin } = req.body;
+    let { email, password, roleId, firstname,lastname, isAdmin, department } = req.body;
 
-    // Check if the admin already exists by email
+    firstname = toPascalCase(firstname);
+    lastname = toPascalCase(lastname);
+    email = email.toLowerCase();
+
     const exist = await AdminInstance.findOne({ where: { email } });
     if (exist) {
       return res.status(400).json({ error: "Email already exists" });
@@ -46,7 +50,11 @@ export const signupAdmin = async (req: Request, res: Response) => {
     const admin = await AdminInstance.create({
       ...req.body,
       password: passwordHashed,
-      roleName,
+      roleId,
+      firstname,
+      lastname,
+      email,
+      department,
       isAdmin: true,
     });
 

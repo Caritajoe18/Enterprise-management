@@ -9,7 +9,7 @@ export interface AdminAttributes {
   email: string;
   phoneNumber: string;
   profilePic: string;
-  department: string;
+  department: string[];
   address: string;
   //roleName: string;
   roleId: string;
@@ -77,7 +77,7 @@ export interface AdminAttributes {
         allowNull: true,
       },
       department: {
-        type: DataTypes.STRING,
+        type: DataTypes.JSON,
         allowNull: true,
       },
       // roleName: {

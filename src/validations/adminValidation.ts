@@ -43,7 +43,7 @@ export const signUpSchema = Joi.object({
       "string.empty": "Phone number is required",
       
     }),
-  department: Joi.string().min(4).max(30),
+  department: Joi.array().items(Joi.string()).min(1).max(5),
   profilePic:Joi.string(),
   roleId: Joi.string().min(2).max(50).optional(),
   password: passwordSchema,

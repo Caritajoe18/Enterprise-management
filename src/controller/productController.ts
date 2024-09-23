@@ -3,6 +3,7 @@ import { ProductInstance } from "../models/products";
 import { createProductSchema } from "../validations/productValidations";
 import { option } from "../validations/adminValidation";
 import { Op } from "sequelize";
+import { toPascalCase } from "../utilities/auths";
 
 export const createProducts = async (req: Request, res: Response) => {
   try {
@@ -13,8 +14,8 @@ export const createProducts = async (req: Request, res: Response) => {
         .json({ error: validationResult.error.details[0].message });
     }
 
-    const { name, price, pricePlan } = req.body;
-
+    let { name, price, pricePlan } = req.body;
+    name = toPascalCase(name)
     const exist = await ProductInstance.findOne({ where: { name } });
     if (exist) {
       return res.status(400).json({ message: "Product already exists" });
@@ -22,6 +23,7 @@ export const createProducts = async (req: Request, res: Response) => {
 
     let product = await ProductInstance.create({
       ...req.body,
+      name,
       price,
       pricePlan: pricePlan || {},
     });
