@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyToken } from '../utilities/auths'; // Assuming you have a verifyToken function
-import Admins from '../models/admin'; // Import your Admin model
+import { verifyToken } from '../utilities/auths';
+import Admins from '../models/admin'; 
 import { JwtPayload } from 'jsonwebtoken';
 
 export interface AuthRequest extends Request {
@@ -24,11 +24,24 @@ export const authenticateAdmin = async (req: AuthRequest, res: Response, next: N
       return res.status(401).json({ message: decoded });
     }
 
-    const { id, isAdmin } = decoded as { id: string, isAdmin: boolean };
+    // const { id, isAdmin } = decoded as { id: string, isAdmin: boolean };
 
-    if (!id) {
+    const { id, isAdmin } = decoded  as JwtPayload;
+
+    //console.log("the tokkk", decoded)
+
+    if (!id && !isAdmin) {
       return res.status(401).json({ message: 'Unauthorized: No user ID in token' });
     }
+
+    if (isAdmin) {
+      const admin = await Admins.findOne({ where: { isAdmin: true, id } });
+      if (!admin) {
+        return res.status(404).json({ message: "Admin not found" });
+      }
+      req.admin = admin;
+        return next();  
+      }
 
     // Find the admin by ID
     const admin = await Admins.findByPk(id);
@@ -38,6 +51,7 @@ export const authenticateAdmin = async (req: AuthRequest, res: Response, next: N
 
     req.admin = admin;
     next();
+  
   } catch (error) {
     console.error('Error authenticating admin:', error);
     res.status(500).json({ message: 'Internal Server Error' });
