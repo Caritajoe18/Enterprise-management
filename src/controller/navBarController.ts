@@ -4,6 +4,7 @@ import Permissions from "../models/permission";
 import { AuthRequest } from "../middleware/staffPermissions";
 import RolePermission from "../models/rolepermission";
 import Role from "../models/role";
+import Admins from "../models/admin";
 
 export const createNavParent = async (req: Request, res: Response) => {
   const { name, iconUrl } = req.body;
@@ -118,12 +119,44 @@ export const getUserNavPermissions = async (
   req: AuthRequest,
   res: Response
 ) => {
+     
   try {
+    console.time('getUserNavPermissions'); 
+    const admin = req.admin as Admins;
     if (!req.admin || !("roleId" in req.admin)) {
       return res.status(400).json({ message: "No roleId found in user" });
     }
 
-    const { roleId } = req.admin;
+    const {roleId, isAdmin} = admin.dataValues;
+
+    if (isAdmin) {
+      const navParents = await NavParent.findAll();
+      const permissions = await Permissions.findAll({ where: { isNav: true } });
+
+      const navParentMap: Record<number, any> = {};
+      navParents.forEach((navParent: any) => {
+        navParentMap[navParent.id] = {
+          navParentId: navParent.id,
+          navParentName: navParent.name,
+          navParentSlug: navParent.slug,
+          navParentIcon: navParent.iconUrl,
+          permissions: [],
+        };
+      });
+
+      permissions.forEach((permission: any) => {
+        if (permission.navParentId && navParentMap[permission.navParentId]) {
+          navParentMap[permission.navParentId].permissions.push({
+            name: permission.name,
+            slug: permission.slug,
+          });
+        }
+      });
+
+      const result = Object.values(navParentMap);
+      return res.status(200).json({ navParentsWithPermissions: result });
+    }
+
 
     const rolePermissions = await RolePermission.findAll({
       where: { roleId },
@@ -182,7 +215,7 @@ export const getUserNavPermissions = async (
     });
 
     const result = Object.values(navParentMap);
-
+    console.timeEnd('getUserNavPermissions'); 
     return res.status(200).json({ navParentsWithPermissions: result });
   } catch (error: unknown) {
     if (error instanceof Error) {
