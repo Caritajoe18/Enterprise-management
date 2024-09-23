@@ -104,10 +104,15 @@ export const updateStaffSchema = Joi.object({
     "string.length": "phone number should have the length of {#limit}",
   }),
   roleId: Joi.string().min(2).max(50).optional(),
-  password: passwordSchema,
+  password: Joi.string()
+  .min(5)
+  .max(15)
+  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{5,15}$/)
+  .message(
+    "Password must be between 5 and 15 characters, contain at least one lowercase letter, one uppercase letter and one digit"
+  ),
   confirmPassword: Joi.any()
     .equal(Joi.ref("password"))
-    .required()
     .label("Confirm password")
     .messages({
       "any.only": "Passwords do not match",
