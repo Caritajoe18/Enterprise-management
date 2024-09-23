@@ -99,12 +99,11 @@ export const updateStaffSchema = Joi.object({
     .messages({
       "string.length": "phone number should have the length of {#limit}",
     }),
-  department: Joi.string().messages({
-    "string.length": "phone number should have the length of {#limit}",
-  }),
+    department: Joi.array().items(Joi.string()).min(1).max(5),
   address: Joi.string().messages({
     "string.length": "phone number should have the length of {#limit}",
   }),
+  roleId: Joi.string().min(2).max(50).optional(),
   password: passwordSchema,
   confirmPassword: Joi.any()
     .equal(Joi.ref("password"))
