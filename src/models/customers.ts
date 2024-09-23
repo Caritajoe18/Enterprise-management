@@ -1,6 +1,5 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../db";
-import { validateCategory } from "../validations/productValidations";
 
 export interface CustomerAttributes {
   id: string;
@@ -8,16 +7,15 @@ export interface CustomerAttributes {
   lastname: string;
   date: Date;
   email:string;
-  profilePic:string;
-  phoneNumber: number;
-  address: string;
-  category: string;
-  description: string;
+  profilePic?:string;
+  phoneNumber: string;
+  address?: string;
+  description?: string;
 }
 
-export class CustomerInstance extends Model<CustomerAttributes> {}
+export class Customer extends Model<CustomerAttributes> {}
 
-CustomerInstance.init(
+Customer.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -35,7 +33,7 @@ CustomerInstance.init(
     },
     email: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     profilePic: {
       type: DataTypes.STRING,
@@ -43,7 +41,7 @@ CustomerInstance.init(
     },
     date: {
       type: DataTypes.DATE,
-      allowNull: true,
+      allowNull: false,
       defaultValue: DataTypes.NOW,
     },
     address: {
@@ -51,19 +49,10 @@ CustomerInstance.init(
       allowNull: true,
     },
     phoneNumber: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: true,
     },
-    category: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: "Regular", 
-      validate: {
-        async isCategory(value: string) {
-          await validateCategory(value);
-        }
-      },
-    },
+  
     description: {
       type: DataTypes.TEXT,
       allowNull: true,
@@ -71,8 +60,8 @@ CustomerInstance.init(
   },
   {
     sequelize: db,
-    tableName: "customers",
+    tableName: "Customers",
   }
 );
 
-export default CustomerInstance;
+export default Customer;

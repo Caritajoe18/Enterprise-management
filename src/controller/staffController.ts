@@ -80,7 +80,7 @@ export const signupStaff = async (req: Request, res: Response) => {
 export const updateStaff = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    let {firstname, lastname, phoneNumber, department} = req.body
+    let {firstname, lastname, phoneNumber, department, roleId, address} = req.body
 
     firstname = toPascalCase(firstname);
     lastname = toPascalCase(lastname);
@@ -95,7 +95,7 @@ export const updateStaff = async (req: Request, res: Response) => {
     if (!staff) {
       return res.status(404).json({ error: "staff not found" });
     }
-    const updatedStaff = await staff.update({firstname, lastname, phoneNumber, department}, { where: { id } } );
+    const updatedStaff = await staff.update({firstname, lastname, phoneNumber, department, address,roleId }, { where: { id } } );
     res
       .status(200)
       .json({ message: "Staff updated successfully", updatedStaff });
@@ -137,8 +137,8 @@ export const restoreStaff = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const staff = await AdminInstance.findByPk(id);
-    if (!staff) {
-      return res.status(404).json({ error: "Staff not found" });
+    if (!staff || staff.dataValues.active) {
+      return res.status(404).json({ error: "Staff not found or was not suspended" });
     }
 
      const restoredStaff = await staff.update(

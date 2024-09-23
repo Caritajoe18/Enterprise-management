@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CustomerInstance } from "../models/customers";
+import { Customer } from "../models/customers";
 import {
   regCustomerSchema,
   updateCustomerSchema,
@@ -16,13 +16,13 @@ export const createCustomer = async (req: Request, res: Response) => {
     }
     const { email } = req.body;
 
-    const exist = await CustomerInstance.findOne({ where: { email } });
+    const exist = await Customer.findOne({ where: { email } });
 
     if (exist) {
       return res.status(400).json({ error: "Customer email already exists" });
     }
 
-    const customer = await CustomerInstance.create({ ...req.body });
+    const customer = await Customer.create({ ...req.body });
     return res.status(201).json({
       message: "customer created succsesfully",
       customer,
@@ -37,7 +37,7 @@ export const createCustomer = async (req: Request, res: Response) => {
 };
 export const getAllCustomers = async (req: Request, res: Response) => {
   try {
-    const customers = await CustomerInstance.findAll({
+    const customers = await Customer.findAll({
       order: [["name", "ASC"]],
     });
     if (customers.length === 0) {
@@ -59,7 +59,7 @@ export const getCustomer = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const customer = await CustomerInstance.findByPk(id);
+    const customer = await Customer.findByPk(id);
     if (!customer) {
       return res.status(404).json({ message: "customer not found", customer });
     }
@@ -83,7 +83,7 @@ export const updateCustomer = async (req: Request, res: Response) => {
         .status(400)
         .json({ error: validationResult.error.details[0].message });
     }
-    const customer = await CustomerInstance.findByPk(id);
+    const customer = await Customer.findByPk(id);
     if (!customer) {
       return res.status(404).json({ error: "customer not found" });
     }

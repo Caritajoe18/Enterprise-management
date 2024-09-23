@@ -14,8 +14,8 @@ export const createProducts = async (req: Request, res: Response) => {
         .json({ error: validationResult.error.details[0].message });
     }
 
-    let { name, price, pricePlan } = req.body;
-    name = toPascalCase(name)
+  const { name, price, pricePlan } = req.body;
+    //name = toPascalCase(name)
     const exist = await ProductInstance.findOne({ where: { name } });
     if (exist) {
       return res.status(400).json({ message: "Product already exists" });

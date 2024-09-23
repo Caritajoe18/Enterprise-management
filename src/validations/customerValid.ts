@@ -9,7 +9,6 @@ export const regCustomerSchema = Joi.object({
       email: Joi.string().email().required(),
       address: Joi.string().required(),
       phonenumber:Joi.string(),
-      category:Joi.string(),
       profilePic:Joi.string(),
 });
 
