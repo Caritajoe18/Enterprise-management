@@ -11,7 +11,6 @@ export interface AdminAttributes {
   profilePic: string;
   department: string[];
   address: string;
-  //roleName: string;
   roleId: string;
   verificationToken?: string;
   resetPasswordToken?: string| null;
@@ -23,18 +22,13 @@ export interface AdminAttributes {
 }
 
 
-// module.exports = (sequelize, DataTypes) => {
+
   class Admins extends Model<AdminAttributes> {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
+    
 
     public role?: Role;
     static associate(models: any) {
-      // define association here
-
+      
       Admins.belongsTo(models.Roles, {
  foreignKey: 'roleId',
    as: 'roles',  });
@@ -80,10 +74,7 @@ export interface AdminAttributes {
         type: DataTypes.JSON,
         allowNull: true,
       },
-      // roleName: {
-      //   type: DataTypes.STRING,
-      //   allowNull: true,
-      // },
+    
       
       roleId: {
         type: DataTypes.UUID,

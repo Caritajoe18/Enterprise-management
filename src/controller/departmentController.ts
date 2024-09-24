@@ -16,16 +16,16 @@ export const creaetDepartment = async (req: Request, res: Response) => {
         .json({ error: validationResult.error.details[0].message });
     }
     let { name } = req.body;
-    name = toPascalCase(name)
+    name = toPascalCase(name);
     const exist = await Department.findOne({ where: { name } });
     if (exist) {
       return res.status(400).json({ error: "Department already exists" });
     }
     const dept = await Department.create({
       ...req.body,
-      name
+      name,
     });
-    console.log("prrrr:",typeof dept.dataValues.product);
+    console.log("prrrr:", typeof dept.dataValues.product);
     return res.status(201).json({
       message: "Department created successfully",
       dept,
@@ -41,7 +41,7 @@ export const creaetDepartment = async (req: Request, res: Response) => {
 export const editDepartment = async (req: Request, res: Response) => {
   const { id } = req.params;
   let { name, product } = req.body;
-  name = toPascalCase(name)
+  name = toPascalCase(name);
   try {
     const validationResult = editDepartmentSchema.validate(req.body, option);
     if (validationResult.error) {
@@ -76,41 +76,41 @@ export const editDepartment = async (req: Request, res: Response) => {
 
 export const getAllDepartments = async (req: Request, res: Response) => {
   try {
-      
-      const departments = await Department.findAll({order: [["name", "ASC"]],});
+    const departments = await Department.findAll({ order: [["name", "ASC"]] });
 
-const parsedDepartments = departments.map(department => {
-  return {
-      ...department.toJSON(),
-      product: typeof department.dataValues.product === 'string' ? JSON.parse(department.dataValues.product) : department.dataValues.product
-  };
-});
+    const parsedDepartments = departments.map((department) => {
+      return {
+        ...department.toJSON(),
+        product:
+          typeof department.dataValues.product === "string"
+            ? JSON.parse(department.dataValues.product)
+            : department.dataValues.product,
+      };
+    });
 
-return res.status(200).json({ departments: parsedDepartments });
-      
-      
+    return res.status(200).json({ departments: parsedDepartments });
   } catch (error: unknown) {
-      if (error instanceof Error) {
-          return res.status(500).json({ error: error.message });
-      }
-      return res.status(500).json({ error: "An error occurred" });
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "An error occurred" });
   }
 };
 
-export const deleteDept = async(req: Request, res: Response)=>{
-try {
-  const { id } = req.params;
+export const deleteDept = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
     const dept = await Department.findByPk(id);
     if (!dept) {
       return res.status(404).json({ error: "staff not found" });
     }
-    
+
     const deletedStaff = await dept.destroy();
     res.status(200).json({ message: "Department deleted successfully" });
-} catch (error: unknown) {
-  if (error instanceof Error) {
+  } catch (error: unknown) {
+    if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "An error occurred" });
   }
-  return res.status(500).json({ error: "An error occurred" });
-}
-}
+};

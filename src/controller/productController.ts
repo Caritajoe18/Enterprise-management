@@ -15,7 +15,7 @@ export const createProducts = async (req: Request, res: Response) => {
     }
 
   const { name, price, pricePlan } = req.body;
-    //name = toPascalCase(name)
+
     const exist = await ProductInstance.findOne({ where: { name } });
     if (exist) {
       return res.status(400).json({ message: "Product already exists" });
@@ -56,11 +56,7 @@ export const updateProducts = async (req: Request, res: Response) => {
       { name, price: updatedPrices },
       { where: { id } }
     );
-    //product.dataValues.prices = { ...product.dataValues.prices, ...prices };
-
-    // console.log("After update:", product.dataValues);
-    //await product.save();
-
+    
     res
       .status(200)
       .json({ message: "Prices updated successfully", updatedProducts });
@@ -122,9 +118,7 @@ export const getProducts = async (req: Request, res: Response) => {
       products: parsedProducts,
     });
 
-    // res
-    //   .status(200)
-    //   .json({ message: "Company's products retrieved successfully", products });
+    
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
@@ -142,7 +136,7 @@ export const deleteProduct = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "No product found" });
     }
 
-    // Delete the product
+    
     await product.destroy();
 
     res.status(200).json({ message: "Product deleted successfully" });

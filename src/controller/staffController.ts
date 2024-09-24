@@ -24,7 +24,7 @@ export const signupStaff = async (req: Request, res: Response) => {
         .json({ error: validationResult.error.details[0].message });
     }
 
-    let { email, password, firstname, lastname,roleId, department } = req.body;
+    let { email, password, firstname, lastname, roleId, department } = req.body;
 
     firstname = toPascalCase(firstname);
     lastname = toPascalCase(lastname);
@@ -42,7 +42,6 @@ export const signupStaff = async (req: Request, res: Response) => {
     }
     const passwordHashed = await bcryptEncode({ value: password });
 
-  
     const user = await AdminInstance.create({
       ...req.body,
       roleId: role.dataValues.id,
@@ -50,11 +49,8 @@ export const signupStaff = async (req: Request, res: Response) => {
       firstname,
       lastname,
       email,
-      department
+      department,
     });
-    //console.log(user, "uerrrrr issss");
-
-    
 
     await sendVerificationMail(
       email,
@@ -63,11 +59,10 @@ export const signupStaff = async (req: Request, res: Response) => {
       generateVerificationEmailHTML
     );
 
-
     return res.status(201).json({
       message:
         "Staff created successfully, Check your email to activate your account",
-      user
+      user,
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -80,7 +75,8 @@ export const signupStaff = async (req: Request, res: Response) => {
 export const updateStaff = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    let {firstname, lastname, phoneNumber, department, roleId, address} = req.body
+    let { firstname, lastname, phoneNumber, department, roleId, address } =
+      req.body;
 
     firstname = toPascalCase(firstname);
     lastname = toPascalCase(lastname);
@@ -95,7 +91,10 @@ export const updateStaff = async (req: Request, res: Response) => {
     if (!staff) {
       return res.status(404).json({ error: "staff not found" });
     }
-    const updatedStaff = await staff.update({firstname, lastname, phoneNumber, department, address,roleId }, { where: { id } } );
+    const updatedStaff = await staff.update(
+      { firstname, lastname, phoneNumber, department, address, roleId },
+      { where: { id } }
+    );
     res
       .status(200)
       .json({ message: "Staff updated successfully", updatedStaff });
@@ -119,12 +118,14 @@ export const suspendStaff = async (req: Request, res: Response) => {
     if (staff.dataValues.isAdmin) {
       return res.status(403).json({ message: "Cannont Suspend this user" });
     }
-     const suspendedStaff = await staff.update(
+    const suspendedStaff = await staff.update(
       { active: false },
       { where: { id }, returning: true }
     );
 
-    res.status(200).json({ message: "Staff suspended successfully" , suspendedStaff});
+    res
+      .status(200)
+      .json({ message: "Staff suspended successfully", suspendedStaff });
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
@@ -138,15 +139,19 @@ export const restoreStaff = async (req: Request, res: Response) => {
     const { id } = req.params;
     const staff = await AdminInstance.findByPk(id);
     if (!staff || staff.dataValues.active) {
-      return res.status(404).json({ error: "Staff not found or was not suspended" });
+      return res
+        .status(404)
+        .json({ error: "Staff not found or was not suspended" });
     }
 
-     const restoredStaff = await staff.update(
+    const restoredStaff = await staff.update(
       { active: true },
       { where: { id }, returning: true }
     );
 
-    res.status(200).json({ message: "Staff restored successfully", restoredStaff });
+    res
+      .status(200)
+      .json({ message: "Staff restored successfully", restoredStaff });
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
@@ -175,19 +180,18 @@ export const deleteStaff = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllStaff = async (req: AuthRequest , res: Response) => {
+export const getAllStaff = async (req: AuthRequest, res: Response) => {
   try {
-
     const currentUserId = req.admin?.dataValues.id;
     const whereClause = currentUserId ? { id: { [Op.ne]: currentUserId } } : {};
     const staffList = await AdminInstance.findAll({
       where: whereClause,
       order: [["createdAt", "ASC"]],
     });
-    if(staffList.length === 0){
-      return res.status(204).send()
+    if (staffList.length === 0) {
+      return res.status(204).send();
     }
-     res
+    res
       .status(200)
       .json({ message: "Staff retrieved successfully", staffList });
   } catch (error: unknown) {
@@ -208,12 +212,10 @@ export const getSuspendedStaff = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "No suspended staff found" });
     }
 
-    res
-      .status(200)
-      .json({
-        message: "Suspended staff retrieved successfully",
-        suspendedStaffList,
-      });
+    res.status(200).json({
+      message: "Suspended staff retrieved successfully",
+      suspendedStaffList,
+    });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
@@ -225,7 +227,7 @@ export const getSuspendedStaff = async (req: Request, res: Response) => {
 
 export const searchStaff = async (req: Request, res: Response) => {
   try {
-    const search = req.query as unknown as string ;
+    const search = req.query as unknown as string;
 
     const whereClause: {
       [Op.or]?: {

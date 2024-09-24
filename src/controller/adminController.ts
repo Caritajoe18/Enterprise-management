@@ -43,10 +43,10 @@ export const signupAdmin = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Email already exists" });
     }
 
-    // Hash the password
+    
     const passwordHashed = await bcryptEncode({ value: password });
 
-    // Create the new admin and associate the roleName directly
+    
     const admin = await AdminInstance.create({
       ...req.body,
       password: passwordHashed,
@@ -222,8 +222,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     }
     
        const passwordHashed = await bcryptEncode({ value: password });
-    //   req.body.password = passwordHashed;
-
+    
       const updated = await user.update({
         password: passwordHashed,
        resetPasswordTokenExpiry: null,

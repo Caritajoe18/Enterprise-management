@@ -24,12 +24,10 @@ export const authenticateAdmin = async (req: AuthRequest, res: Response, next: N
       return res.status(401).json({ message: decoded });
     }
 
-    // const { id, isAdmin } = decoded as { id: string, isAdmin: boolean };
-
+  
     const { id, isAdmin } = decoded  as JwtPayload;
 
-    //console.log("the tokkk", decoded)
-
+    
     if (!id && !isAdmin) {
       return res.status(401).json({ message: 'Unauthorized: No user ID in token' });
     }

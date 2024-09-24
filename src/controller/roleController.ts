@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import Role from "../models/role";
 import Permission from "../models/permission";
-import AdminInstance from "../models/admin";
 import RolePermission from "../models/rolepermission";
 import { createRoleSchema, option } from "../validations/adminValidation";
 import { toPascalCase } from "../utilities/auths";
@@ -11,11 +10,11 @@ export const addRole = async (req: Request, res: Response) => {
     const validationResult = createRoleSchema.validate(req.body, option);
     if (validationResult.error) {
       return res
-      .status(400)
-      .json({ error: validationResult.error.details[0].message });
+        .status(400)
+        .json({ error: validationResult.error.details[0].message });
     }
     let { name, permissionsId } = req.body;
-    name = toPascalCase(name)
+    name = toPascalCase(name);
     const existingRole = await Role.findOne({
       where: { name },
     });
@@ -36,20 +35,6 @@ export const addRole = async (req: Request, res: Response) => {
       });
       console.log(permissionsInstances, "permissions instances");
 
-      // for (const permissionInstance of permissionsInstances) {
-      //   await RolePermission.create({
-      //     roleId: role.dataValues.id,
-      //     permissionId: permissionInstance.dataValues.id,
-      //   });
-      // }
-
-      // Alternatively
-      // await Promise.all(permissionsInstances.map(permissionInstance =>
-      //   RolePermission.create({
-      //     roleId: role.dataValues.id,
-      //     permissionId: permissionInstance.dataValues.id,
-      //   })
-      // ));
       const rolePermissionData = permissionsInstances.map(
         (permissionInstance) => ({
           roleId: role.dataValues.id,
@@ -58,11 +43,8 @@ export const addRole = async (req: Request, res: Response) => {
       );
       console.log(rolePermissionData, "role permission data");
 
-      // Perform bulk insert into RolePermission table
       await RolePermission.bulkCreate(rolePermissionData, { returning: true });
     }
-
-    //console.log(RolePermission, "role permission")
 
     return res.status(201).json({ role });
   } catch (error: unknown) {
@@ -74,10 +56,9 @@ export const addRole = async (req: Request, res: Response) => {
 };
 export const getAllRoles = async (req: Request, res: Response) => {
   try {
-
     const roles = await Role.findAll({
-      attributes: ["id", "name"], 
-      order: [["name", "ASC"]]
+      attributes: ["id", "name"],
+      order: [["name", "ASC"]],
     });
 
     if (!roles.length) {
