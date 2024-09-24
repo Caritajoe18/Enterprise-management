@@ -3,7 +3,7 @@ import { verifyToken } from "../utilities/auths";
 import RolePermission from "../models/rolepermission";  
 import Permission from "../models/permission";
 import { JwtPayload } from "jsonwebtoken";  
-import Admins, { AdminAttributes } from "../models/admin";
+import Admins from "../models/admin";
 
 export interface AuthRequest extends Request {
   admin?: Admins;  

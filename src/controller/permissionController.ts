@@ -2,8 +2,7 @@ import { Request, Response } from "express";
 import Permission from "../models/permission";
 import Role from "../models/role";
 import RolePermission from "../models/rolepermission";
-import sequelize from "../db";
-import { Op, QueryTypes, ValidationError } from "sequelize";
+import { Op, ValidationError } from "sequelize";
 import NavParent from "../models/navparent";
 
 export const createPermissions = async (req: Request, res: Response) => {

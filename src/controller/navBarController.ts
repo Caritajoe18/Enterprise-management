@@ -3,7 +3,6 @@ import NavParent from "../models/navparent";
 import Permissions from "../models/permission";
 import { AuthRequest } from "../middleware/staffPermissions";
 import RolePermission from "../models/rolepermission";
-import Role from "../models/role";
 import Admins from "../models/admin";
 
 export const createNavParent = async (req: Request, res: Response) => {
