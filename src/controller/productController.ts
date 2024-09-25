@@ -64,9 +64,8 @@ export const updateProducts = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "product not found" });
     }
 
-    const updatedPrices = { ...product.dataValues.price, ...price};
-    const updatedPricePlan = { ...product.dataValues.pricePlan, ...pricePlan };
-
+    const updatedPrices = price ? price : product.dataValues.price;  
+    const updatedPricePlan = pricePlan ? pricePlan : product.dataValues.pricePlan;
    await Products.update(
       { name, category, price: updatedPrices, pricePlan: updatedPricePlan},
       { where: { id } }
