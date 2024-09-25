@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
-import { ProductInstance } from "../models/products";
-import { createProductSchema } from "../validations/productValidations";
+import { Products } from "../models/products";
+import { createProductSchema, updateProductSchema } from "../validations/productValidations";
 import { option } from "../validations/adminValidation";
 import { Op } from "sequelize";
 import { toPascalCase } from "../utilities/auths";
+import Departments from "../models/department";
 
 export const createProducts = async (req: Request, res: Response) => {
   try {
@@ -14,18 +15,25 @@ export const createProducts = async (req: Request, res: Response) => {
         .json({ error: validationResult.error.details[0].message });
     }
 
-  const { name, price, pricePlan } = req.body;
+  const { name, price, pricePlan, departmentId} = req.body;
 
-    const exist = await ProductInstance.findOne({ where: { name } });
+    const exist = await Products.findOne({ where: { name } });
     if (exist) {
       return res.status(400).json({ message: "Product already exists" });
     }
+    if (departmentId) {
+      const departmentExists = await Departments.findByPk(departmentId);
+      if (!departmentExists) {
+        return res.status(400).json({ message: "Department not found" });
+      }
+    }
 
-    let product = await ProductInstance.create({
+    let product = await Products.create({
       ...req.body,
       name,
       price,
       pricePlan: pricePlan || {},
+      departmentId: departmentId || null,
     });
 
     res
@@ -42,24 +50,39 @@ export const createProducts = async (req: Request, res: Response) => {
 
 export const updateProducts = async (req: Request, res: Response) => {
   try {
+    const validationResult = updateProductSchema.validate(req.body, option);
+    if (validationResult.error) {
+      return res
+        .status(400)
+        .json({ error: validationResult.error.details[0].message });
+    }
     const { id } = req.params;
-    const { prices, name } = req.body;
+    const { price, name, pricePlan, category } = req.body;
 
-    const product = await ProductInstance.findByPk(id);
+    const product = await Products.findByPk(id);
     if (!product) {
       return res.status(404).json({ error: "product not found" });
     }
 
-    const updatedPrices = { ...product.dataValues.price, ...prices };
+    const updatedPrices = { ...product.dataValues.price, ...price};
+    const updatedPricePlan = { ...product.dataValues.pricePlan, ...pricePlan };
 
-    const updatedProducts = await ProductInstance.update(
-      { name, price: updatedPrices },
+   await Products.update(
+      { name, category, price: updatedPrices, pricePlan: updatedPricePlan},
       { where: { id } }
     );
+
+    const updatedProducts = await Products.findByPk(id);
+
+    if (!updatedProducts) {
+      return res
+        .status(500)
+        .json({ error: "Error retrieving updated products" });
+    }
     
     res
       .status(200)
-      .json({ message: "Prices updated successfully", updatedProducts });
+      .json({ message: "Products updated successfully", updatedProducts });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
@@ -79,7 +102,7 @@ export const searchProducts = async (req: Request, res: Response) => {
       whereClause.name = { [Op.like]: `%${name}%` };
     }
 
-    const products = await ProductInstance.findAll({ where: whereClause });
+    const products = await Products.findAll({ where: whereClause });
 
     if (products.length === 0) {
       return res
@@ -100,7 +123,7 @@ export const searchProducts = async (req: Request, res: Response) => {
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
-    const products = await ProductInstance.findAll();
+    const products = await Products.findAll();
     if (products.length === 0) {
       return res.status(204).send();
     }
@@ -131,7 +154,7 @@ export const deleteProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const product = await ProductInstance.findByPk(id);
+    const product = await Products.findByPk(id);
     if (!product) {
       return res.status(404).json({ message: "No product found" });
     }

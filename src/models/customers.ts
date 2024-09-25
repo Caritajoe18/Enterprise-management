@@ -10,7 +10,7 @@ export interface CustomerAttributes {
   profilePic?:string;
   phoneNumber: string;
   address?: string;
-  description?: string;
+  
 }
 
 export class Customer extends Model<CustomerAttributes> {}
@@ -53,10 +53,6 @@ Customer.init(
       allowNull: false,
     },
   
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
   },
   {
     sequelize: db,

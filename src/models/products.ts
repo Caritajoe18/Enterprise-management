@@ -1,7 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../db";
 
-export interface Product {
+export interface IProduct {
   unit: string;
   amount: number;
 }
@@ -12,13 +12,23 @@ export interface Plan {
 export interface ProductsAttributes {
   id: string;
   name: string;
-  price: Product[]; 
+  category: 'For Sale' | 'For Purchase';
+  price: IProduct[]; 
   pricePlan?: Plan[];
+  departmentId: string | null;
 }
 
-export class ProductInstance extends Model<ProductsAttributes> {}
+export class Products extends Model<ProductsAttributes> {
+  static associate(models: any) {
+    
+    Products.belongsTo(models.Departments, {
+      foreignKey: "departmentId",
+      as: "department", 
+    });
+  }
+}
 
-ProductInstance.init(
+Products.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -31,6 +41,10 @@ ProductInstance.init(
       allowNull: false,
       unique: true,
     },
+    category: {
+      type: DataTypes.ENUM('For Sale', 'For Purchase'),
+      allowNull: false,
+    },
     
      price: {
       type: DataTypes.JSON,
@@ -42,9 +56,18 @@ ProductInstance.init(
       defaultValue:{},
       allowNull: true,
     },
+    departmentId: {
+      type: DataTypes.UUID,
+      allowNull: true, 
+      references: {
+        model: "Departments",  
+        key: "id",
+      },
+      onDelete: "SET NULL",  
+    },
   },
 
-  { sequelize: db, tableName: "Products" }
+  { sequelize: db, modelName: 'Products', tableName: "Products" }
 );
 
-export default ProductInstance;
+export default Products;

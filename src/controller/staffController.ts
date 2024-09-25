@@ -227,7 +227,7 @@ export const getSuspendedStaff = async (req: Request, res: Response) => {
 
 export const searchStaff = async (req: Request, res: Response) => {
   try {
-    const search = req.query as unknown as string;
+    const {search} = req.query 
 
     const whereClause: {
       [Op.or]?: {
@@ -241,7 +241,7 @@ export const searchStaff = async (req: Request, res: Response) => {
       whereClause[Op.or] = [
         { firstname: { [Op.like]: `%${search}%` } },
         { department: { [Op.like]: `%${search}%` } },
-        { roleId: { [Op.eq]: search } },
+        { roleId: { [Op.eq]: search.toString() } },
       ];
     }
 

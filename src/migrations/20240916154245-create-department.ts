@@ -14,10 +14,6 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      product: {
-        type: Sequelize.JSON,
-        allowNull: false,
-      },
 
       createdAt: {
         type: Sequelize.DATE,

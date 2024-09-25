@@ -18,7 +18,7 @@ export interface RoleAttributes {
     public permissions?: Permission[];
 
     static associate(models: any) {
-      Role.belongsToMany(models.Permissions, {
+      Role.belongsToMany(models.Permission, {
         through: 'RolePermission',
         as: 'permissions',
           foreignKey: 'roleId',
@@ -43,6 +43,7 @@ export interface RoleAttributes {
           },
   }, {
     sequelize:db,
-    modelName: 'Roles',
+    modelName: 'Role',
+    tableName:'Roles',
   });
   export default Role;

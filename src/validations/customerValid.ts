@@ -10,8 +10,7 @@ export const regCustomerSchema = Joi.object({
       address: Joi.string().required(),
       phoneNumber:Joi.string().required(),
       profilePic:Joi.string(),
-      date:Joi.date(),
-      description:Joi.string(),
+      date:Joi.date()
 });
 
 export const updateCustomerSchema = Joi.object({
@@ -33,8 +32,7 @@ export const updateCustomerSchema = Joi.object({
       address: Joi.string(),
       phoneNumber:Joi.string(),
       date:Joi.date(),
-      profilePic:Joi.string(),
-      description:Joi.string()
+      profilePic:Joi.string()
 });
 
 export const createOrderSchema = Joi.object({

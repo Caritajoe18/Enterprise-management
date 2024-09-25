@@ -1,15 +1,20 @@
-import { Sequelize } from 'sequelize';
 import sequelize  from '../db' 
-import Roles from './role';
-import Permissions from './permission';
+import Role from './role';
+import Permission from './permission';
 import Admins from './admin';
 import NavParents from './navparent';
+import Products from './products';
+import Departments from './department';
+import RolePermission from './rolepermission';
 
 const models = {
   Admins,
-  Roles,
-  Permissions,
+  Role,
+  Permission,
   NavParents,
+  RolePermission,
+  Departments,
+  Products,
 };
 
 
@@ -18,6 +23,9 @@ Object.values(models).forEach(model => {
     model.associate(models);
   }
 });
+// Products.belongsTo(Departments, { foreignKey: 'departmentId', onDelete: 'SET NULL' });
+// Departments.hasMany(Products, { foreignKey: 'departmentId', onDelete: 'SET NULL' });
+
 
 export { sequelize };
 export default models;

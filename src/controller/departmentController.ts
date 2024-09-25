@@ -1,112 +1,136 @@
 import { Request, Response } from "express";
-import Department from "../models/department";
+import Departments from "../models/department";
 import {
   createDepartmentSchema,
   editDepartmentSchema,
 } from "../validations/productValidations";
 import { option } from "../validations/adminValidation";
 import { toPascalCase } from "../utilities/auths";
+import Products from "../models/products";
 
-export const creaetDepartment = async (req: Request, res: Response) => {
+export const createDepartment = async (req: Request, res: Response) => {
   try {
-    const validationResult = createDepartmentSchema.validate(req.body, option);
+    const validationResult = createDepartmentSchema.validate(req.body, {
+      abortEarly: false,
+    });
     if (validationResult.error) {
-      return res
-        .status(400)
-        .json({ error: validationResult.error.details[0].message });
+      return res.status(400).json({
+        error: validationResult.error.details.map((detail) => detail.message),
+      });
     }
+
     let { name } = req.body;
     name = toPascalCase(name);
-    const exist = await Department.findOne({ where: { name } });
-    if (exist) {
+
+    const existingDepartment = await Departments.findOne({ where: { name } });
+    if (existingDepartment) {
       return res.status(400).json({ error: "Department already exists" });
     }
-    const dept = await Department.create({
+
+    const newDepartment = await Departments.create({
       ...req.body,
       name,
     });
-    console.log("prrrr:", typeof dept.dataValues.product);
+
     return res.status(201).json({
       message: "Department created successfully",
-      dept,
+      department: newDepartment,
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
     }
-    return res.status(500).json({ error: "An error occurred" });
+    return res.status(500).json({ error: "An unknown error occurred" });
   }
 };
 
 export const editDepartment = async (req: Request, res: Response) => {
   const { id } = req.params;
-  let { name, product } = req.body;
+  let { name } = req.body;
   name = toPascalCase(name);
+
   try {
-    const validationResult = editDepartmentSchema.validate(req.body, option);
+    const validationResult = editDepartmentSchema.validate(req.body, {
+      abortEarly: false,
+    });
     if (validationResult.error) {
-      return res
-        .status(400)
-        .json({ error: validationResult.error.details[0].message });
+      return res.status(400).json({
+        error: validationResult.error.details.map((detail) => detail.message),
+      });
     }
-    const dept = await Department.findByPk(id);
-    if (!dept) {
+
+    const department = await Departments.findByPk(id);
+    if (!department) {
       return res.status(404).json({ error: "Department not found" });
     }
-    const updatedDept = await Department.update(
-      { name, product },
-      { where: { id } }
-    );
-    const updatedDeptData = await Department.findByPk(id);
-    if (!updatedDept) {
+
+    await department.update({ name });
+
+    const updatedDepartment = await Departments.findByPk(id);
+
+    if (!updatedDepartment) {
       return res
         .status(500)
         .json({ error: "Error retrieving updated department" });
     }
-    res
-      .status(200)
-      .json({ message: "Staff updated successfully", updatedDeptData });
+
+    return res.status(200).json({
+      message: "Department updated successfully",
+      department: updatedDepartment,
+    });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
     }
-    return res.status(500).json({ error: "An error occurred" });
+    return res.status(500).json({ error: "An unknown error occurred" });
   }
 };
-
 export const getAllDepartments = async (req: Request, res: Response) => {
   try {
-    const departments = await Department.findAll({ order: [["name", "ASC"]] });
-
-    const parsedDepartments = departments.map((department) => {
-      return {
-        ...department.toJSON(),
-        product:
-          typeof department.dataValues.product === "string"
-            ? JSON.parse(department.dataValues.product)
-            : department.dataValues.product,
-      };
+    const departments = await Departments.findAll({
+      order: [["name", "ASC"]],
+      include: [
+        {
+          model: Products,
+          as: "products",
+          attributes: ["id", "name", "category"],
+        },
+      ],
     });
 
-    return res.status(200).json({ departments: parsedDepartments });
+    return res.status(200).json({ departments });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
     }
-    return res.status(500).json({ error: "An error occurred" });
+    return res.status(500).json({ error: "An unknown error occurred" });
+  }
+};
+export const getDepartments = async (req: Request, res: Response) => {
+  try {
+    const departments = await Departments.findAll({
+      order: [["name", "ASC"]],
+    });
+
+    return res.status(200).json({ departments });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "An unknown error occurred" });
   }
 };
 
 export const deleteDept = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const dept = await Department.findByPk(id);
+    const dept = await Departments.findByPk(id);
     if (!dept) {
-      return res.status(404).json({ error: "staff not found" });
+      return res.status(404).json({ error: "Department not found" });
     }
 
     const deletedStaff = await dept.destroy();
-    res.status(200).json({ message: "Department deleted successfully" });
+    res.status(200).json({ message: "Departments deleted successfully" });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
