@@ -15,6 +15,10 @@ module.exports = {
         allowNull: false,
         unique: true,
       },
+      category:{
+        type:Sequelize.ENUM('For Sale', 'For Purchase'),
+        allowNull:false,
+      },
       price: {
         type: Sequelize.JSON,
         allowNull: false,
@@ -22,6 +26,15 @@ module.exports = {
       pricePlan: {
         type: Sequelize.JSON,
         allowNull: true,
+      },
+      departmentId: {
+        type: Sequelize.UUID,
+        references: {
+          model: "Departments",  
+          key: "id",
+        },
+        allowNull: true,
+        onDelete: 'SET NULL',  
       },
       createdAt: {
         allowNull: false,

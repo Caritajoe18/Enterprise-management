@@ -20,14 +20,14 @@ class Permission extends Model<PermissionAttributes> {
    */
   static associate(models: any) {
 
-    Permission.belongsTo(NavParent, {
+    Permission.belongsTo(models.NavParents, {
       foreignKey: "navParentId",
       as: "navParent",
     });
 
     Permission.belongsToMany(models.Role, {
       through: "RolePermission",
-      as: "role",
+      as: "roles",
         foreignKey: 'permissionId',
      otherKey: 'roleId'
     });
@@ -72,7 +72,8 @@ Permission.init(
   },
   {
     sequelize: db,
-    modelName: "Permissions",
+    modelName: "Permission",
+    tableName: "Permissions"
   }
 );
 

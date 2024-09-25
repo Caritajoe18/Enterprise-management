@@ -1,12 +1,13 @@
 import express from "express";
-import { creaetDepartment, deleteDept, editDepartment, getAllDepartments } from "../controller/departmentController";
+import { createDepartment, deleteDept, editDepartment, getAllDepartments, getDepartments } from "../controller/departmentController";
 import { authorize } from "../middleware/staffPermissions";
 
 const router = express.Router();
 
-router.post("/create-department", authorize(), creaetDepartment);
+router.post("/create-department", authorize(), createDepartment);
 router.patch("/edit-department/:id", authorize(), editDepartment);
 router.get("/view-department", authorize(), getAllDepartments);
-router.delete("/Delete-department/:id", authorize(), deleteDept);
+router.get("/get-department", getDepartments);
+router.delete("/delete-department/:id", authorize(), deleteDept);
 
 export default router;

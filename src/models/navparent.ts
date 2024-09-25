@@ -16,7 +16,7 @@ class NavParent extends Model<NavParentAttributes> {
    * The `models/index` file will call this method automatically.
    */
   static associate(models: any) {
-    NavParent.hasMany(models.Permissions, {
+    NavParent.hasMany(models.Permission, {
       foreignKey: "navParentId",
       as: "permissions",
     });
@@ -51,6 +51,7 @@ NavParent.init(
   {
     sequelize: db,
     modelName: "NavParents",
+    tableName: "NavParents",
   }
 );
 //return createNavParent;

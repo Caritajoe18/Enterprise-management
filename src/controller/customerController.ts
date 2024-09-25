@@ -6,6 +6,7 @@ import {
 } from "../validations/customerValid";
 import { option } from "../validations/adminValidation";
 import { toPascalCase } from "../utilities/auths";
+import { Op } from "sequelize";
 
 export const createCustomer = async (req: Request, res: Response) => {
   try {
@@ -15,9 +16,10 @@ export const createCustomer = async (req: Request, res: Response) => {
         .status(400)
         .json({ error: validationResult.error.details[0].message });
     }
-    let { phoneNumber, firstname, lastname } = req.body;
+    let { phoneNumber, firstname, lastname, email } = req.body;
     firstname = toPascalCase(firstname);
     lastname = toPascalCase(lastname);
+    email = email.toLowerCase();
 
     const exist = await Customer.findOne({ where: { phoneNumber } });
 
@@ -31,6 +33,7 @@ export const createCustomer = async (req: Request, res: Response) => {
       ...req.body,
       firstname,
       lastname,
+      email,
     });
     return res.status(201).json({
       message: "customer created succsesfully",
@@ -88,7 +91,7 @@ export const updateCustomer = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const { phoneNumber, firstname, lastname, address, description } = req.body;
+    const { phoneNumber, firstname, lastname, address} = req.body;
 
     const updatedFirstname = toPascalCase(firstname);
     const updatedLastname = toPascalCase(lastname);
@@ -116,7 +119,6 @@ export const updateCustomer = async (req: Request, res: Response) => {
 
     const updatedCustomer = await customer.update({
       phoneNumber,
-      description,
       firstname: updatedFirstname,
       lastname: updatedLastname,
       address,
@@ -153,6 +155,46 @@ export const deleteCustomer = async (req: Request, res: Response) => {
       res.status(500).json({ error: error.message });
     } else {
       res.status(500).json({ error: "An unexpected error occurred." });
+    }
+  }
+};
+
+export const searchCustomer = async (req: Request, res: Response) => {
+  try {
+    const {search} = req.query 
+
+    const whereClause: {
+      [Op.or]?: {
+        firstname?: { [Op.like]: string };
+        lastname?: { [Op.like]: string };
+        id?: { [Op.eq]: string };
+      }[];
+    } = {};
+
+    if (search) {
+      whereClause[Op.or] = [
+        { firstname: { [Op.like]: `%${search}%` } },
+        { lastname: { [Op.like]: `%${search}%` } },
+        { id: { [Op.eq]: search.toString() } },
+      ];
+    }
+
+    const customerList = await Customer.findAll({ where: whereClause });
+
+    if (customerList.length == 0) {
+      return res
+        .status(404)
+        .json({ message: "No customer found matching the criteria" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Staff retrieved successfully", customerList });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   }
 };

@@ -1,27 +1,26 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../db";
+import  { Products } from "./products";
 
-export interface Product {
-    assignedProduct: string;
-    productCategory: string;
-  }
 
 export interface DeptAttributes {
   id: string;
   name: string;
-  product: Product[];
   
 }
 
 
-  class Department extends Model<DeptAttributes> {
+  class Departments extends Model<DeptAttributes> {
     
 
     static associate(models: any) {
-      
+      Departments.hasMany(models.Products, {
+        foreignKey: "departmentId", 
+        as: "products",
+      }); 
     }
   }
- Department.init({
+ Departments.init({
     
       id: {
         type: DataTypes.UUID,
@@ -34,13 +33,10 @@ export interface DeptAttributes {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      product: {
-        type: DataTypes.JSON,
-        allowNull: false,
-      },
-     
+      
   }, {
     sequelize: db,
     modelName: 'Departments',
+    tableName:'Departments',
   });
-  export default  Department;
+  export default  Departments;

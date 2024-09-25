@@ -38,7 +38,7 @@ import db from '../db'
 
   }, {
     sequelize: db,
-    modelName: 'RolePermissions',
+    modelName: 'RolePermission',
   });
 
 

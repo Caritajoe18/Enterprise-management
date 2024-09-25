@@ -29,14 +29,14 @@ export interface AdminAttributes {
     public role?: Role;
     static associate(models: any) {
       
-      Admins.belongsTo(models.Roles, {
+      Admins.belongsTo(models.Role, {
  foreignKey: 'roleId',
-   as: 'roles',  });
+   as: 'role',  });
 
- Role.hasMany(models.Admins, {
-  foreignKey: 'roleId',
-   as: 'admins',
-});
+//  Role.hasMany(models.Admins, {
+//   foreignKey: 'roleId',
+//    as: 'admins',
+// });
     }
   }
   Admins.init({
@@ -124,5 +124,6 @@ export interface AdminAttributes {
   }, {
     sequelize: db,
     modelName: 'Admins',
+    tableName: 'Admins',
   });
   export default  Admins;
