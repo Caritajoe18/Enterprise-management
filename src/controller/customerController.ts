@@ -95,6 +95,7 @@ export const updateCustomer = async (req: Request, res: Response) => {
 
     const updatedFirstname = toPascalCase(firstname);
     const updatedLastname = toPascalCase(lastname);
+    const updatedEmail = email.toLowerCase();
 
     const validationResult = updateCustomerSchema.validate(req.body, option);
     if (validationResult.error) {
@@ -122,7 +123,7 @@ export const updateCustomer = async (req: Request, res: Response) => {
       firstname: updatedFirstname,
       lastname: updatedLastname,
       address,
-      email
+      email:updatedEmail
     });
     res.status(200).json({
       message: "Customer updated succesfully",
