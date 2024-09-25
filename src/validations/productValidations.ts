@@ -46,7 +46,7 @@ export const createProductSchema = Joi.object({
     "string.required": "The name of a product is required",
     "any.required": "Product name is required",
   }),
-  departmentId: Joi.string(),
+  departmentId: Joi.string().required(),
   category:  Joi.string().valid('For Sale', 'For Purchase').required(),
   price: Joi.array()
     .items(
