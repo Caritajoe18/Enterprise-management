@@ -75,7 +75,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        name: "Department Ledger",
+        name: "Ledger",
         iconUrl: "/icons/support.png",
         slug: "department-ledger",
         isNav: true,
@@ -148,7 +148,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        name: "Weighing Operations",
+        name: "Weighing",
         iconUrl: "/icons/support.png",
         slug: "weighing-operations",
         isNav: true,
