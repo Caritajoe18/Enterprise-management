@@ -54,6 +54,8 @@ export const authorize = () => {
         req.admin = admin;
         const permissionUrl = req.path.startsWith('/') ? req.path.slice(1) : req.path;
 
+        console.log(permissionUrl,",,,,,")
+
         const permission = await Permission.findOne({
           where: { url: permissionUrl  }, 
         });

@@ -71,7 +71,7 @@ export const getAllCustomers = async (req: Request, res: Response) => {
 export const getCustomer = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-
+ console.log(req.path, "yyy")
     const customer = await Customer.findByPk(id);
     if (!customer) {
       return res.status(404).json({ message: "customer not found", customer });
