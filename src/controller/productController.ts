@@ -74,11 +74,11 @@ export const updateProducts = async (req: Request, res: Response) => {
     const updatedProducts = await Products.findByPk(id);
 
     if (updatedProducts) {
-      if (typeof updatedProducts.dataValues.price === 'string') {
+      if (typeof updatedProducts.dataValues.price == 'string') {
         updatedProducts.dataValues.price = JSON.parse(updatedProducts.dataValues.price);
       }
 
-      if (typeof updatedProducts.dataValues.pricePlan === 'string') {
+      if (typeof updatedProducts.dataValues.pricePlan == 'string') {
         updatedProducts.dataValues.pricePlan = JSON.parse(updatedProducts.dataValues.pricePlan);
       }
     }
