@@ -186,7 +186,7 @@ export const getAllStaff = async (req: AuthRequest, res: Response) => {
     const whereClause = currentUserId ? { id: { [Op.ne]: currentUserId } } : {};
     const staffList = await AdminInstance.findAll({
       where: whereClause,
-      order: [["createdAt", "ASC"]],
+      order:[["createdAt", "DESC"]],
     });
     if (staffList.length === 0) {
       return res.status(204).send();
@@ -206,6 +206,7 @@ export const getSuspendedStaff = async (req: Request, res: Response) => {
   try {
     const suspendedStaffList = await AdminInstance.findAll({
       where: { active: false },
+      order:[["createdAt", "DESC"]],
     });
 
     if (suspendedStaffList.length === 0) {

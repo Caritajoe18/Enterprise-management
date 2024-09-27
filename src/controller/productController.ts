@@ -126,7 +126,7 @@ export const searchProducts = async (req: Request, res: Response) => {
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
-    const products = await Products.findAll();
+    const products = await Products.findAll({order:[["createdAt", "DESC"]]});
     if (products.length === 0) {
       return res.status(204).send();
     }
