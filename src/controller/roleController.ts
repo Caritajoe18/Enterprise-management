@@ -33,15 +33,28 @@ export const addRole = async (req: Request, res: Response) => {
           id: permissionsId,
         },
       });
-      console.log(permissionsInstances, "permissions instances");
+      //console.log(permissionsInstances, "permissions instances");
+      const foundPermissionIds = permissionsInstances.map(
+        (permission) => permission.dataValues.id
+      );
 
+      const missingPermissions = permissionsId.filter(
+        (id: string) => !foundPermissionIds.includes(id)
+      );
+
+      if (missingPermissions.length > 0) {
+        return res.status(404).json({
+          message: "Some permissions were not found",
+          missingPermissions,
+        });
+      }
       const rolePermissionData = permissionsInstances.map(
         (permissionInstance) => ({
           roleId: role.dataValues.id,
           permissionId: permissionInstance.dataValues.id,
         })
       );
-      console.log(rolePermissionData, "role permission data");
+      //console.log(rolePermissionData, "role permission data");
 
       await RolePermission.bulkCreate(rolePermissionData, { returning: true });
     }
@@ -123,4 +136,3 @@ export const getRoles = async (req: Request, res: Response) => {
   }
 };
 
-export const removeRole = async (req: Request, res: Response) => {};
