@@ -1,16 +1,16 @@
 import { Request, Response } from "express";
-import { Customer } from "../models/customers";
+import { Supplier } from "../models/suppliers";
 import {
-  regCustomerSchema,
-  updateCustomerSchema,
+  regSupplierSchema,
+  updateSupplierSchema,
 } from "../validations/customerValid";
 import { option } from "../validations/adminValidation";
 import { toPascalCase } from "../utilities/auths";
 import { Op } from "sequelize";
 
-export const createCustomer = async (req: Request, res: Response) => {
+export const createSupplier = async (req: Request, res: Response) => {
   try {
-    const validationResult = regCustomerSchema.validate(req.body, option);
+    const validationResult = regSupplierSchema.validate(req.body, option);
     if (validationResult.error) {
       return res
         .status(400)
@@ -21,22 +21,22 @@ export const createCustomer = async (req: Request, res: Response) => {
     lastname = toPascalCase(lastname);
     email = email.toLowerCase();
 
-    const exist = await Customer.findOne({ where: { phoneNumber } });
+    const exist = await Supplier.findOne({ where: { phoneNumber } });
 
     if (exist) {
       return res
         .status(400)
-        .json({ error: "Customer with phonenumber already exists" });
+        .json({ error: "Supplier with phonenumber already exists" });
     }
 
-    const customer = await Customer.create({
+    const customer = await Supplier.create({
       ...req.body,
       firstname,
       lastname,
       email,
     });
     return res.status(201).json({
-      message: "customer created succsesfully",
+      message: "Supplier created succsesfully",
       customer,
     });
   } catch (error: unknown) {
@@ -48,16 +48,16 @@ export const createCustomer = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllCustomers = async (req: Request, res: Response) => {
+export const getAllSuppliers = async (req: Request, res: Response) => {
   try {
-    const customers = await Customer.findAll({
+    const customers = await Supplier.findAll({
       order: [["createdAt", "DESC"]],
     });
     if (customers.length === 0) {
       return res.status(204).send();
     }
     res.status(200).json({
-      message: "successfully retrieved your customers",
+      message: "successfully retrieved your Suppliers",
       customers,
     });
   } catch (error: unknown) {
@@ -68,17 +68,17 @@ export const getAllCustomers = async (req: Request, res: Response) => {
     }
   }
 };
-export const getCustomer = async (req: Request, res: Response) => {
+export const getSupplier = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
- console.log(req.path, "yyy")
-    const customer = await Customer.findByPk(id);
+    //console.log(req.path, "yyy")
+    const customer = await Supplier.findByPk(id);
     if (!customer) {
-      return res.status(404).json({ message: "customer not found", customer });
+      return res.status(404).json({ message: "Supplier not found", customer });
     }
     res
       .status(200)
-      .json({ messages: "Customer retrieved succesfully", customer });
+      .json({ messages: "Supplier retrieved succesfully", customer });
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
@@ -87,33 +87,34 @@ export const getCustomer = async (req: Request, res: Response) => {
     }
   }
 };
-export const updateCustomer = async (req: Request, res: Response) => {
+export const updateSupplier = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const { phoneNumber, firstname, lastname, address, email} = req.body;
+    const { phoneNumber, firstname, lastname, address, email } = req.body;
 
     const updatedFirstname = toPascalCase(firstname);
     const updatedLastname = toPascalCase(lastname);
     const updatedEmail = email ? email.toLowerCase() : null;
-    const validationResult = updateCustomerSchema.validate(req.body, option);
+
+    const validationResult = updateSupplierSchema.validate(req.body, option);
     if (validationResult.error) {
       return res
         .status(400)
         .json({ error: validationResult.error.details[0].message });
     }
-    const customer = await Customer.findByPk(id);
+    const customer = await Supplier.findByPk(id);
     if (!customer) {
-      return res.status(404).json({ error: "customer not found" });
+      return res.status(404).json({ error: "Supplier not found" });
     }
     if (phoneNumber && phoneNumber !== customer.dataValues.phoneNumber) {
-      const existingCustomer = await Customer.findOne({
+      const existingCustomer = await Supplier.findOne({
         where: { phoneNumber },
       });
       if (existingCustomer) {
         return res
           .status(400)
-          .json({ error: "Customer with this phone number already exists" });
+          .json({ error: "Supplier with this phone number already exists" });
       }
     }
 
@@ -122,10 +123,10 @@ export const updateCustomer = async (req: Request, res: Response) => {
       firstname: updatedFirstname,
       lastname: updatedLastname,
       address,
-      email:updatedEmail
+      email: updatedEmail,
     });
     res.status(200).json({
-      message: "Customer updated succesfully",
+      message: "Supplier updated succesfully",
       updatedCustomer,
     });
   } catch (error: unknown) {
@@ -137,19 +138,19 @@ export const updateCustomer = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteCustomer = async (req: Request, res: Response) => {
+export const deleteSupplier = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const customer = await Customer.findByPk(id);
+    const customer = await Supplier.findByPk(id);
     if (!customer) {
-      return res.status(404).json({ error: "Customer not found" });
+      return res.status(404).json({ error: "Supplier not found" });
     }
 
     await customer.destroy();
 
     return res.status(200).json({
-      message: "Customer deleted successfully",
+      message: "Supplier deleted successfully",
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -160,9 +161,9 @@ export const deleteCustomer = async (req: Request, res: Response) => {
   }
 };
 
-export const searchCustomer = async (req: Request, res: Response) => {
+export const searchSupplier = async (req: Request, res: Response) => {
   try {
-    const {search} = req.query 
+    const { search } = req.query;
 
     const whereClause: {
       [Op.or]?: {
@@ -180,17 +181,17 @@ export const searchCustomer = async (req: Request, res: Response) => {
       ];
     }
 
-    const customerList = await Customer.findAll({ where: whereClause });
+    const customerList = await Supplier.findAll({ where: whereClause });
 
     if (customerList.length == 0) {
       return res
         .status(404)
-        .json({ message: "No customer found matching the criteria" });
+        .json({ message: "No supplier found matching the criteria" });
     }
 
     res
       .status(200)
-      .json({ message: "Staff retrieved successfully", customerList });
+      .json({ message: "Supplier retrieved successfully", customerList });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });

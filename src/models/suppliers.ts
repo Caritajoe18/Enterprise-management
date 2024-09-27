@@ -1,17 +1,18 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../db";
-export interface suppliersAttributes {
+export interface SupplierAttributes {
   id: string;
-  name: string;
-  date: Date;
-  product: string;
-  credit: string;
-  debit: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  
   
 }
-export class suppliersInstance extends Model<suppliersAttributes> {}
+export class Supplier extends Model<SupplierAttributes> {}
 
-suppliersInstance.init(
+Supplier.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -20,32 +21,30 @@ suppliersInstance.init(
       allowNull: false,
     },
 
-    name: {
+    firstname: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    date: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    
-    },
-    product: {
+    lastname: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-
-    credit: {
+    email: {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    debit: {
+    
+    address: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    phoneNumber: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    
      
   },
-  { sequelize: db, tableName: "suppliers" }
+  { sequelize: db, tableName: "Suppliers", modelName: "Supplier" }
 );
 
-export default suppliersInstance;
+export default Supplier;

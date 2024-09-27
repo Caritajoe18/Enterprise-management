@@ -88,7 +88,7 @@ export const editDepartment = async (req: Request, res: Response) => {
 export const getAllDepartments = async (req: Request, res: Response) => {
   try {
     const departments = await Departments.findAll({
-      order: [["name", "ASC"]],
+      order:[["createdAt", "DESC"]],
       include: [
         {
           model: Products,
