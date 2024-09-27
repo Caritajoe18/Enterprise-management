@@ -4,14 +4,14 @@ import Role from "../models/role";
 import RolePermission from "../models/rolepermission";
 import { Op, ValidationError } from "sequelize";
 import NavParent from "../models/navparent";
+import { sequelize } from "../models/index";
 
 export const createPermissions = async (req: Request, res: Response) => {
-  const { name, isNav, navParentId } = req.body;
+  const { name, navParentId, url } = req.body;
 
   try {
     const slug = name.toLowerCase().replace(/ /g, "-");
 
-    
     const existingPermission = await Permission.findOne({ where: { slug } });
     if (existingPermission) {
       return res
@@ -29,26 +29,26 @@ export const createPermissions = async (req: Request, res: Response) => {
     const newPermission = await Permission.create({
       ...req.body,
       navParentId: navParent ? navParent.dataValues.id : null,
-      url: name,
-      slug
+      url,
+      slug,
     });
 
     return res.status(201).json({ permissions: newPermission });
-  }catch (error: unknown) {
-    
+  } catch (error: unknown) {
     if (error instanceof ValidationError) {
-      console.error('Validation error details:', error.errors);
-      return res.status(400).json({ error: error.errors.map(e => e.message) });
+      console.error("Validation error details:", error.errors);
+      return res
+        .status(400)
+        .json({ error: error.errors.map((e) => e.message) });
     }
 
     if (error instanceof Error) {
-      console.error('Error creating permission:', error.message);
+      console.error("Error creating permission:", error.message);
       return res.status(500).json({ error: error.message });
     }
 
     return res.status(500).json({ error: "An error occurred" });
   }
-
 };
 
 export const addPermissionsToRole = async (req: Request, res: Response) => {
@@ -78,18 +78,39 @@ export const addPermissionsToRole = async (req: Request, res: Response) => {
     if (permissions.length === 0) {
       return res.status(404).json({ message: "Permissions not found" });
     }
-    const rolePermissionData = permissions.map((permission) => ({
+
+    const existingRolePermissions = await RolePermission.findAll({
+      where: {
+        roleId,
+        permissionId: permissionsId,
+      },
+    });
+
+    const existingPermissionIds = existingRolePermissions.map(
+      (rp) => rp.dataValues.permissionId
+    );
+
+    const newPermissions = permissions.filter(
+      (permission) => !existingPermissionIds.includes(permission.dataValues.id)
+    );
+
+    if (newPermissions.length === 0) {
+      return res
+        .status(400)
+        .json({
+          message: "All provided permissions are already added to this role",
+        });
+    }
+    const rolePermissionData = newPermissions.map((permission) => ({
       roleId,
       permissionId: permission.dataValues.id,
     }));
 
     await RolePermission.bulkCreate(rolePermissionData, { returning: true });
 
-    console.log("roleid3", roleId);
-
     res.status(200).json({
       message: "Permissions added to role successfully",
-      addedPermissions: permissions,
+      addedPermissions: newPermissions,
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -103,59 +124,55 @@ export const removePermissionsFromRole = async (
   req: Request,
   res: Response
 ) => {
-  const roleId = req.params.roleId;
-  const { permissions } = req.body;
+  const { roleId } = req.params;
+  const { permissionsId } = req.body;
 
   try {
-    // Find the role
-    const role = await Role.findByPk(roleId);
-
-    if (!role) {
-      return res.status(404).json({ message: "Role not found" });
-    }
-
-    if (!Array.isArray(permissions) || permissions.length === 0) {
+    if (!Array.isArray(permissionsId) || permissionsId.length === 0) {
       return res
         .status(400)
         .json({ message: "Permissions must be a non-empty array" });
     }
 
-    // Find permissions to remove
-    const permissionsToRemove = await Permission.findAll({
+    const role = await Role.findByPk(roleId);
+    if (!role) {
+      return res.status(404).json({ message: "Role not found" });
+    }
+
+    const permissions = await Permission.findAll({
       where: {
-        name: permissions,
+        id: permissionsId,
       },
     });
 
-    const permissionIdsToRemove = permissionsToRemove.map(
-      (p) => p.dataValues.id
-    );
+    if (permissions.length === 0) {
+      return res.status(404).json({ message: "Permissions not found" });
+    }
 
-    // Remove permissions from RolePermission table
-    await RolePermission.destroy({
-      where: {
-        roleId,
-        permissionId: {
-          [Op.in]: permissionIdsToRemove,
+    await sequelize.transaction(async (t) => {
+      await RolePermission.destroy({
+        where: {
+          roleId,
+          permissionId: permissionsId,
         },
-      },
+        transaction: t,
+      });
     });
 
-    res
-      .status(200)
-      .json({ message: "Permissions removed from role successfully" });
+    res.status(200).json({
+      message: "Permissions removed from role successfully",
+      removedPermissions: permissions,
+    });
   } catch (error: unknown) {
     if (error instanceof Error) {
-      res.status(500).json({ error: error.message });
-    } else {
-      res.status(500).json({ error: "An unexpected error occurred." });
+      return res.status(500).json({ error: error.message });
     }
+    res.status(500).json({ error: "An unexpected error occurred." });
   }
 };
 
 export const getAllPermissions = async (req: Request, res: Response) => {
   try {
-    // Fetch all permissions from the database
     const permissions = await Permission.findAll();
 
     return res.status(200).json({ permissions });
