@@ -128,7 +128,7 @@ export const getProducts = async (req: Request, res: Response) => {
   try {
     const products = await Products.findAll({order:[["createdAt", "DESC"]]});
     if (products.length === 0) {
-      return res.status(204).send();
+      return res.status(404).json({message:"No products found", products});
     }
 
     const parsedProducts = products.map(product => {

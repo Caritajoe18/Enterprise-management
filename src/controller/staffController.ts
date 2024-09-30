@@ -189,7 +189,9 @@ export const getAllStaff = async (req: AuthRequest, res: Response) => {
       order:[["createdAt", "DESC"]],
     });
     if (staffList.length === 0) {
-      return res.status(204).send();
+      return res.status(404).json(
+        { message: "No staff found in the database", staffList}
+      );
     }
     res
       .status(200)
