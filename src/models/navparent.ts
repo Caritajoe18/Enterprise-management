@@ -1,15 +1,17 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../db";
+import Permission from "./permission";
 
 export interface NavParentAttributes {
   id: string;
   name: string;
   iconUrl: string;
-  isNav:boolean;
+  isNav: boolean;
   slug: string;
 }
 
 class NavParent extends Model<NavParentAttributes> {
+  permissions: any;
   /**
    * Helper method for defining associations.
    * This method is not a part of Sequelize lifecycle.
@@ -20,6 +22,7 @@ class NavParent extends Model<NavParentAttributes> {
       foreignKey: "navParentId",
       as: "permissions",
     });
+    Permission.belongsTo(models.NavParent, { foreignKey: "navParentId" });
   }
 }
 NavParent.init(
@@ -37,11 +40,11 @@ NavParent.init(
     slug: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique:true,
+      unique: true,
     },
-    isNav:{
-      type:DataTypes.BOOLEAN,
-      defaultValue:false
+    isNav: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     iconUrl: {
       type: DataTypes.STRING,
@@ -50,7 +53,7 @@ NavParent.init(
   },
   {
     sequelize: db,
-    modelName: "NavParents",
+    modelName: "NavParent",
     tableName: "NavParents",
   }
 );

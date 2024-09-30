@@ -2,7 +2,7 @@ import sequelize  from '../db'
 import Role from './role';
 import Permission from './permission';
 import Admins from './admin';
-import NavParents from './navparent';
+import NavParent from './navparent';
 import Products from './products';
 import Departments from './department';
 import RolePermission from './rolepermission';
@@ -11,7 +11,7 @@ const models = {
   Admins,
   Role,
   Permission,
-  NavParents,
+  NavParent,
   RolePermission,
   Departments,
   Products,
