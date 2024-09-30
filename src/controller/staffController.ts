@@ -265,3 +265,29 @@ export const searchStaff = async (req: Request, res: Response) => {
     }
   }
 };
+
+export const orderStaffFirstname = async (req: Request, res: Response) => {
+  try {
+    
+    const customerList = await AdminInstance.findAll({
+      order: [['firstname', 'ASC']],
+    });
+
+    if (customerList.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No Staff found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Staff retrieved successfully", customerList });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "An unexpected error occurred" });
+    }
+  }
+};
+

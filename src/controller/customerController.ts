@@ -19,7 +19,7 @@ export const createCustomer = async (req: Request, res: Response) => {
     let { phoneNumber, firstname, lastname, email } = req.body;
     firstname = toPascalCase(firstname);
     lastname = toPascalCase(lastname);
-    email = email.toLowerCase();
+    email = email ? email.toLowerCase(): null;
 
     const exist = await Customer.findOne({ where: { phoneNumber } });
 
@@ -191,6 +191,31 @@ export const searchCustomer = async (req: Request, res: Response) => {
     res
       .status(200)
       .json({ message: "Staff retrieved successfully", customerList });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "An unexpected error occurred" });
+    }
+  }
+};
+
+export const orderCustomersFirstname = async (req: Request, res: Response) => {
+  try {
+    
+    const customerList = await Customer.findAll({
+      order: [['firstname', 'ASC']],
+    });
+
+    if (customerList.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No customers found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Customers retrieved successfully", customerList });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });

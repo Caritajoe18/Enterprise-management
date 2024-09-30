@@ -19,8 +19,7 @@ export const createSupplier = async (req: Request, res: Response) => {
     let { phoneNumber, firstname, lastname, email } = req.body;
     firstname = toPascalCase(firstname);
     lastname = toPascalCase(lastname);
-    email = email.toLowerCase();
-
+    email = email ? email.toLowerCase() : null;
     const exist = await Supplier.findOne({ where: { phoneNumber } });
 
     if (exist) {

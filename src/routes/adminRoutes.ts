@@ -23,6 +23,7 @@ import {
   signupStaff,
   suspendStaff,
   updateStaff,
+  orderStaffFirstname,
 } from "../controller/staffController";
 import {addRole, getAllRoles, getRoles} from "../controller/roleController";
 import { addPermissionsToRole, createPermissions, getAllPermissions, removePermissionsFromRole } from "../controller/permissionController";
@@ -72,5 +73,6 @@ router.delete("/delete-staff/:id", authorize(),deleteStaff);
 router.get("/all-staff",authorize(), getAllStaff);
 router.get("/search-staff", searchStaff);
 router.get("/suspended-staff", authorize(),getSuspendedStaff);
+router.get("/order-staff", authorize(),orderStaffFirstname);
 
 export default router;

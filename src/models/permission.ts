@@ -20,7 +20,7 @@ class Permission extends Model<PermissionAttributes> {
    */
   static associate(models: any) {
 
-    Permission.belongsTo(models.NavParents, {
+    Permission.belongsTo(models.NavParent, {
       foreignKey: "navParentId",
       as: "navParent",
     });
@@ -54,7 +54,7 @@ Permission.init(
   type: DataTypes.UUID,
   allowNull: true,
   references: {
-    model: "NavParents", 
+    model: "NavParent", 
     key: "id",
   },
 

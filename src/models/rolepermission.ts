@@ -19,7 +19,7 @@ import db from '../db'
     roleId: {
             type: DataTypes.UUID,
             references: {
-              model: "Roles",
+              model: "Role",
               key: 'id',
             },
             onUpdate: 'CASCADE',
@@ -28,7 +28,7 @@ import db from '../db'
           permissionId: {
             type: DataTypes.UUID,
             references: {
-              model: "Permissions",
+              model: "Permission",
               key: 'id',
             },
             onUpdate: 'CASCADE',
