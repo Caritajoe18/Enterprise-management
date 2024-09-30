@@ -199,3 +199,29 @@ export const searchSupplier = async (req: Request, res: Response) => {
     }
   }
 };
+  
+
+export const orderSupplierFirstname = async (req: Request, res: Response) => {
+  try {
+    
+    const customerList = await Supplier.findAll({
+      order: [['firstname', 'ASC']],
+    });
+
+    if (customerList.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No customers found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Suppliers retrieved successfully", customerList });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "An unexpected error occurred" });
+    }
+  }
+};
