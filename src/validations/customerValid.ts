@@ -77,7 +77,8 @@ date:Joi.string().required(),
 });
 
 export const createLedgerSchema = Joi.object({
-  credit: Joi.number().required(),
-  debit: Joi.number().required(),
-  balance: Joi.number().required(),
+  customerId: Joi.string().required(),
+  productId: Joi.string().required(),
+  amount: Joi.number().required(),
+  
 })

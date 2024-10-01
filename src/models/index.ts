@@ -6,6 +6,8 @@ import NavParent from './navparent';
 import Products from './products';
 import Departments from './department';
 import RolePermission from './rolepermission';
+import Ledger from './ledger';
+import Customer from './customers';
 
 const models = {
   Admins,
@@ -15,6 +17,8 @@ const models = {
   RolePermission,
   Departments,
   Products,
+  Customer,
+  Ledger,
 };
 
 

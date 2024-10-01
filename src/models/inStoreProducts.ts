@@ -14,7 +14,12 @@ export interface productAttributes {
   
   
 }
-export class productInstance extends Model<productAttributes> {}
+export class productInstance extends Model<productAttributes> {
+  static associate(models: any) {
+    
+    
+  }
+}
 
 productInstance.init(
   {

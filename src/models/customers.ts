@@ -13,7 +13,14 @@ export interface CustomerAttributes {
   
 }
 
-export class Customer extends Model<CustomerAttributes> {}
+export class Customer extends Model<CustomerAttributes> {
+
+  static associate(models: any) {
+    
+    
+  }
+
+}
 
 Customer.init(
   {
