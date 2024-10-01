@@ -43,7 +43,7 @@ router.post("/add-nav", authorize(), createNavParent);
 router.get("/get-nav",authenticateAdmin, getUserNavPermissions);
 router.get("/get-permissions",authorize(), getAllPermissions);
 
-//router.get("/get-permissi",authorize(), getNavWithPermissions ); //testing
+router.get("/get-permissi", getNavWithPermissions ); //testing
 
 
 //products

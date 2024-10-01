@@ -10,7 +10,12 @@ export interface SupplierAttributes {
   
   
 }
-export class Supplier extends Model<SupplierAttributes> {}
+export class Supplier extends Model<SupplierAttributes> {
+  static associate(models: any) {
+    
+    
+  }
+}
 
 Supplier.init(
   {

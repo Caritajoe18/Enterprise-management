@@ -54,7 +54,7 @@ Permission.init(
   type: DataTypes.UUID,
   allowNull: true,
   references: {
-    model: "NavParent", 
+    model: "NavParents", 
     key: "id",
   },
 
