@@ -120,7 +120,7 @@ export const getUserNavPermissions = async (
 ) => {
      
   try {
-    console.time('getUserNavPermissions'); 
+    //console.time('getUserNavPermissions'); 
     const admin = req.admin as Admins;
     if (!req.admin || !("roleId" in req.admin)) {
       return res.status(400).json({ message: "No roleId found in user" });
@@ -214,7 +214,7 @@ export const getUserNavPermissions = async (
     });
 
     const result = Object.values(navParentMap);
-    console.timeEnd('getUserNavPermissions'); 
+    //console.timeEnd('getUserNavPermissions'); 
     return res.status(200).json({ navParentsWithPermissions: result });
   } catch (error: unknown) {
     if (error instanceof Error) {
