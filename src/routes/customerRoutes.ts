@@ -2,7 +2,7 @@ import express from 'express';
 import { createCustomer, deleteCustomer, getAllCustomers, getCustomer, orderCustomersFirstname, searchCustomer, updateCustomer } from '../controller/customerController';
 import { authorize } from '../middleware/staffPermissions';
 import { createSupplier, deleteSupplier, getAllSuppliers, getSupplier, orderSupplierFirstname, searchSupplier, updateSupplier } from '../controller/supplierController';
-import { createAccountandLedger } from '../controller/ledgerController';
+import { createAccountandLedger, getCustomerLedgerByProduct } from '../controller/ledgerController';
 import { approveCashTicket, raiseCashTicket, rejectCashTicket } from '../controller/ticketController';
 const router = express.Router();
 
@@ -26,7 +26,7 @@ router.get('/order-customers',authorize(), orderCustomersFirstname);
 
 //ledger, accountbook, placeorder
 router.post('/create-account', authorize(), createAccountandLedger);
-router.get('/get-customerledger', authorize(), )
+router.get("/get-ledger/:productId/:customerId", authorize(), getCustomerLedgerByProduct);
 router.post('/raise-cashticket', authorize(), raiseCashTicket)
 router.patch('/approve-cashticket/:ticketId', authorize(), approveCashTicket)
 router.patch('/reject-cashticket/:ticketId', authorize(), rejectCashTicket)
