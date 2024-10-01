@@ -10,12 +10,19 @@ export const raiseCashTicket = async (req: AuthRequest, res: Response) => {
   const { roleId } = admin.dataValues;
   const { customerId, staffName, amount, productId, creditOrDebit } = req.body;
   try {
-    const customer = await Customer.findOne({ where: { id: customerId } });
-    if (!customer) {
+    const customer = customerId
+      ? await Customer.findOne({ where: { id: customerId } })
+      : null;
+
+    if (customerId && !customer) {
       return res.status(404).json({ message: "Customer not found" });
     }
-    const product = await Products.findOne({ where: { id: productId } });
-    if (!product) {
+
+    const product = productId
+      ? await Products.findOne({ where: { id: productId } })
+      : null;
+
+    if (productId && !product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
