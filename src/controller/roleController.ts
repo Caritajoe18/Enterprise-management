@@ -5,6 +5,7 @@ import RolePermission from "../models/rolepermission";
 import { createRoleSchema, option } from "../validations/adminValidation";
 import { toPascalCase } from "../utilities/auths";
 import NavParent from "../models/navparent";
+import { Op } from "sequelize";
 
 export const addRole = async (req: Request, res: Response) => {
   try {
@@ -68,11 +69,11 @@ export const addRole = async (req: Request, res: Response) => {
     res.status(500).json({ error: "An error occurred" });
   }
 };
-export const getAllRoles = async (req: Request, res: Response) => {
+export const getAllRole = async (req: Request, res: Response) => {
   try {
     const roles = await Role.findAll({
       attributes: ["id", "name"],
-      order:[["createdAt", "DESC"]],
+      order: [["createdAt", "DESC"]],
     });
 
     if (!roles.length) {
@@ -123,10 +124,93 @@ export const getAllRoles = async (req: Request, res: Response) => {
     res.status(500).json({ error: "An error occurred" });
   }
 };
+export const getAllRoles = async (req: Request, res: Response) => {
+  try {
+    const roles = await Role.findAll({
+      attributes: ["id", "name"],
+      order: [["createdAt", "DESC"]],
+    });
+
+    console.log("roles:", roles);
+    if (!roles.length) {
+      return res.status(404).json({ message: "No roles found" });
+    }
+
+    const rolePermissions = await RolePermission.findAll({
+      attributes: ["roleId", "permissionId"],
+    });
+
+    const permissionIds = rolePermissions.map(
+      (rp) => rp.dataValues.permissionId
+    );
+
+    const permissionsWithNavParents = await Permission.findAll({
+      where: {
+        id: permissionIds,
+      },
+      attributes: ["id", "name", "slug", "navParentId"],
+      include: [
+        {
+          model: NavParent,
+          as: "navParent", 
+          attributes: ["id", "name", "iconUrl", "slug"],
+        },
+      ],
+      
+    });
+
+    console.log("permm:", permissionsWithNavParents);
+    const permWithNav = JSON.stringify(permissionsWithNavParents, null, 2);
+    const permWithNavs = JSON.parse(permWithNav);
+    console.log("my res:", permWithNavs);
+
+  
+
+    const rolesWithPermissionsAndNavParents = roles.map((role) => {
+      const uniqueNavParentIds = new Set<string>();
+
+      const associatedNav = rolePermissions
+        .filter((rp) => rp.dataValues.roleId === role.dataValues.id)
+        .map((rp) => {
+          const permission = permWithNavs.find(
+            (perm :any) => perm.id === rp.dataValues.permissionId
+          );
+          if (permission) {
+            if (!uniqueNavParentIds.has(permission.navParent.id)) {
+            
+              uniqueNavParentIds.add(permission.navParent.id);
+    
+            return {
+              id: permission.navParent.id,
+              name: permission.navParent.name,
+              slug: permission.navParent.slug,
+            };
+          }
+          }
+          return null;
+        })
+        .filter((nav) => nav !== null);
+
+    
+      return {
+        id: role.dataValues.id,
+        name: role.dataValues.name,
+        nav: associatedNav,
+      };
+    });
+
+    return res.status(200).json({ roles: rolesWithPermissionsAndNavParents });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred" });
+  }
+};
 
 export const getRoles = async (req: Request, res: Response) => {
   try {
-    const roles = await Role.findAll({ order:[["createdAt", "DESC"]] });
+    const roles = await Role.findAll({ order: [["createdAt", "DESC"]] });
 
     return res.status(200).json(roles);
   } catch (error: unknown) {
@@ -137,92 +221,99 @@ export const getRoles = async (req: Request, res: Response) => {
   }
 };
 
-export const editRoleWithPermissions = async (req: Request, res: Response) => {
-  const { roleId } = req.params;
-  const { permissionsId, name } = req.body; 
-  
-  try {
-    // Step 1: Find the role by ID
-    const role = await Role.findByPk(roleId);
-    if (!role) {
-      return res.status(404).json({ message: "Role not found" });
-    }
+// export const editRoleWithPermissions = async (req: Request, res: Response) => {
+//   const { roleId } = req.params;
+//   const { permissionsId, name } = req.body;
 
-    // Step 2: Optionally update the role's name
-    const updatedName = name ? toPascalCase(name) : role.dataValues.name;
-    if (updatedName !== role.dataValues.name) {
-      role.dataValues.name = updatedName;
-      await role.save();
-    }
+//   try {
+//     // Step 1: Find the role by ID
+//     const role = await Role.findByPk(roleId);
+//     if (!role) {
+//       return res.status(404).json({ message: "Role not found" });
+//     }
 
-    // Step 3: Fetch all NavParents and their associated permissions
-    const navParentsWithPermissions = await NavParent.findAll({
-      include: [
-        {
-          model: Permission,
-          as: 'permissions',
-          attributes: ['id', 'name', 'url'], 
-        },
-      ],
-    });
+//     // Step 2: Optionally update the role's name
+//     const updatedName = name ? toPascalCase(name) : role.dataValues.name;
+//     if (updatedName !== role.dataValues.name) {
+//       role.dataValues.name = updatedName;
+//       await role.save();
+//     }
 
-    // Step 4: Fetch the current permissions assigned to the role
-    const currentPermissions = await RolePermission.findAll({
-      where: { roleId },
-      attributes: ['permissionId'],
-    });
-    const currentPermissionIds = currentPermissions.map((rp) => rp.dataValues.permissionId);
+//     // Step 3: Fetch all NavParents and their associated permissions
+//     const navParentsWithPermissions = await NavParent.findAll({
+//       include: [
+//         {
+//           model: Permission,
+//           as: "permissions",
+//           attributes: ["id", "name", "url"],
+//         },
+//       ],
+//     });
 
-    // Step 5: Attach a flag to each permission to indicate if it's already assigned to the role
-    const navParentsWithPermissionStatus = navParentsWithPermissions.map((navParent) => {
-      const updatedPermissions = navParent.permissions?.map((permission:any) => ({
-        ...permission.toJSON(),
-        assigned: currentPermissionIds.includes(permission.id), // Add 'assigned' flag
-      }));
-      return {
-        ...navParent.toJSON(),
-        permissions: updatedPermissions, // Attach the updated permissions
-      };
-    });
+//     // Step 4: Fetch the current permissions assigned to the role
+//     const currentPermissions = await RolePermission.findAll({
+//       where: { roleId },
+//       attributes: ["permissionId"],
+//     });
+//     const currentPermissionIds = currentPermissions.map(
+//       (rp) => rp.dataValues.permissionId
+//     );
 
-    // Step 6: If permissions are provided in the request, update the role's permissions
-    if (permissionsId) {
-      // Determine permissions to add and remove
-      const permissionsToAdd = permissionsId.filter((id: string) => !currentPermissionIds.includes(id));
-      const permissionsToRemove = currentPermissionIds.filter((id) => !permissionsId.includes(id));
+//     // Step 5: Attach a flag to each permission to indicate if it's already assigned to the role
+//     const navParentsWithPermissionStatus = navParentsWithPermissions.map(
+//       (navParent) => {
+//         const updatedPermissions = navParent.permissions?.map(
+//           (permission: any) => ({
+//             ...permission.toJSON(),
+//             assigned: currentPermissionIds.includes(permission.id), // Add 'assigned' flag
+//           })
+//         );
+//         return {
+//           ...navParent.toJSON(),
+//           permissions: updatedPermissions, // Attach the updated permissions
+//         };
+//       }
+//     );
 
-      // Add new permissions
-      if (permissionsToAdd.length > 0) {
-        const newPermissions = permissionsToAdd.map((permissionId: string) => ({
-          roleId,
-          permissionId,
-        }));
-        await RolePermission.bulkCreate(newPermissions); // Add the new permissions
-      }
+//     // Step 6: If permissions are provided in the request, update the role's permissions
+//     if (permissionsId) {
+//       // Determine permissions to add and remove
+//       const permissionsToAdd = permissionsId.filter(
+//         (id: string) => !currentPermissionIds.includes(id)
+//       );
+//       const permissionsToRemove = currentPermissionIds.filter(
+//         (id) => !permissionsId.includes(id)
+//       );
 
-      // Remove permissions that are no longer needed
-      if (permissionsToRemove.length > 0) {
-        await RolePermission.destroy({
-          where: {
-            roleId,
-            permissionId: permissionsToRemove,
-          },
-        });
-      }
-    }
+//       // Add new permissions
+//       if (permissionsToAdd.length > 0) {
+//         const newPermissions = permissionsToAdd.map((permissionId: string) => ({
+//           roleId,
+//           permissionId,
+//         }));
+//         await RolePermission.bulkCreate(newPermissions); // Add the new permissions
+//       }
 
-    // Step 7: Return the nav parents and their associated permissions with the assigned status
-    return res.status(200).json({
-      message: "Role updated successfully",
-      navParents: navParentsWithPermissionStatus, // Include nav parents and permissions with the 'assigned' flag
-    });
+//       // Remove permissions that are no longer needed
+//       if (permissionsToRemove.length > 0) {
+//         await RolePermission.destroy({
+//           where: {
+//             roleId,
+//             permissionId: permissionsToRemove,
+//           },
+//         });
+//       }
+//     }
 
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return res.status(500).json({ error: error.message });
-    }
-    return res.status(500).json({ error: "An unexpected error occurred." });
-  }
-};
-
-
+//     // Step 7: Return the nav parents and their associated permissions with the assigned status
+//     return res.status(200).json({
+//       message: "Role updated successfully",
+//       navParents: navParentsWithPermissionStatus, // Include nav parents and permissions with the 'assigned' flag
+//     });
+//   } catch (error: unknown) {
+//     if (error instanceof Error) {
+//       return res.status(500).json({ error: error.message });
+//     }
+//     return res.status(500).json({ error: "An unexpected error occurred." });
+//   }
+// };

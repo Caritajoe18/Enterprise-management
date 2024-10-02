@@ -22,8 +22,8 @@ class NavParent extends Model<NavParentAttributes> {
       foreignKey: "navParentId",
       as: "permissions",
     });
-    Permission.belongsTo(models.NavParent, { foreignKey: "navParentId" });
-  }
+  //   Permission.belongsTo(models.NavParent, { foreignKey: "navParentId" });
+   }
 }
 NavParent.init(
   {
