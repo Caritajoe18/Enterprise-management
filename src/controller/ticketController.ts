@@ -88,6 +88,9 @@ export const rejectCashTicket = async (req: Request, res: Response) => {
     ticket.dataValues.status = "rejected";
 
     await ticket.save();
+    return res
+      .status(200)
+      .json({ message: "Ticket rejected successfully", ticket });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });

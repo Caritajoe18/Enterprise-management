@@ -13,6 +13,7 @@ export interface PermissionAttributes {
 
 // export default (sequelize, DataTypes) => {
 class Permission extends Model<PermissionAttributes> {
+  public navParent?: NavParent;
   /**
    * Helper method for defining associations.
    * This method is not a part of Sequelize lifecycle.
