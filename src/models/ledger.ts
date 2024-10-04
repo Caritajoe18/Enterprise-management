@@ -18,11 +18,11 @@ export interface LedgerAttributes {
 export class Ledger extends Model<LedgerAttributes> {
   static associate(models: any) {
     
-    Ledger.belongsTo(models.Products, {
+    Ledger.hasMany(models.Products, {
       foreignKey: "productId",
       as: "ledger", 
     });
-    Ledger.belongsTo(models.Customer, {
+    Ledger.hasMany(models.Customer, {
         foreignKey: "customerId",
         as:"ledgers"
     })

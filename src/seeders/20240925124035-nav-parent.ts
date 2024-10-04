@@ -7,7 +7,7 @@ module.exports = {
     await queryInterface.bulkInsert("NavParents", [
       {
         id: uuidv4(), 
-        name: "Dashboard",
+        name: "Account Book",
         iconUrl: "fa-hat",
         slug: "dashboard",
         isNav: true,
@@ -47,9 +47,9 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        name: "Pharmacy Store",
+        name: "Admins",
         iconUrl: "/icons/settings.png",
-        slug: "pharmacy-store",
+        slug: "admins",
         isNav: true,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -102,9 +102,9 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        name: "Admins",
+        name: "Pharmacy Store",
         iconUrl: "/icons/support.png",
-        slug: "admin",
+        slug: "pharmacy-store",
         isNav: true,
         createdAt: new Date(),
         updatedAt: new Date(),
