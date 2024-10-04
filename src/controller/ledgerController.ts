@@ -25,34 +25,39 @@ export const createAccountandLedger = async (req: Request, res: Response) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+
+    console.log("helooo1");
     const accountBook = await AccountBook.create(
       { ...req.body, creditType: "Transfer" },
       { transaction }
     );
+    console.log("helooo2");
     const latestEntry = await Ledger.findOne({
       where: { customerId, productId },
       order: [["createdAt", "DESC"]],
       transaction,
     });
+    console.log("helooooooo3");
+    const prevBalance = latestEntry ? latestEntry.dataValues.balance : 0;
+    const newBalance: number = prevBalance + amount;
 
-    const prevBalance = latestEntry? latestEntry.dataValues.balance : 0;
-    const newBalance = prevBalance + amount;
-    
-      await Ledger.create(
-        {
-          ...req.body,
-          customerId,
-          productId,
-          unit: "N/A",
-          quantity: 0,
-          credit: amount,
-          debit: 0,
-          balance: newBalance,
-          creditType: "Transfer",
-        },
-        { transaction }
-      );
-   // }
+    console.log(`Previous Balance: ${prevBalance}`);
+    console.log(`New Balance: ${newBalance}`);
+
+    await Ledger.create(
+      {
+        ...req.body,
+        customerId,
+        productId,
+        unit: "N/A",
+        quantity: 0,
+        credit: amount,
+        debit: 0,
+        balance: newBalance,
+        creditType: "Transfer",
+      },
+      { transaction }
+    );
 
     await transaction.commit();
 
@@ -63,6 +68,22 @@ export const createAccountandLedger = async (req: Request, res: Response) => {
   } catch (error: unknown) {
     await transaction.rollback();
 
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.status(500).json({ error: "An unknown error occurred" });
+  }
+};
+
+export const getAccountBook = async (req: Request, res: Response) => {
+  try {
+    const acct = await AccountBook.findAll({ order: [["createdAt", "DESC"]] });
+    if (acct.length === 0) {
+      return res.status(404).json({ message: "Not found" });
+    }
+     return  res.status(200).json({ message: "Account retrieved successfully", acct });
+  } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
     }
@@ -84,19 +105,19 @@ export const getCustomerLedgerByProduct = async (
         productId,
       },
     });
-    if(!ledgerEntries){
+    if (!ledgerEntries) {
       return res.status(404).json({ message: "Customer or Product not found" });
     }
 
     if (ledgerEntries.length === 0) {
-      return res
-        .status(404)
-        .json({
-          message: "No ledger entries found for this customer and product.",
-        });
+      return res.status(404).json({
+        message: "No ledger entries found for this customer and product.",
+      });
     }
 
-    return res.status(200).json({ message : "ledger retrieved successfully",ledgerEntries});
+    return res
+      .status(200)
+      .json({ message: "ledger retrieved successfully", ledgerEntries });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ message: error.message });
@@ -105,75 +126,67 @@ export const getCustomerLedgerByProduct = async (
   }
 };
 
-export const getProductLedger = async (
-  req: Request,
-  res: Response
-) => {
-const {productId} = req.params;
-if (!productId) {
-  return res.status(400).json({ message: "Product ID is required." });
-}
-try {
-  const ledgerEntries = await Ledger.findAll({
-    where: {
-      productId
-    },
-    order: [["createdAt", "DESC"]],
-  });
-  if(!ledgerEntries){
-    return res.status(404).json({ message: "Product not found" });
+export const getProductLedger = async (req: Request, res: Response) => {
+  const { productId } = req.params;
+  if (!productId) {
+    return res.status(400).json({ message: "Product ID is required." });
   }
+  try {
+    const ledgerEntries = await Ledger.findAll({
+      where: {
+        productId,
+      },
+      order: [["createdAt", "DESC"]],
+    });
+    if (!ledgerEntries) {
+      return res.status(404).json({ message: "Product not found" });
+    }
 
-  if (ledgerEntries.length === 0) {
-    return res
-      .status(404)
-      .json({
+    if (ledgerEntries.length === 0) {
+      return res.status(404).json({
         message: "No ledger entries found for this product.",
       });
-  }
+    }
 
-  return res.status(200).json({ message : "ledger retrieved successfully",ledgerEntries});
-} catch (error: unknown) {
-  if (error instanceof Error) {
-    return res.status(500).json({ message: error.message });
-  }
-  return res.status(500).json({ message: "An unexpected error occurred." });
-}
-
-};
-export const getCustomerLedger = async (
-  req: Request,
-  res: Response
-) => {
-const {customerId} = req.params;
-if(!customerId){
- return res.status(400).json({ message: "customer ID is required." }); 
-}
-try {
-  const ledgerEntries = await Ledger.findAll({
-    where: {
-      customerId,
-    },
-    order: [["createdAt", "DESC"]],
-  });
-  if(!ledgerEntries){
-    return res.status(404).json({ message: "Customer not found" });
-  }
-
-  if (ledgerEntries.length == 0) {
     return res
-      .status(404)
-      .json({
+      .status(200)
+      .json({ message: "ledger retrieved successfully", ledgerEntries });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ message: error.message });
+    }
+    return res.status(500).json({ message: "An unexpected error occurred." });
+  }
+};
+export const getCustomerLedger = async (req: Request, res: Response) => {
+  const { customerId } = req.params;
+  if (!customerId) {
+    return res.status(400).json({ message: "customer ID is required." });
+  }
+  try {
+    const ledgerEntries = await Ledger.findAll({
+      where: {
+        customerId,
+      },
+      order: [["createdAt", "DESC"]],
+    });
+    if (!ledgerEntries) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
+    if (ledgerEntries.length == 0) {
+      return res.status(404).json({
         message: "No ledger entries found for this customer.",
       });
-  }
+    }
 
-  return res.status(200).json({ message : "ledger retrieved successfully",ledgerEntries});
-} catch (error: unknown) {
-  if (error instanceof Error) {
-    return res.status(500).json({ message: error.message });
+    return res
+      .status(200)
+      .json({ message: "ledger retrieved successfully", ledgerEntries });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ message: error.message });
+    }
+    return res.status(500).json({ message: "An unexpected error occurred." });
   }
-  return res.status(500).json({ message: "An unexpected error occurred." });
-}
-
 };
