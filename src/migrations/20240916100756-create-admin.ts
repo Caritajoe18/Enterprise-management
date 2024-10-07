@@ -53,6 +53,10 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
+      pushSubscription: {
+        type: DataTypes.JSON, 
+        allowNull: true, 
+      },
       verificationToken: {
         type: Sequelize.STRING,
         allowNull: true,

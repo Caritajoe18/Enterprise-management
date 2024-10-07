@@ -22,6 +22,11 @@ module.exports = {
         type: Sequelize.STRING,
         
       },
+      orderIndex: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        unique: true,  
+      },
       isNav: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,

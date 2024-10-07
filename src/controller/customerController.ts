@@ -26,18 +26,22 @@ export const createCustomer = async (req: Request, res: Response) => {
     if (exist) {
       return res
         .status(400)
-        .json({ error: "Customer with phonenumber already exists" });
+        .json({ error: "Customer with phone number already exists" });
     }
-
+    
     const customer = await Customer.create({
       ...req.body,
       firstname,
       lastname,
       email,
     });
+
+    const customerTag = `PC${String(customer.dataValues.idCount).padStart(4, '0')}`;
+    await Customer.update({ customerTag }, { where: { idCount: customer.dataValues.idCount } });
+    const newCus = await Customer.findOne({where: {customerTag}})
     return res.status(201).json({
       message: "customer created succsesfully",
-      customer,
+       newCus
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -54,7 +58,7 @@ export const getAllCustomers = async (req: Request, res: Response) => {
       order: [["createdAt", "DESC"]],
     });
     if (customers.length === 0) {
-      return res.status(204).send();
+      return res.status(404).json({messege: "No Customers Found"});
     }
     res.status(200).json({
       message: "successfully retrieved your customers",

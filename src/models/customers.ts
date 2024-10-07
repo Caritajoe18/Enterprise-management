@@ -3,6 +3,8 @@ import db from "../db";
 
 export interface CustomerAttributes {
   id: string;
+  idCount: number;
+  customerTag: string;
   firstname: string;
   lastname: string;
   date: Date;
@@ -29,6 +31,17 @@ Customer.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
       allowNull: false,
+    },
+    idCount:{
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      unique:true
+    },
+    customerTag :{
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique:true
+
     },
     firstname: {
       type: DataTypes.STRING,

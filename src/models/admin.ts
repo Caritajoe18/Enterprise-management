@@ -2,6 +2,15 @@ import { DataTypes, Model } from "sequelize";
 import db from "../db";
 import Role from "./role";
 
+interface PushSubscription {
+  endpoint: string;       
+  keys: {
+    p256dh: string;       
+    auth: string;
+  };
+}
+
+
 export interface AdminAttributes {
   id: string;
   firstname: string;
@@ -12,6 +21,7 @@ export interface AdminAttributes {
   department: string[];
   address: string;
   roleId: string;
+  pushSubscription: PushSubscription | null;
   verificationToken?: string;
   resetPasswordToken?: string| null;
   resetPasswordTokenExpiry:number| null;
@@ -64,6 +74,10 @@ export interface AdminAttributes {
       phoneNumber: {
         type: DataTypes.STRING,
         allowNull: false,
+      },
+      pushSubscription: {
+        type: DataTypes.JSON, // Field to store push subscription object
+        allowNull: true, // Can be null until they subscribe
       },
   
       profilePic: {

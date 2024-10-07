@@ -7,6 +7,7 @@ export interface PermissionAttributes {
   name: string;
   isNav:boolean;
   navParentId:string;
+  isAssigned:boolean;
   url:string;
   slug:string;
 }
@@ -50,6 +51,10 @@ Permission.init(
   isNav:{
     type:DataTypes.BOOLEAN,
     defaultValue:false
+  },
+  isAssigned:{
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
   },
  navParentId:{
   type: DataTypes.UUID,

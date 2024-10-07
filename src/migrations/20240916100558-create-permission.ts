@@ -19,6 +19,10 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
       },
+      isAssigned:{
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
       navParentId: {
         type: Sequelize.UUID,
         references: {

@@ -11,6 +11,17 @@ module.exports = {
         allowNull: false,
         primaryKey: true,
       },
+      idCount:{
+        type: Sequelize.INTEGER,
+        autoIncrement: true,
+        unique:true
+      },
+      customerTag :{
+        type: Sequelize.STRING,
+        allowNull: true,
+        unique:true
+
+      },
       firstname: {
         type: Sequelize.STRING,
         allowNull: false,
