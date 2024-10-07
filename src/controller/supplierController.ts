@@ -34,9 +34,19 @@ export const createSupplier = async (req: Request, res: Response) => {
       lastname,
       email,
     });
+
+    const supplierTag = `PS${String(customer.dataValues.idCount).padStart(
+      4,
+      "0"
+    )}`;
+    await Supplier.update(
+      { supplierTag },
+      { where: { idCount: customer.dataValues.idCount } }
+    );
+    const newSup = await Supplier.findOne({ where: { supplierTag } });
     return res.status(201).json({
       message: "Supplier created succsesfully",
-      customer,
+      newSup,
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -199,19 +209,15 @@ export const searchSupplier = async (req: Request, res: Response) => {
     }
   }
 };
-  
 
 export const orderSupplierFirstname = async (req: Request, res: Response) => {
   try {
-    
     const customerList = await Supplier.findAll({
-      order: [['firstname', 'ASC']],
+      order: [["firstname", "ASC"]],
     });
 
     if (customerList.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No customers found" });
+      return res.status(404).json({ message: "No customers found" });
     }
 
     res

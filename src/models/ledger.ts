@@ -18,13 +18,13 @@ export interface LedgerAttributes {
 export class Ledger extends Model<LedgerAttributes> {
   static associate(models: any) {
     
-    Ledger.hasMany(models.Products, {
+    Ledger.belongsTo(models.Products, {
       foreignKey: "productId",
-      as: "ledger", 
+      as: "customer", 
     });
-    Ledger.hasMany(models.Customer, {
+    Ledger.belongsTo(models.Customer, {
         foreignKey: "customerId",
-        as:"ledgers"
+        as:"product"
     })
   }
 }
@@ -39,23 +39,23 @@ Ledger.init(
     },
     productId: {
         type: DataTypes.UUID,
-        allowNull: true,
+        allowNull: false,
         references: {
           model: 'Products', 
           key: 'id',
         },
         onUpdate: 'CASCADE',
-        onDelete: 'SET NULL'
+        onDelete: 'CASCADE'
       },
       customerId: {
         type: DataTypes.UUID,
-        allowNull: true,
+        allowNull: false,
         references: {
           model: 'Customers',
           key: 'id',
         },
         onUpdate: 'CASCADE',
-        onDelete: 'SET NULL'
+        onDelete: 'CASCADE'
       },
       unit: {
         type: DataTypes.STRING,

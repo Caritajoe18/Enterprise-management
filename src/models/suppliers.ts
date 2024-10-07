@@ -2,6 +2,8 @@ import { DataTypes, Model } from "sequelize";
 import db from "../db";
 export interface SupplierAttributes {
   id: string;
+  idCount: number;
+  supplierTag: string;
   firstname: string;
   lastname: string;
   email: string;
@@ -24,6 +26,17 @@ Supplier.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
       allowNull: false,
+    },
+    idCount:{
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      unique:true
+    },
+    supplierTag:{
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique:true
+
     },
 
     firstname: {
