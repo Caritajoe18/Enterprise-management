@@ -39,6 +39,7 @@ export const getAllNavandPerm = async (req: Request, res: Response) => {
   try {
     const navParents = await NavParent.findAll({
       attributes: ["id", "name"],
+      order: [["orderIndex", "ASC"]],
     });
 
     if (navParents.length === 0) {

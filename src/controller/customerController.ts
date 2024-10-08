@@ -36,7 +36,7 @@ export const createCustomer = async (req: Request, res: Response) => {
       email,
     });
 
-    const customerTag = `PC${String(customer.dataValues.idCount).padStart(4, '0')}`;
+    const customerTag = `PC/${String(customer.dataValues.idCount).padStart(4, '0')}`;
     await Customer.update({ customerTag }, { where: { idCount: customer.dataValues.idCount } });
     const newCus = await Customer.findOne({where: {customerTag}})
     return res.status(201).json({
