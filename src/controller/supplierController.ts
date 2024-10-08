@@ -35,7 +35,7 @@ export const createSupplier = async (req: Request, res: Response) => {
       email,
     });
 
-    const supplierTag = `PS${String(customer.dataValues.idCount).padStart(
+    const supplierTag = `PS/${String(customer.dataValues.idCount).padStart(
       4,
       "0"
     )}`;
