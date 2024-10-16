@@ -32,8 +32,11 @@ export const raiseCustomerOrder = async (req: Request, res: Response) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+    const prices = Array.isArray(product.dataValues.price) 
+  ? product.dataValues.price 
+  : [product.dataValues.price];
 
-    const productPrice = product.dataValues.price.find(
+    const productPrice = prices.find(
       (p: any) => p.unit === unit
     );
     if (!productPrice) {
