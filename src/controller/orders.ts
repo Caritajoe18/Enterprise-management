@@ -48,7 +48,14 @@ export const raiseCustomerOrder = async (req: Request, res: Response) => {
     // console.log("ProductPrice:", productPrice);
 
     if (!productPrice) {
-      throw new Error(`Price not found for unit: ${unit}`);
+      const availableUnits = prices.map((p) => p.unit).join(", ");
+  const productId = product.dataValues.id;
+  const productName = product.dataValues.name;
+
+  throw new Error(
+    `Price not found for unit: "${unit}". ` +
+    `Available units for product "${productName}" (ID: ${productId}): [${availableUnits}].`
+  );
     }
 
     const unitPrice = new Decimal(productPrice.amount);
