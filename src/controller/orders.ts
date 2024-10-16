@@ -35,6 +35,7 @@ export const raiseCustomerOrder = async (req: Request, res: Response) => {
     //   const prices = Array.isArray(product.dataValues.price)
     // ? product.dataValues.price
     // : [product.dataValues.price];
+    console.log("Product price field:", product.dataValues.price); //
     let prices = product.dataValues.price;
     if (!Array.isArray(prices)) {
       //console.log("Wrapping price in an array:", prices);
@@ -43,19 +44,26 @@ export const raiseCustomerOrder = async (req: Request, res: Response) => {
 
     //console.log("Prices after wrapping:", prices);
 
-    const productPrice = prices.find((p: any) => p.unit === unit);
+    //const productPrice = prices.find((p: any) => p.unit === unit);
+    let productPrice = null;
+    for (const price of prices) {
+      if (price.unit.toLowerCase() === unit.toLowerCase()) {
+        productPrice = price;
+        break; 
+      }
+    }
     // console.log("Product data:", product.dataValues);
-    // console.log("ProductPrice:", productPrice);
+     console.log("ProductPrice:", productPrice);
 
     if (!productPrice) {
       const availableUnits = prices.map((p) => p.unit).join(", ");
-  const productId = product.dataValues.id;
-  const productName = product.dataValues.name;
+      const productId = product.dataValues.id;
+      const productName = product.dataValues.name;
 
-  throw new Error(
-    `Price not found for unit: "${unit}". ` +
-    `Available units for product "${productName}" (ID: ${productId}): [${availableUnits}].`
-  );
+      throw new Error(
+        `Price not found for unit: "${unit}". ` +
+          `Available units for product "${productName}" (ID: ${productId}): [${availableUnits}].`
+      );
     }
 
     const unitPrice = new Decimal(productPrice.amount);
