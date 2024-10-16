@@ -67,7 +67,7 @@ Ledger.init(
       },
       creditType: {
         type: DataTypes.ENUM('Transfer', 'Cash'),
-        allowNull: false
+        allowNull: true
       },
       credit: {
         type: DataTypes.DECIMAL(15, 2)

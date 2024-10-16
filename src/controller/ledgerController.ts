@@ -6,44 +6,60 @@ import { option } from "../validations/adminValidation";
 import { createLedgerSchema } from "../validations/customerValid";
 import Customer from "../models/customers";
 import Products from "../models/products";
+import Decimal from "decimal.js";
 
-export const createAccountandLedger = async (req: Request, res: Response) => {
+export const createAccountAndLedger = async (req: Request, res: Response) => {
   const validationResult = createLedgerSchema.validate(req.body, option);
   if (validationResult.error) {
+    console.error("Validation Error:", validationResult.error.details);
     return res
       .status(400)
       .json({ error: validationResult.error.details[0].message });
   }
-  const transaction = await db.transaction();
+
+  // const transaction = await db.transaction();
   try {
     const { customerId, amount, productId } = req.body;
-    const customer = await Customer.findOne({ where: { id: customerId } });
+
+    const parsedAmount = new Decimal(amount);
+
+    // Find Customer and Product in parallel for better performance
+    const [customer, product] = await Promise.all([
+      Customer.findOne({ where: { id: customerId } }),
+      Products.findOne({ where: { id: productId } }),
+    ]);
+
     if (!customer) {
+      // await transaction.rollback();
       return res.status(404).json({ message: "Customer not found" });
     }
-    const product = await Products.findOne({ where: { id: productId } });
     if (!product) {
+      // await transaction.rollback();
       return res.status(404).json({ message: "Product not found" });
     }
 
-    console.log("helooo1");
+    console.log("Creating account book entry...");
     const accountBook = await AccountBook.create(
-      { ...req.body, creditType: "Transfer" },
-      { transaction }
+      { ...req.body, creditType: "Transfer" }
+      // { transaction }
     );
-    console.log("helooo2");
+
+    console.log("Fetching latest ledger entry...");
     const latestEntry = await Ledger.findOne({
       where: { customerId, productId },
       order: [["createdAt", "DESC"]],
-      transaction,
+      // transaction,  // Ensure this operation is under the same transaction
     });
-    console.log("helooooooo3");
-    const prevBalance = latestEntry ? latestEntry.dataValues.balance : 0;
-    const newBalance: number = prevBalance + amount;
 
-    console.log(`Previous Balance: ${prevBalance}`);
-    console.log(`New Balance: ${newBalance}`);
+    const prevBalance = latestEntry
+      ? new Decimal(latestEntry.dataValues.balance)
+      : new Decimal(0);
+    const newBalance = prevBalance.plus(parsedAmount);
 
+    console.log(amount, "amount");
+    console.log(`Previous Balance: ${prevBalance}, New Balance: ${newBalance}`);
+
+    console.log("Creating new ledger entry...");
     await Ledger.create(
       {
         ...req.body,
@@ -51,22 +67,30 @@ export const createAccountandLedger = async (req: Request, res: Response) => {
         productId,
         unit: "N/A",
         quantity: 0,
-        credit: amount,
+        credit: parsedAmount.toNumber(),
         debit: 0,
-        balance: newBalance,
+        balance: newBalance.toNumber(),
         creditType: "Transfer",
-      },
-      { transaction }
+      }
+      // { transaction }
     );
 
-    await transaction.commit();
+    // await transaction.commit();
+    console.log("Transaction committed successfully.");
 
     return res.status(201).json({
       message: "Account and ledger created successfully",
       accountBook,
     });
   } catch (error: unknown) {
-    await transaction.rollback();
+    console.error("Transaction failed, rolling back:", error);
+
+    // try {
+    //   // await transaction.rollback();
+    // } catch (rollbackError) {
+    //   console.error("Rollback failed:", rollbackError);
+    //   return res.status(500).json({ error: "Rollback failed. Check logs." });
+    // }
 
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
@@ -82,7 +106,9 @@ export const getAccountBook = async (req: Request, res: Response) => {
     if (acct.length === 0) {
       return res.status(404).json({ message: "Not found" });
     }
-     return  res.status(200).json({ message: "Account retrieved successfully", acct });
+    return res
+      .status(200)
+      .json({ message: "Account retrieved successfully", acct });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });

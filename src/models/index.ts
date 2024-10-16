@@ -8,6 +8,7 @@ import Departments from './department';
 import RolePermission from './rolepermission';
 import Ledger from './ledger';
 import Customer from './customers';
+import CustomerOrder from './customerOrder';
 
 const models = {
   Admins,
@@ -19,6 +20,7 @@ const models = {
   Products,
   Customer,
   Ledger,
+  CustomerOrder
 };
 
 
