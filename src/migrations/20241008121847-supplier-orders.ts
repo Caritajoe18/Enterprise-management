@@ -3,12 +3,21 @@ import { QueryInterface, DataTypes } from "sequelize";
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
-    await queryInterface.createTable('Ledgers', {
-      id: {
+      await queryInterface.createTable('SupplierOrders', { id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         allowNull: false,
         primaryKey: true,
+      },
+      supplierId: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: 'Suppliers',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
       },
       productId: {
         type: Sequelize.UUID,
@@ -18,59 +27,34 @@ module.exports = {
           key: 'id',
         },
         onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
-      },
-      customerId: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: 'Customers',
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
+        onDelete: 'CASCADE' 
+        
       },
       unit: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: true,
       },
       quantity: {
-        type: Sequelize.INTEGER,
-        allowNull: false
+        type: DataTypes.DECIMAL(10,3),
+        allowNull: true,
       },
-      creditType: {
-        type: Sequelize.ENUM('Transfer', 'Cash'),
-        allowNull: true
-      },
-      credit: {
-        type: Sequelize.DECIMAL(15, 2)
-        ,
-        allowNull: true
-      },
-      debit: {
-        type: Sequelize.DECIMAL(15, 2)
-        ,
-        allowNull: true
-      },
-      balance: {
-        type: Sequelize.DECIMAL(15, 2)
-        ,
-        allowNull: false
+      price: {
+        type: Sequelize.DECIMAL(15, 2),
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW,
+        type: Sequelize.DATE
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW,
+        type: Sequelize.DATE
       }
-    });
+      
+      });
+    
   },
 
   async down (queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
-    await queryInterface.dropTable('Ledgers');
+    await queryInterface.dropTable('SupplierOrders');
   }
 };

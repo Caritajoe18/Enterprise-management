@@ -25,6 +25,7 @@ export class Products extends Model<ProductsAttributes> {
       foreignKey: "departmentId",
       as: "department", 
     });
+    Products.hasMany(models.CustomerOrder, { foreignKey: 'productId', as : 'orders' });
   }
 }
 

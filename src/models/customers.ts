@@ -18,7 +18,8 @@ export interface CustomerAttributes {
 export class Customer extends Model<CustomerAttributes> {
 
   static associate(models: any) {
-    
+    Customer.hasMany(models.CustomerOrder, { foreignKey: 'customerId', as : 'orders'  });
+ 
     
   }
 

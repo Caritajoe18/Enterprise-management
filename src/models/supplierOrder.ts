@@ -1,32 +1,32 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../db";
 
-interface CustomerOrderAttributes {
+interface SupplierOrderAttributes {
   id: string;
-  customerId: string;
+  supplierId: string;
   productId: string;
   unit?: string;
   quantity?: number;
   price: number;
-  discount?: number;
+  
 }
 
-class CustomerOrder extends Model<CustomerOrderAttributes> {
+class SupplierOrder extends Model<SupplierOrderAttributes> {
   static associate(models: any) {
     // define association here
 
-    CustomerOrder.belongsTo(models.Products, {
+    SupplierOrder.belongsTo(models.Products, {
       foreignKey: "productId",
-      as: "porders",
+      as: "sorders",
     });
-    CustomerOrder.belongsTo(models.Customer, {
-      foreignKey: "customerId",
-      as: "corder",
+    SupplierOrder.belongsTo(models.Supplier, {
+      foreignKey: "supplierId",
+      as: "sorder",
     });
   }
 }
 
-CustomerOrder.init(
+SupplierOrder.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -34,11 +34,11 @@ CustomerOrder.init(
       allowNull: false,
       primaryKey: true,
     },
-    customerId: {
+    supplierId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: "Customers",
+        model: "Suppliers",
         key: "id",
       },
       onUpdate: "CASCADE",
@@ -59,22 +59,19 @@ CustomerOrder.init(
       allowNull: true,
     },
     quantity: {
-      type: DataTypes.DECIMAL(10, 3),
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     price: {
       type: DataTypes.DECIMAL(15, 2),
       allowNull: false,
     },
-    discount: {
-      type: DataTypes.DECIMAL(15, 2),
-      allowNull: true,
-    },
+   
   },
   {
     sequelize: db,
-    modelName: "CustomerOrder",
+    modelName: "SupplierOrder",
   }
 );
 
-export default CustomerOrder;
+export default SupplierOrder;
