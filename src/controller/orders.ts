@@ -5,7 +5,7 @@ import { customerOrderSchema } from "../validations/customerValid";
 import { option } from "../validations/adminValidation";
 import Customer from "../models/customers";
 import Ledger from "../models/ledger";
-import Decimal from 'decimal.js';
+import Decimal from "decimal.js";
 import db from "../db";
 
 export const raiseCustomerOrder = async (req: Request, res: Response) => {
@@ -32,22 +32,31 @@ export const raiseCustomerOrder = async (req: Request, res: Response) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-    const prices = Array.isArray(product.dataValues.price) 
-  ? product.dataValues.price 
-  : [product.dataValues.price];
+    //   const prices = Array.isArray(product.dataValues.price)
+    // ? product.dataValues.price
+    // : [product.dataValues.price];
+    let prices = product.dataValues.price;
+    if (!Array.isArray(prices)) {
+      //console.log("Wrapping price in an array:", prices);
+      prices = [prices];
+    }
 
-    const productPrice = prices.find(
-      (p: any) => p.unit === unit
-    );
+    //console.log("Prices after wrapping:", prices);
+
+    const productPrice = prices.find((p: any) => p.unit === unit);
+    // console.log("Product data:", product.dataValues);
+    // console.log("ProductPrice:", productPrice);
+
     if (!productPrice) {
       throw new Error(`Price not found for unit: ${unit}`);
     }
 
-    const unitPrice = new Decimal(productPrice.amount); 
+    const unitPrice = new Decimal(productPrice.amount);
     const parsedQuantity = new Decimal(quantity);
-    const totalPrice = unitPrice.mul(parsedQuantity); 
-    console.log(`${unitPrice} * ${parsedQuantity} = ${totalPrice} (Total Price)`);
-
+    const totalPrice = unitPrice.mul(parsedQuantity);
+    console.log(
+      `${unitPrice} * ${parsedQuantity} = ${totalPrice} (Total Price)`
+    );
 
     const newOrder = await CustomerOrder.create({
       ...req.body,
@@ -55,7 +64,7 @@ export const raiseCustomerOrder = async (req: Request, res: Response) => {
       productId,
       unit,
       quantity,
-      price: totalPrice.toNumber()
+      price: totalPrice.toNumber(),
     });
 
     console.log("Order created successfully:", newOrder);
@@ -66,15 +75,14 @@ export const raiseCustomerOrder = async (req: Request, res: Response) => {
       //transaction,
     });
 
-    const prevBalance = latestEntry 
-      ? new Decimal(latestEntry.dataValues.balance) 
+    const prevBalance = latestEntry
+      ? new Decimal(latestEntry.dataValues.balance)
       : new Decimal(0);
 
     const newBalance = prevBalance.minus(totalPrice);
     console.log(`Previous Balance: ${prevBalance}, New Balance: ${newBalance}`);
     console.log(`Previous Balance: ${prevBalance}, New Balance: ${newBalance}`);
 
-    
     await Ledger.create({
       ...req.body,
       customerId,
@@ -82,7 +90,7 @@ export const raiseCustomerOrder = async (req: Request, res: Response) => {
       unit,
       quantity,
       credit: 0,
-      debit: totalPrice.toNumber(), 
+      debit: totalPrice.toNumber(),
       balance: newBalance.toNumber(),
     });
     // await transaction.commit();
@@ -118,11 +126,18 @@ export const getOrdersByProduct = async (req: Request, res: Response) => {
     const orders = await CustomerOrder.findAll({
       where: { productId },
       include: [
-        { model: Customer,as: "corder", attributes: ['customerTag', 'firstname', 'lastname'] },
-        { model: Products,as: "porders", attributes: ['name', 'price', 'pricePlan'] },
-        
+        {
+          model: Customer,
+          as: "corder",
+          attributes: ["customerTag", "firstname", "lastname"],
+        },
+        {
+          model: Products,
+          as: "porders",
+          attributes: ["name", "price", "pricePlan"],
+        },
       ],
-      order: [["createdAt", "DESC"]]
+      order: [["createdAt", "DESC"]],
       //logging: console.log, //
     });
 
@@ -146,7 +161,8 @@ export const getOrdersByProduct = async (req: Request, res: Response) => {
 
 export const getAllOrders = async (req: Request, res: Response) => {
   try {
-    const orders = await CustomerOrder.findAll({ order: [["createdAt", "DESC"]]
+    const orders = await CustomerOrder.findAll({
+      order: [["createdAt", "DESC"]],
     });
 
     return res.status(200).json(orders);
@@ -168,14 +184,24 @@ export const getOrdersByCustomer = async (req: Request, res: Response) => {
     const orders = await CustomerOrder.findAll({
       where: { customerId },
       include: [
-        { model: Customer,as: "corder", attributes: ['customerTag', 'firstname', 'lastname'] },
-        { model: Products,as: "porders", attributes: ['name', 'price', 'pricePlan'] },
+        {
+          model: Customer,
+          as: "corder",
+          attributes: ["customerTag", "firstname", "lastname"],
+        },
+        {
+          model: Products,
+          as: "porders",
+          attributes: ["name", "price", "pricePlan"],
+        },
       ],
-      order: [["createdAt", "DESC"]]
+      order: [["createdAt", "DESC"]],
     });
 
     if (orders.length === 0) {
-      return res.status(404).json({ message: 'No orders found for this customer' });
+      return res
+        .status(404)
+        .json({ message: "No orders found for this customer" });
     }
 
     return res.status(200).json(orders);
@@ -189,4 +215,3 @@ export const getOrdersByCustomer = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "An unknown error occurred" });
   }
 };
-
