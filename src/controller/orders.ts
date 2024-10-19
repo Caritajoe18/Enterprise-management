@@ -47,7 +47,7 @@ export const raiseCustomerOrder = async (req: Request, res: Response) => {
     //const productPrice = prices.find((p: any) => p.unit === unit);
     let productPrice = null;
     for (const price of prices) {
-      if (price.unit.toLowerCase() === unit.toLowerCase()) {
+      if (price.unit === unit) {
         productPrice = price;
         break; 
       }
