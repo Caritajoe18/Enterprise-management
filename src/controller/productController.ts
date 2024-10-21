@@ -174,3 +174,42 @@ export const deleteProduct = async (req: Request, res: Response) => {
     }
   }
 };
+
+export const getDepartmentProducts = async (req: Request, res: Response) => {
+  try {
+    const {departmentId} =req.params
+    const products = await Products.findAll({
+      where: {
+        departmentId: departmentId, 
+      },
+      order: [["createdAt", "DESC"]],
+    });
+
+    if (products.length === 0) {
+      return res.status(404).json({ message: "No products found", products });
+    }
+
+    const parsedProducts = products.map((product) => ({
+      ...product.toJSON(),
+      price:
+        typeof product.dataValues.price === "string"
+          ? JSON.parse(product.dataValues.price)
+          : product.dataValues.price,
+      pricePlan:
+        typeof product.dataValues.pricePlan === "string"
+          ? JSON.parse(product.dataValues.pricePlan)
+          : product.dataValues.pricePlan,
+    }));
+
+    res.status(200).json({
+      message: "products retrieved successfully",
+      products: parsedProducts,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred" });
+  }
+};
+
