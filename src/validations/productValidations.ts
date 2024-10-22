@@ -5,12 +5,9 @@ export const createDepartmentSchema = Joi.object({
   name: Joi.string().required().messages({
     "string.required": "The name of a department is required",
   }),
-  
-    
 });
 export const editDepartmentSchema = Joi.object({
   name: Joi.string(),
-  
 });
 
 export const validatePrices = (value: { [key: string]: number }) => {
@@ -47,7 +44,7 @@ export const createProductSchema = Joi.object({
     "any.required": "Product name is required",
   }),
   departmentId: Joi.string().required(),
-  category:  Joi.string().valid('For Sale', 'For Purchase').required(),
+  category: Joi.string().valid("For Sale", "For Purchase").required(),
   price: Joi.array()
     .items(
       Joi.object({
@@ -89,7 +86,7 @@ export const updateProductSchema = Joi.object({
     "any.required": "Product name is required",
   }),
   departmentId: Joi.string(),
-  category:  Joi.string().valid('For Sale', 'For Purchase'),
+  category: Joi.string().valid("For Sale", "For Purchase"),
   price: Joi.array()
     .items(
       Joi.object({
@@ -124,3 +121,81 @@ export const updateProductSchema = Joi.object({
       "array.base": "Price plan must be a valid array of objects.",
     }),
 });
+
+export const storeValidationSchema = Joi.object({
+  productId: Joi.string().uuid().required().messages({
+    "string.base": "Product ID must be a string.",
+    "string.guid": "Product ID must be a valid UUID.",
+    "any.required": "Product ID is required.",
+  }),
+  image: Joi.string().uri().optional().messages({
+    "string.uri": "Image must be a valid URL.",
+  }),
+  productTag: Joi.string().messages({
+    "string.base": "Product tag must be a string.",
+    "any.required": "Product tag is required.",
+  }),
+  category: Joi.string().messages({
+    "string.base": "Category must be a string.",
+    "any.required": "Category is required.",
+  }),
+  unit: Joi.string().messages({
+    "string.base": "Unit must be a string.",
+    "any.required": "Unit is required.",
+  }),
+  quantity: Joi.number().min(0).optional().default(0).messages({
+    "number.base": "Quantity must be a number.",
+    "number.min": "Quantity cannot be negative.",
+  }),
+  thresholdValue: Joi.number().integer().min(0).messages({
+    "number.base": "Threshold value must be an integer.",
+    "number.min": "Threshold value cannot be negative.",
+    "any.required": "Threshold value is required.",
+  }),
+});
+
+export const storeEditValidationSchema = Joi.object({
+  image: Joi.string().uri().optional().messages({
+    "string.uri": "Image must be a valid URL.",
+  }),
+  productTag: Joi.string().messages({
+    "string.base": "Product tag must be a string.",
+  }),
+  category: Joi.string().messages({
+    "string.base": "Category must be a string.",
+
+  }),
+  unit: Joi.string().messages({
+    "string.base": "Unit must be a string.",
+  }),
+  quantity: Joi.number().min(0).optional().default(0).messages({
+    "number.base": "Quantity must be a number.",
+    "number.min": "Quantity cannot be negative.",
+  }),
+  thresholdValue: Joi.number().integer().min(0).messages({
+    "number.base": "Threshold value must be an integer.",
+    "number.min": "Threshold value cannot be negative.",
+    "any.required": "Threshold value is required.",
+  }),
+});
+
+export const orderValidationSchema = Joi.object({
+  rawMaterial: Joi.string().required().messages({
+    'string.base': 'Raw material must be a string.',
+    'any.required': 'Raw material is required.',
+  }),
+  quantity: Joi.number().min(1).required().messages({
+    'number.base': 'Quantity must be a number.',
+    'number.min': 'Quantity must be at least 1.',
+    'any.required': 'Quantity is required.',
+  }),
+  unit: Joi.string().required().messages({
+    'string.base': 'Unit must be a string.',
+    'any.required': 'Unit is required.',
+  }),
+  expectedDeliveryDate: Joi.date().messages({
+    'date.base': 'Expected delivery date must be a valid date.',
+    'any.required': 'Expected delivery date is required.',
+  }),
+});
+
