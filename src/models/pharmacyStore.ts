@@ -21,7 +21,20 @@ export class PharmacyStore extends Model<PharmacyStoreAttributes> {
   static associate(models: any) {
     // define association here
   }
+  get status(): string {
+    const quantity = this.getDataValue('quantity');
+    const thresholdValue = this.getDataValue('thresholdValue');
+    
+    if (quantity > thresholdValue) {
+      return "In Stock";
+    } else if (quantity === thresholdValue) {
+      return "Out of Stock";
+    } else {
+      return "Low Stock";
+    }
+  }
 }
+
 PharmacyStore.init(
   {
     id: {
@@ -47,11 +60,11 @@ PharmacyStore.init(
     },
     productTag: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     category: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     unit: {
       type: DataTypes.STRING,
@@ -65,11 +78,25 @@ PharmacyStore.init(
     },
     thresholdValue: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       defaultValue: 0,
     },
   },
-  { sequelize: db, tableName: "PharmacyStores" }
+  { sequelize: db, tableName: "PharmacyStores",
+  getterMethods: {
+    status() {
+      const quantity = this.getDataValue('quantity');
+      const thresholdValue = this.getDataValue('thresholdValue');
+      if (quantity > thresholdValue) {
+        return "In Stock";
+      } else if (quantity === thresholdValue) {
+        return "Low Stock";
+      } else {
+        return "Out of Stock";
+      }
+    }
+  }
+}
 );
 
 export default PharmacyStore;

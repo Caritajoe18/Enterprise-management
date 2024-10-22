@@ -26,15 +26,15 @@ module.exports = {
       },
       productTag: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       category: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       unit: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       quantity:{
         type: Sequelize.DECIMAL(10,3),
