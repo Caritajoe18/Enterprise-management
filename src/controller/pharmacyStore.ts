@@ -41,7 +41,7 @@ export const createStore = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    const exist = await PharmacyStore.findAll({where: {productId}});
+    const exist = await PharmacyStore.findOne({where: {productId}});
     if (exist) {
         return res.status(404).json({ message: "Product already added to store" });
       }
@@ -217,6 +217,29 @@ export const createOrder = async (req: Request, res: Response) => {
     console.error("Error creating order:", err);
     return res.status(500).json({
       error: "Failed to create order",
+    });
+  }
+};
+
+export const deletePharmStore = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const store = await PharmacyStore.findByPk(id);
+
+    if (!store) {
+      return res.status(404).json({ message: "Store not found" });
+    }
+
+    await store.destroy();
+
+    return res.status(200).json({
+      message: "Store deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting store:", error);
+    return res.status(500).json({
+      error: "Failed to delete store",
     });
   }
 };

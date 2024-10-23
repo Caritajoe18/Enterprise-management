@@ -3,7 +3,8 @@ import { createDepartment, deleteDept, editDepartment, getAllDepartments, getDep
 import { authorize } from "../middleware/staffPermissions";
 import { getDepartmentForPurchase, getDepartmentForSale, getDepartmentProducts } from "../controller/productController";
 import upload from "../utilities/multer";
-import { createOrder, createStore, editStore, getPharmStores, getStoreForPurchase, getStoreForSale, uploadImage } from "../controller/pharmacyStore";
+import { createOrder, createStore, deletePharmStore, editStore, getPharmStores, getStoreForPurchase, getStoreForSale, uploadImage } from "../controller/pharmacyStore";
+import { createGenStore, deleteGenStore, editGenStore, getGenStores } from "../controller/generalStore";
 
 const router = express.Router();
 
@@ -24,6 +25,14 @@ router.get("/view-pharmstore-prod", getStoreForSale);
 router.get("/view-pharmstore-raw", getStoreForPurchase);
 router.patch("/edit-pharmstore/:id", editStore);
 router.post("/raise-pharm-order", createOrder);
+router.delete("/delete-pharmstore/:id", deletePharmStore);
+
+//general Store
+router.post("/create-gen-store", createGenStore);
+router.get("/view-gen-store", getGenStores);
+router.patch("/edit-genstore/:id", editGenStore);
+router.delete("/delete-genstore/:id", deleteGenStore);
+
 
 
 export default router;
