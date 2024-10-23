@@ -9,6 +9,8 @@ import RolePermission from './rolepermission';
 import Ledger from './ledger';
 import Customer from './customers';
 import CustomerOrder from './customerOrder';
+import PharmacyStore from './pharmacyStore';
+import GeneralStore from './generalStore';
 
 const models = {
   Admins,
@@ -20,7 +22,9 @@ const models = {
   Products,
   Customer,
   Ledger,
-  CustomerOrder
+  CustomerOrder,
+  PharmacyStore,
+  GeneralStore
 };
 
 

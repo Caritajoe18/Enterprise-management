@@ -199,3 +199,22 @@ export const orderValidationSchema = Joi.object({
   }),
 });
 
+export const genStoreValidationSchema = Joi.object({
+  name: Joi.string().required().messages({
+    "string.base": "Name must be a string.",
+    "any.required": "name is required.",
+  }),
+  unit: Joi.string().messages({
+    "string.base": "Unit must be a string.",
+    "any.required": "Unit is required.",
+  }),
+  quantity: Joi.number().min(0).optional().default(0).messages({
+    "number.base": "Quantity must be a number.",
+    "number.min": "Quantity cannot be negative.",
+  }),
+  thresholdValue: Joi.number().integer().min(0).messages({
+    "number.base": "Threshold value must be an integer.",
+    "number.min": "Threshold value cannot be negative.",
+    "any.required": "Threshold value is required.",
+  }),
+});
