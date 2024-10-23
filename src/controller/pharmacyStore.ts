@@ -103,10 +103,14 @@ export const getStoreForSale = async (req: Request, res: Response) => {
     if (!stores.length) {
       return res.status(404).json({ message: "No stores found for sale" });
     }
+    const parsedStores = stores.map((store) => ({
+      ...store.toJSON(),
+      status: store.status, 
+    }));
 
     res.status(200).json({
       message: "Pharmacy stores with products for sale retrieved successfully",
-      stores,
+      parsedStores,
     });
   } catch (error) {
     console.error("Error fetching pharmacy stores:", error);
@@ -133,10 +137,14 @@ export const getStoreForPurchase = async (req: Request, res: Response) => {
     if (!stores.length) {
       return res.status(404).json({ message: "No stores found for raw materils" });
     }
+    const parsedStores = stores.map((store) => ({
+      ...store.toJSON(),
+      status: store.status, 
+    }));
 
     res.status(200).json({
       message: "Pharmacy stores with raw materials retrieved successfully",
-      stores,
+      parsedStores,
     });
   } catch (error) {
     console.error("Error fetching pharmacy stores:", error);
@@ -183,35 +191,42 @@ export const editStore = async (req: Request, res: Response) => {
 
 export const createOrder = async (req: Request, res: Response) => {
   try {
-    const { rawMaterial } = req.body;
+    const { orders } = req.body;
 
-    const { error, value } = orderValidationSchema.validate(req.body, {
-      abortEarly: false,
-    });
+    const validatedOrders = [];
+    for (const order of orders) {
+      const { error, value } = orderValidationSchema.validate(order, {
+        abortEarly: false,
+      });
 
-    if (error) {
-      const errors = error.details.map((detail) => detail.message);
-      return res.status(400).json({ errors });
-    }
+      if (error) {
+        const errors = error.details.map((detail) => detail.message);
+        return res.status(400).json({ errors });
+      }
 
-    const product = await Products.findOne({
-      where: { id: rawMaterial },
-    });
+      const product = await Products.findOne({
+        where: { id: value.rawMaterial },
+      });
 
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({ message: "Product or products not found" });
+    }
+    validatedOrders.push(value);
     }
 
-    const newOrder = await PharmacyOrder.create({
-      ...req.body,
-      quantity: value.quantity,
-      unit: value.unit,
-      expectedDeliveryDate: value.expectedDeliveryDate,
-    });
+    const newOrders = await PharmacyOrder.bulkCreate(
+      validatedOrders.map((order) => ({
+        ...req.body,
+        rawMaterial: order.rawMaterial,
+        quantity: order.quantity,
+        unit: order.unit,
+        expectedDeliveryDate: order.expectedDeliveryDate,
+      }))
+    );
 
     return res.status(201).json({
-      message: "Order created successfully",
-      order: newOrder,
+      message: "Orders created successfully",
+      order: newOrders,
     });
   } catch (err) {
     console.error("Error creating order:", err);

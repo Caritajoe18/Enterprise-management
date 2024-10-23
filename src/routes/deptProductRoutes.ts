@@ -1,10 +1,10 @@
 import express from "express";
-import { createDepartment, deleteDept, editDepartment, getAllDepartments, getDepartments } from "../controller/departmentController";
+import { createDepartment, deleteDept, editDepartment, getAllDepartments, getDepartments, getDepartmentsLikePharm } from "../controller/departmentController";
 import { authorize } from "../middleware/staffPermissions";
 import { getDepartmentForPurchase, getDepartmentForSale, getDepartmentProducts } from "../controller/productController";
 import upload from "../utilities/multer";
 import { createOrder, createStore, deletePharmStore, editStore, getPharmStores, getStoreForPurchase, getStoreForSale, uploadImage } from "../controller/pharmacyStore";
-import { createGenStore, deleteGenStore, editGenStore, getGenStores } from "../controller/generalStore";
+import { createGenOrder, createGenStore, deleteGenStore, editGenStore, getGenStores } from "../controller/generalStore";
 
 const router = express.Router();
 
@@ -18,6 +18,7 @@ router.delete("/delete-department/:id", authorize(), deleteDept);
 router.get('/get-all-dept-product/:departmentId', getDepartmentProducts);
 router.get('/get-dept-product/:departmentId', getDepartmentForSale);
 router.get('/get-dept-raw/:departmentId', getDepartmentForPurchase);
+router.get('/get-pharm-dept', getDepartmentsLikePharm);
 router.post("/upload", upload.single("file"), uploadImage);
 router.post("/create-pharmstore", createStore);
 router.get("/view-pharmstore", getPharmStores);
@@ -32,6 +33,7 @@ router.post("/create-gen-store", createGenStore);
 router.get("/view-gen-store", getGenStores);
 router.patch("/edit-genstore/:id", editGenStore);
 router.delete("/delete-genstore/:id", deleteGenStore);
+router.post("/create-genstore-order", createGenOrder);
 
 
 

@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
 import {
   editGenStoreValidationSchema,
+  genOrderValidationSchema,
   genStoreValidationSchema,
 } from "../validations/productValidations";
 import GeneralStore from "../models/generalStore";
+import GeneralOrder from "../models/generalOrders";
 
 export const createGenStore = async (req: Request, res: Response) => {
   try {
@@ -94,6 +96,54 @@ export const editGenStore = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "Failed to update store" });
   }
 };
+
+export const createGenOrder = async (req: Request, res: Response) => {
+    try {
+      const { orders } = req.body;
+  
+      const validatedOrders = [];
+      for (const order of orders) {
+        const { error, value } = genOrderValidationSchema.validate(order, {
+          abortEarly: false,
+        });
+  
+        if (error) {
+          const errors = error.details.map((detail) => detail.message);
+          return res.status(400).json({ errors });
+        }
+  
+        const shelf = await GeneralStore.findOne({
+          where: { name: value.name },
+        });
+  
+      if (!shelf) {
+        return res.status(404).json({ message: "Product or products not found" });
+      }
+      validatedOrders.push(value);
+      }
+  
+      const newOrders = await GeneralOrder.bulkCreate(
+        validatedOrders.map((order) => ({
+          ...req.body,
+          name: order.name,
+          quantity: order.quantity,
+          unit: order.unit,
+          expectedDeliveryDate: order.expectedDeliveryDate,
+        }))
+      );
+  
+      return res.status(201).json({
+        message: "Orders created successfully",
+        order: newOrders,
+      });
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+          return res.status(500).json({ error: error.message });
+        }
+        return res.status(500).json({ error: "An error occurred" });
+      }
+    };
+    
 
 export const deleteGenStore = async (req: Request, res: Response) => {
   try {
