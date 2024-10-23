@@ -40,6 +40,11 @@ export const createStore = async (req: Request, res: Response) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+
+    const exist = await PharmacyStore.findAll({where: {productId}});
+    if (exist) {
+        return res.status(404).json({ message: "Product already added to store" });
+      }
     const store = await PharmacyStore.create(value);
     const storeData = {
       ...store.get(),
@@ -79,6 +84,68 @@ export const getPharmStores = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "Failed to retrieve stores" });
   }
 };
+
+
+export const getStoreForSale = async (req: Request, res: Response) => {
+  try {
+    const stores = await PharmacyStore.findAll({
+      include: [{
+        model: Products,  
+        as: 'product',    
+        where: {
+          category: 'For Sale'
+        },
+        attributes: ['id', 'name']
+      }]
+    });
+
+
+    if (!stores.length) {
+      return res.status(404).json({ message: "No stores found for sale" });
+    }
+
+    res.status(200).json({
+      message: "Pharmacy stores with products for sale retrieved successfully",
+      stores,
+    });
+  } catch (error) {
+    console.error("Error fetching pharmacy stores:", error);
+    return res.status(500).json({
+      error: "Failed to fetch pharmacy stores",
+    });
+  }
+};
+
+export const getStoreForPurchase = async (req: Request, res: Response) => {
+  try {
+    const stores = await PharmacyStore.findAll({
+      include: [{
+        model: Products,  
+        as: 'product',    
+        where: {
+          category: 'For Purchase'
+        },
+        attributes: ['id', 'name']
+      }]
+    });
+
+
+    if (!stores.length) {
+      return res.status(404).json({ message: "No stores found for raw materils" });
+    }
+
+    res.status(200).json({
+      message: "Pharmacy stores with raw materials retrieved successfully",
+      stores,
+    });
+  } catch (error) {
+    console.error("Error fetching pharmacy stores:", error);
+    return res.status(500).json({
+      error: "Failed to fetch pharmacy stores",
+    });
+  }
+};
+
 
 export const editStore = async (req: Request, res: Response) => {
   try {

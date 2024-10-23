@@ -19,6 +19,11 @@ export class PharmacyStore extends Model<PharmacyStoreAttributes> {
    * The `models/index` file will call this method automatically.
    */
   static associate(models: any) {
+    PharmacyStore.belongsTo(models.Products, {
+      foreignKey: "productId",
+      as: "product",  // Alias for accessing the related product
+    });
+
     // define association here
   }
   get status(): string {
