@@ -7,6 +7,7 @@ import {
 import { option } from "../validations/adminValidation";
 import { toPascalCase } from "../utilities/auths";
 import Products from "../models/products";
+import { Op } from "sequelize";
 
 export const createDepartment = async (req: Request, res: Response) => {
   try {
@@ -118,6 +119,40 @@ export const getDepartments = async (req: Request, res: Response) => {
       return res.status(500).json({ error: error.message });
     }
     return res.status(500).json({ error: "An unknown error occurred" });
+  }
+};
+
+export const getDepartmentsLikePharm = async (req: Request, res: Response) => {
+  try {
+    const searchTerm = req.query.name || 'pharm'; 
+    const departments = await Departments.findAll({
+      where: {
+        name: {
+          [Op.like]: `%${searchTerm}%`, 
+        },
+      },
+    });
+
+    if (departments.length === 0) {
+      return res.status(404).json({ message: 'No departments found' });
+    }
+
+
+    // const serializedDepartments = departments.map(dept => ({
+    //   id: dept.dataValues.id,
+    //   name: dept.dataValues.name,
+      
+    // }));
+
+    return res.status(200).json({
+      message: 'Departments retrieved successfully',
+      department: departments,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "An error occurred" });
   }
 };
 
