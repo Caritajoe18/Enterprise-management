@@ -5,6 +5,7 @@ import { getDepartmentForPurchase, getDepartmentForSale, getDepartmentProducts }
 import upload from "../utilities/multer";
 import { createOrder, createStore, deletePharmStore, editStore, getPharmStores, getStoreForPurchase, getStoreForSale, uploadImage } from "../controller/pharmacyStore";
 import { createGenOrder, createGenStore, deleteGenStore, editGenStore, getGenStores } from "../controller/generalStore";
+import { createDeptStore, editDeptStore, getDeptStoreForPurchase, getDeptStoreForSale } from "../controller/departmentStoreController";
 
 const router = express.Router();
 
@@ -35,6 +36,11 @@ router.patch("/edit-genstore/:id", editGenStore);
 router.delete("/delete-genstore/:id", deleteGenStore);
 router.post("/create-genstore-order", createGenOrder);
 
+//dept store
+router.post('/create-dept-store', createDeptStore)
+router.get('/view-deptstore-prod', getDeptStoreForSale)
+router.get('/view-deptstore-raw', getDeptStoreForPurchase)
+router.patch('/edit-deptstore/:id', editDeptStore)
 
 
 export default router;

@@ -32,6 +32,10 @@ export class Products extends Model<ProductsAttributes> {
       foreignKey: "productId",
       as: "store",
     });
+    Products.hasOne(models.DepartmentStore, {
+      foreignKey: "name",
+      as: "stores",  // Alias should match what you use in queries
+    });
   }
 }
 
