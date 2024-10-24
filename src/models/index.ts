@@ -11,6 +11,7 @@ import Customer from './customers';
 import CustomerOrder from './customerOrder';
 import PharmacyStore from './pharmacyStore';
 import GeneralStore from './generalStore';
+import DepartmentStore from './departmentStore';
 
 const models = {
   Admins,
@@ -24,7 +25,8 @@ const models = {
   Ledger,
   CustomerOrder,
   PharmacyStore,
-  GeneralStore
+  GeneralStore,
+  DepartmentStore
 };
 
 

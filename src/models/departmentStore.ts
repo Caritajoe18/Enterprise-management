@@ -3,24 +3,23 @@ import db from "../db";
 
 export interface PharmacyStoreAttributes {
   id: string;
-  productId: string;
+  name: string;
   image?: string;
-  productTag: string;
-  category: string;
+  department: string;
   unit: string;
   quantity:number;
   thresholdValue: number;
 }
 
-export class PharmacyStore extends Model<PharmacyStoreAttributes> {
+export class DepartmentStore extends Model<PharmacyStoreAttributes> {
   /**
    * Helper method for defining associations.
    * This method is not a part of Sequelize lifecycle.
    * The `models/index` file will call this method automatically.
    */
   static associate(models: any) {
-    PharmacyStore.belongsTo(models.Products, {
-      foreignKey: "productId",
+    DepartmentStore.belongsTo(models.Products, {
+      foreignKey: "name",
       as: "product",  // Alias for accessing the related product
     });
 
@@ -32,15 +31,15 @@ export class PharmacyStore extends Model<PharmacyStoreAttributes> {
     
     if (quantity > thresholdValue) {
       return "In Stock";
-    } else if (quantity === thresholdValue) {
-      return "Low Stock";
+    } else if (quantity <= 0) {
+      return "Out Stock";
     } else {
-      return "Out of Stock";
+      return "Low Stock";
     }
   }
 }
 
-PharmacyStore.init(
+DepartmentStore.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -49,7 +48,17 @@ PharmacyStore.init(
       allowNull: false,
     },
 
-    productId: {
+    department: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: "Departments",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
+    },
+    name: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -63,14 +72,7 @@ PharmacyStore.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    productTag: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    category: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
+    
     unit: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -87,21 +89,8 @@ PharmacyStore.init(
       defaultValue: 0,
     },
   },
-  { sequelize: db, tableName: "PharmacyStores",
-  getterMethods: {
-    status() {
-      const quantity = this.getDataValue('quantity');
-      const thresholdValue = this.getDataValue('thresholdValue');
-      if (quantity > thresholdValue) {
-        return "In Stock";
-      } else if (quantity <= 0) {
-        return "Out Stock";
-      } else {
-        return "Low Stock";
-      }
-    }
-  }
+  { sequelize: db, tableName: "DepartmentStores",
 }
 );
 
-export default PharmacyStore;
+export default DepartmentStore;
