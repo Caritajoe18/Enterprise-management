@@ -17,7 +17,7 @@ export class GeneralStore extends Model<GeneralAttributes> {
     if (quantity > thresholdValue) {
       return "In Stock";
     } else if (quantity <= 0) {
-      return "Out Stock";
+      return "Out of Stock";
     } else {
       return "Low Stock";
     }

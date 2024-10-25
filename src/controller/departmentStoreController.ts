@@ -6,7 +6,7 @@ import Products from "../models/products";
 
 export const createDeptStore = async (req: Request, res: Response) => {
     try {
-      const { name, department } = req.body;
+      const { productId, departmentId } = req.body;
       const { error, value } = genStoreValidationSchema.validate(req.body, {
         abortEarly: false,
       });
@@ -17,21 +17,21 @@ export const createDeptStore = async (req: Request, res: Response) => {
       }
 
       const dept = await Departments.findOne({
-        where: { id: department },
+        where: { id: departmentId },
       });
   
       if (!dept) {
         return res.status(404).json({ message: "department not found" });
       };
       const product = await Products.findOne({
-        where: { id: name, departmentId: department },  
+        where: { id: productId, departmentId: departmentId},  
       });
   
       if (!product) {
-        return res.status(404).json({ message: "Product not found in thedepartment" });
+        return res.status(404).json({ message: "Product not found in the department" });
       }
   
-      const exist = await DepartmentStore.findOne({ where: { name } });
+      const exist = await DepartmentStore.findOne({ where: { productId } });
       if (exist) {
         return res.status(409).json({ message: "Product already exists" });
       }
@@ -169,4 +169,27 @@ export const editDeptStore = async (req: Request, res: Response) => {
         res.status(500).json({ error: "An unexpected error occurred." });
       }
     };
+
+    export const deleteDeptStore = async (req: Request, res: Response) => {
+        try {
+          const { id } = req.params;
+      
+          const store = await DepartmentStore.findByPk(id);
+      
+          if (!store) {
+            return res.status(404).json({ message: "Store not found" });
+          }
+      
+          await store.destroy();
+      
+          return res.status(200).json({
+            message: "Store deleted successfully",
+          });
+        } catch (error) {
+          console.error("Error deleting store:", error);
+          return res.status(500).json({
+            error: "Failed to delete store",
+          });
+        }
+      };
     

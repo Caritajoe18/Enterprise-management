@@ -12,9 +12,13 @@ module.exports = {
         allowNull: false,
         primaryKey: true,
     },
-    name: {
-      type: Sequelize.STRING,
-        allowNull: false,
+    productId: {
+        type: Sequelize.UUID,
+        references: {
+          model: 'GeneralStores',
+          key: 'id'
+        },
+        onDelete: 'CASCADE'
     },
     quantity: {
       type: Sequelize.DECIMAL(10,3),

@@ -3,7 +3,7 @@ import { QueryInterface, DataTypes } from "sequelize";
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
-    await queryInterface.createTable("DepartmentStores", {
+    await queryInterface.createTable("DepartmentOrders", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -31,11 +31,6 @@ module.exports = {
           onUpdate: "CASCADE",
           onDelete: "CASCADE",
       },
-      image:{
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
-
       unit: {
         type: Sequelize.STRING,
         allowNull: true,
@@ -45,10 +40,9 @@ module.exports = {
         allowNull: true,
         defaultValue: 0,
       },
-      thresholdValue: {
-        type: Sequelize.INTEGER,
+      expectedDeliveryDate: {
+        type: Sequelize.DATE,
         allowNull: true,
-        defaultValue: 0,
       },
       createdAt: {
         allowNull: false,
@@ -62,6 +56,6 @@ module.exports = {
   },
 
   async down(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
-    await queryInterface.dropTable("DepartmentStores");
+    await queryInterface.dropTable("DepartmentOrders");
   },
 };

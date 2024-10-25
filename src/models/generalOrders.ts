@@ -3,13 +3,21 @@ import db from '../db'; // assuming db is properly configured
 
 interface GeneralOrderAttributes {
   id: string;
-  name: string;
+  productId: string;
   quantity: number;
   unit: string;
   expectedDeliveryDate: Date;
 }
 
-export class GeneralOrder extends Model<GeneralOrderAttributes> {}
+export class GeneralOrder extends Model<GeneralOrderAttributes> {
+
+  static associate(models: any) {
+    GeneralOrder.belongsTo(models.Products, { as: 'store', foreignKey: 'productId' });
+
+    // define association here
+  }
+}
+
 
 GeneralOrder.init(
   {
@@ -19,9 +27,15 @@ GeneralOrder.init(
         primaryKey: true,
         allowNull: false,
     },
-    name: {
-        type: DataTypes.STRING,
-        allowNull: false,
+    productId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: "Products",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
     },
     quantity: {
       type: DataTypes.DECIMAL(10,3),
