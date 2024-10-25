@@ -137,11 +137,9 @@ export const storeValidationSchema = Joi.object({
 
   category: Joi.string().messages({
     "string.base": "Category must be a string.",
-    "any.required": "Category is required.",
   }),
   unit: Joi.string().messages({
     "string.base": "Unit must be a string.",
-    "any.required": "Unit is required.",
   }),
   quantity: Joi.number().min(0).optional().default(0).messages({
     "number.base": "Quantity must be a number.",
@@ -150,7 +148,6 @@ export const storeValidationSchema = Joi.object({
   thresholdValue: Joi.number().integer().min(0).messages({
     "number.base": "Threshold value must be an integer.",
     "number.min": "Threshold value cannot be negative.",
-    "any.required": "Threshold value is required.",
   }),
 });
 
@@ -221,9 +218,11 @@ export const genStoreValidationSchema = Joi.object({
   departmentId: Joi.string().messages({
     "string.base": "department must be a string.",
   }),
-  productId: Joi.string().required().messages({
+  name:Joi.string().messages({
+    "string.base": "name must be a string.",
+  }),
+  productId: Joi.string().messages({
     "string.base": "product must be a string.",
-    "any.required": "product is required.",
   }),
   image: Joi.string().messages({
     "string.base": "Image must be a string.",

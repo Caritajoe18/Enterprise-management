@@ -21,7 +21,7 @@ router.get('/get-dept-product/:departmentId', getDepartmentForSale);
 router.get('/get-dept-raw/:departmentId', getDepartmentForPurchase);
 router.get('/get-pharm-dept', getDepartmentsLikePharm);
 router.post("/upload", upload.single("file"), uploadImage);
-router.post("/create-pharmstore",authorize(), createStore);
+router.post("/create-pharmstore", createStore);
 router.get("/view-pharmstore", authorize(), getPharmStores);
 router.get("/view-pharmstore-prod", authorize(), getStoreForSale);
 router.get("/view-pharmstore-raw", authorize(), getStoreForPurchase);
@@ -31,7 +31,7 @@ router.get("/view-pharm-order",authorize(), viewOrder);
 router.delete("/delete-pharmstore/:id",authorize(), deletePharmStore);
 
 //general Store
-router.post("/create-gen-store",authorize(), createGenStore);
+router.post("/create-gen-store", createGenStore);
 router.get("/view-gen-store",authorize(), getGenStores);
 router.patch("/edit-genstore/:id",authorize(), editGenStore);
 router.delete("/delete-genstore/:id",authorize(), deleteGenStore);
