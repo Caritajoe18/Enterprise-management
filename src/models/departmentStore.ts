@@ -3,9 +3,9 @@ import db from "../db";
 
 export interface PharmacyStoreAttributes {
   id: string;
-  name: string;
+  productId: string;
   image?: string;
-  department: string;
+  departmentId: string;
   unit: string;
   quantity:number;
   thresholdValue: number;
@@ -19,7 +19,7 @@ export class DepartmentStore extends Model<PharmacyStoreAttributes> {
    */
   static associate(models: any) {
     DepartmentStore.belongsTo(models.Products, {
-      foreignKey: "name",
+      foreignKey: "productId",
       as: "product",  // Alias for accessing the related product
     });
 
@@ -48,7 +48,7 @@ DepartmentStore.init(
       allowNull: false,
     },
 
-    department: {
+    departmentId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -58,7 +58,7 @@ DepartmentStore.init(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
-    name: {
+    productId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {

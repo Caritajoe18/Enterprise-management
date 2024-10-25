@@ -113,7 +113,7 @@ export const createGenOrder = async (req: Request, res: Response) => {
         }
   
         const shelf = await GeneralStore.findOne({
-          where: { name: value.name },
+          where: { id: value.productId },
         });
   
       if (!shelf) {
@@ -125,7 +125,7 @@ export const createGenOrder = async (req: Request, res: Response) => {
       const newOrders = await GeneralOrder.bulkCreate(
         validatedOrders.map((order) => ({
           ...req.body,
-          name: order.name,
+          productId: order.productId,
           quantity: order.quantity,
           unit: order.unit,
           expectedDeliveryDate: order.expectedDeliveryDate,
@@ -143,6 +143,27 @@ export const createGenOrder = async (req: Request, res: Response) => {
         return res.status(500).json({ error: "An error occurred" });
       }
     };
+
+    export const viewGenOrder = async (req: Request, res: Response) =>{
+      try {
+        const stores = await GeneralOrder.findAll({
+          order: [["createdAt", "DESC"]],
+        });
+    
+        if (stores.length === 0) {
+          return res.status(404).json({ message: "No Orders found" });
+        }
+    
+    
+        res.status(200).json({
+          message: "Orders retrieved successfully",
+          Orders: stores,
+        });
+      } catch (error) {
+        console.error("Error retrieving stores:", error);
+        return res.status(500).json({ error: "Failed to retrieve stores" });
+      } 
+    }
     
 
 export const deleteGenStore = async (req: Request, res: Response) => {

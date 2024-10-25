@@ -43,7 +43,7 @@ export const createStore = async (req: Request, res: Response) => {
 
     const exist = await PharmacyStore.findOne({where: {productId}});
     if (exist) {
-        return res.status(404).json({ message: "Product already added to store" });
+        return res.status(409).json({ message: "Product already added to store" });
       }
     const store = await PharmacyStore.create(value);
     const storeData = {
@@ -89,6 +89,7 @@ export const getPharmStores = async (req: Request, res: Response) => {
 export const getStoreForSale = async (req: Request, res: Response) => {
   try {
     const stores = await PharmacyStore.findAll({
+      order: [["createdAt", "DESC"]],
       include: [{
         model: Products,  
         as: 'product',    
@@ -123,6 +124,7 @@ export const getStoreForSale = async (req: Request, res: Response) => {
 export const getStoreForPurchase = async (req: Request, res: Response) => {
   try {
     const stores = await PharmacyStore.findAll({
+      order: [["createdAt", "DESC"]],
       include: [{
         model: Products,  
         as: 'product',    
@@ -189,6 +191,8 @@ export const editStore = async (req: Request, res: Response) => {
   }
 };
 
+
+
 export const createOrder = async (req: Request, res: Response) => {
   try {
     const { orders } = req.body;
@@ -235,6 +239,27 @@ export const createOrder = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const viewOrder = async (req: Request, res: Response) =>{
+  try {
+    const stores = await PharmacyOrder.findAll({
+      order: [["createdAt", "DESC"]],
+    });
+
+    if (stores.length === 0) {
+      return res.status(404).json({ message: "No stores found" });
+    }
+
+
+    res.status(200).json({
+      message: "Ordes retrieved successfully",
+      Orders: stores,
+    });
+  } catch (error) {
+    console.error("Error retrieving stores:", error);
+    return res.status(500).json({ error: "Failed to retrieve stores" });
+  } 
+}
 
 export const deletePharmStore = async (req: Request, res: Response) => {
   try {

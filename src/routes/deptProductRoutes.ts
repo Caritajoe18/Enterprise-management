@@ -3,9 +3,9 @@ import { createDepartment, deleteDept, editDepartment, getAllDepartments, getDep
 import { authorize } from "../middleware/staffPermissions";
 import { getDepartmentForPurchase, getDepartmentForSale, getDepartmentProducts } from "../controller/productController";
 import upload from "../utilities/multer";
-import { createOrder, createStore, deletePharmStore, editStore, getPharmStores, getStoreForPurchase, getStoreForSale, uploadImage } from "../controller/pharmacyStore";
-import { createGenOrder, createGenStore, deleteGenStore, editGenStore, getGenStores } from "../controller/generalStore";
-import { createDeptStore, editDeptStore, getDeptStoreForPurchase, getDeptStoreForSale } from "../controller/departmentStoreController";
+import { createOrder, createStore, deletePharmStore, editStore, getPharmStores, getStoreForPurchase, getStoreForSale, uploadImage, viewOrder } from "../controller/pharmacyStore";
+import { createGenOrder, createGenStore, deleteGenStore, editGenStore, getGenStores, viewGenOrder } from "../controller/generalStore";
+import { createDeptStore, deleteDeptStore, editDeptStore, getDeptStoreForPurchase, getDeptStoreForSale } from "../controller/departmentStoreController";
 
 const router = express.Router();
 
@@ -21,26 +21,29 @@ router.get('/get-dept-product/:departmentId', getDepartmentForSale);
 router.get('/get-dept-raw/:departmentId', getDepartmentForPurchase);
 router.get('/get-pharm-dept', getDepartmentsLikePharm);
 router.post("/upload", upload.single("file"), uploadImage);
-router.post("/create-pharmstore", createStore);
-router.get("/view-pharmstore", getPharmStores);
-router.get("/view-pharmstore-prod", getStoreForSale);
-router.get("/view-pharmstore-raw", getStoreForPurchase);
-router.patch("/edit-pharmstore/:id", editStore);
-router.post("/raise-pharm-order", createOrder);
-router.delete("/delete-pharmstore/:id", deletePharmStore);
+router.post("/create-pharmstore",authorize(), createStore);
+router.get("/view-pharmstore", authorize(), getPharmStores);
+router.get("/view-pharmstore-prod", authorize(), getStoreForSale);
+router.get("/view-pharmstore-raw", authorize(), getStoreForPurchase);
+router.patch("/edit-pharmstore/:id",authorize(), editStore);
+router.post("/raise-pharm-order",authorize(), createOrder);
+router.get("/view-pharm-order",authorize(), viewOrder);
+router.delete("/delete-pharmstore/:id",authorize(), deletePharmStore);
 
 //general Store
-router.post("/create-gen-store", createGenStore);
-router.get("/view-gen-store", getGenStores);
-router.patch("/edit-genstore/:id", editGenStore);
-router.delete("/delete-genstore/:id", deleteGenStore);
+router.post("/create-gen-store",authorize(), createGenStore);
+router.get("/view-gen-store",authorize(), getGenStores);
+router.patch("/edit-genstore/:id",authorize(), editGenStore);
+router.delete("/delete-genstore/:id",authorize(), deleteGenStore);
+router.get("/view-gen-order",authorize(), viewGenOrder);
 router.post("/create-genstore-order", createGenOrder);
 
 //dept store
-router.post('/create-dept-store', createDeptStore)
-router.get('/view-deptstore-prod', getDeptStoreForSale)
-router.get('/view-deptstore-raw', getDeptStoreForPurchase)
-router.patch('/edit-deptstore/:id', editDeptStore)
+router.post('/create-dept-store',authorize(), createDeptStore);
+router.get('/view-deptstore-prod', authorize(), getDeptStoreForSale);
+router.get('/view-deptstore-raw',authorize(), getDeptStoreForPurchase);
+router.patch('/edit-deptstore/:id',authorize(), editDeptStore);
+router.delete("/delete-deptstore/:id",authorize(), deleteDeptStore);
 
 
 export default router;
