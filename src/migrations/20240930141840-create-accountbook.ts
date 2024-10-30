@@ -12,9 +12,19 @@ module.exports = {
       },
       customerId: {
         type: Sequelize.UUID,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'Customers', 
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE' 
+      },
+      supplierId: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: 'Suppliers', 
           key: 'id',
         },
         onUpdate: 'CASCADE',

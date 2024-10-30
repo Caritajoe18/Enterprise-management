@@ -31,10 +31,7 @@ router.get('/get-accountbook', authorize(), getAccountBook);
 router.get("/get-ledger/:productId/:customerId", authorize(), getCustomerLedgerByProduct);
 router.get("/get-product-ledger/:productId", authorize(), getProductLedger)
 router.get("/get-customer-ledger/:customerId",authorize(), getCustomerLedger)
-router.post('/raise-cashticket', authorize(), raiseCashTicket)
-router.patch('/approve-cashticket/:ticketId', authorize(), approveCashTicket)
-router.patch('/reject-cashticket/:ticketId', authorize(), rejectCashTicket)
-router.post('/raise-customer-order', authorize(), raiseCustomerOrder);
+router.post('/raise-customer-order',raiseCustomerOrder);
 router.get('/get-product-order/:productId', authorize(), getOrdersByProduct);
 router.get('/get-customer-order/:customerId', authorize(), getOrdersByCustomer);
 router.get('/get-all-orders', authorize(), getAllOrders);

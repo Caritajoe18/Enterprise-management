@@ -3,33 +3,38 @@ import { QueryInterface, DataTypes } from "sequelize";
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
-    await queryInterface.createTable("CashTickets", {
+    await queryInterface.createTable("LPOS", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         allowNull: false,
         primaryKey: true,
       },
-      customerId: {
+      deliveredTo: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      chequeNo: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      chequeVoucherNo: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      supplierId: {
         type: Sequelize.UUID,
-        allowNull: true,
+        allowNull: false,
         references: {
-          model: "Customers",
+          model: "Suppliers",
           key: "id",
         },
         onUpdate: "CASCADE",
-        onDelete: "SET NULL",
+        onDelete: "CASCADE",
       },
-      staffName: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
-      amount: {
-        type: Sequelize.DECIMAL(15, 2),
-      },
-      productId: {
+      rawMaterial: {
         type: Sequelize.UUID,
-        allowNull: true,
+        allowNull: false,
         references: {
           model: "Products",
           key: "id",
@@ -37,22 +42,35 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      creditOrDebit: {
-        type: DataTypes.ENUM("credit", "debit"),
+
+      unitPrice: {
+        type: Sequelize.DECIMAL(15, 2),
+        allowNull: false,
+      },
+      quantOrdered: {
+        type: Sequelize.DECIMAL(10, 3),
+      },
+      expires: {
+        allowNull: false,
+        type: Sequelize.DATE,
+      },
+      period: {
+        allowNull: false,
+        type: Sequelize.DATE,
+      },
+      comments: {
+        type: Sequelize.STRING,
+        allowNull: true,
       },
       status: {
-        type: DataTypes.ENUM("pending", "approved", "rejected", "completed"),
-        defaultValue: "pending",
+        type: DataTypes.ENUM('pending', 'approved', 'rejected', 'completed'),
+        defaultValue: 'pending',
       },
       raisedByAdminId: {
         type: DataTypes.STRING,
         allowNull: true,
       },
       approvedBySuperAdminId: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      cashierId: {
         type: DataTypes.STRING,
         allowNull: true,
       },
@@ -67,6 +85,6 @@ module.exports = {
     });
   },
   async down(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
-    await queryInterface.dropTable("CashTickets");
+    await queryInterface.dropTable("LPOS");
   },
 };

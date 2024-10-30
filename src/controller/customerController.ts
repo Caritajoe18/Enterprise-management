@@ -58,7 +58,7 @@ export const getAllCustomers = async (req: Request, res: Response) => {
       order: [["createdAt", "DESC"]],
     });
     if (customers.length === 0) {
-      return res.status(404).json({messege: "No Customers Found"});
+      return res.status(204).json({messege: "No Customers Found"});
     }
     res.status(200).json({
       message: "successfully retrieved your customers",
@@ -75,10 +75,10 @@ export const getAllCustomers = async (req: Request, res: Response) => {
 export const getCustomer = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
- console.log(req.path, "yyy")
+ //console.log(req.path, "yyy")
     const customer = await Customer.findByPk(id);
     if (!customer) {
-      return res.status(404).json({ message: "customer not found", customer });
+      return res.status(204).json({ message: "customer not found", customer });
     }
     res
       .status(200)

@@ -148,6 +148,7 @@ export const storeValidationSchema = Joi.object({
   thresholdValue: Joi.number().integer().min(0).messages({
     "number.base": "Threshold value must be an integer.",
     "number.min": "Threshold value cannot be negative.",
+
   }),
 });
 
@@ -213,6 +214,38 @@ export const genOrderValidationSchema = Joi.object({
     "any.required": "Expected delivery date is required.",
   }),
 });
+export const deptOrderValidationSchema = Joi.object({
+  productId: Joi.string().required().messages({
+    "string.base": "name must be a string.",
+    "any.required": "name is required.",
+  }),
+  departmentId: Joi.string().required().messages({
+    "string.base": "name must be a string.",
+    "any.required": "name is required.",
+  }),
+  quantity: Joi.number().min(1).required().messages({
+    "number.base": "Quantity must be a number.",
+    "number.min": "Quantity must be at least 1.",
+    "any.required": "Quantity is required.",
+  }),
+  unit: Joi.string().required().messages({
+    "string.base": "Unit must be a string.",
+    "any.required": "Unit is required.",
+  }),
+  expectedDeliveryDate: Joi.date().messages({
+    "date.base": "Expected delivery date must be a valid date.",
+    "any.required": "Expected delivery date is required.",
+  }),
+});
+export const createDeptOrderValidationSchema = Joi.object({
+  orders: Joi.array().items(
+    deptOrderValidationSchema
+  ).messages({
+    "array.base": "Orders must be an array.",
+  }),
+});
+
+
 
 export const genStoreValidationSchema = Joi.object({
   departmentId: Joi.string().messages({

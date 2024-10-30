@@ -91,7 +91,8 @@ export const supplierOrderSchema = Joi.object({
 });
 
 export const createLedgerSchema = Joi.object({
-  customerId: Joi.string().required(),
+  supplierId: Joi.string(),
+  customerId: Joi.string(),
   productId: Joi.string().required(),
   amount: Joi.number().required(),
 });

@@ -7,6 +7,8 @@ import { createLedgerSchema } from "../validations/customerValid";
 import Customer from "../models/customers";
 import Products from "../models/products";
 import Decimal from "decimal.js";
+import SupplierLedger from "../models/supplierLedger";
+import Departments from "../models/department";
 
 export const createAccountAndLedger = async (req: Request, res: Response) => {
   const validationResult = createLedgerSchema.validate(req.body, option);
@@ -19,49 +21,46 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
 
   // const transaction = await db.transaction();
   try {
-    const { customerId, amount, productId } = req.body;
+    const { customerId, amount, productId, supplierId } = req.body;
 
     const parsedAmount = new Decimal(amount);
+    let accountBook;
+    if (customerId) {
+      // Find Customer and Product in parallel for better performance
+      const [customer, product] = await Promise.all([
+        Customer.findOne({ where: { id: customerId } }),
+        Products.findOne({ where: { id: productId } }),
+      ]);
 
-    // Find Customer and Product in parallel for better performance
-    const [customer, product] = await Promise.all([
-      Customer.findOne({ where: { id: customerId } }),
-      Products.findOne({ where: { id: productId } }),
-    ]);
+      if (!customer) {
+        // await transaction.rollback();
+        return res.status(404).json({ message: "Customer not found" });
+      }
+      if (!product) {
+        // await transaction.rollback();
+        return res.status(404).json({ message: "Product not found" });
+      }
 
-    if (!customer) {
-      // await transaction.rollback();
-      return res.status(404).json({ message: "Customer not found" });
-    }
-    if (!product) {
-      // await transaction.rollback();
-      return res.status(404).json({ message: "Product not found" });
-    }
+      //console.log("Creating account book entry...");
+      accountBook = await AccountBook.create(
+        { ...req.body, creditType: "Transfer" }
+        // { transaction }
+      );
 
-    console.log("Creating account book entry...");
-    const accountBook = await AccountBook.create(
-      { ...req.body, creditType: "Transfer" }
-      // { transaction }
-    );
+      //console.log("Fetching latest ledger entry...");
+      const latestEntry = await Ledger.findOne({
+        where: { customerId, productId },
+        order: [["createdAt", "DESC"]],
+        // transaction,  // Ensure this operation is under the same transaction
+      });
 
-    console.log("Fetching latest ledger entry...");
-    const latestEntry = await Ledger.findOne({
-      where: { customerId, productId },
-      order: [["createdAt", "DESC"]],
-      // transaction,  // Ensure this operation is under the same transaction
-    });
+      const prevBalance = latestEntry
+        ? new Decimal(latestEntry.dataValues.balance)
+        : new Decimal(0);
+      const newBalance = prevBalance.plus(parsedAmount);
 
-    const prevBalance = latestEntry
-      ? new Decimal(latestEntry.dataValues.balance)
-      : new Decimal(0);
-    const newBalance = prevBalance.plus(parsedAmount);
-
-    console.log(amount, "amount");
-    console.log(`Previous Balance: ${prevBalance}, New Balance: ${newBalance}`);
-
-    console.log("Creating new ledger entry...");
-    await Ledger.create(
-      {
+      // console.log("Creating new ledger entry...");
+      await Ledger.create({
         ...req.body,
         customerId,
         productId,
@@ -71,12 +70,61 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
         debit: 0,
         balance: newBalance.toNumber(),
         creditType: "Transfer",
-      }
-      // { transaction }
-    );
+      });
+    } else if (supplierId) {
+      // console.log("Creating account book entry for supplier...");
+      accountBook = await AccountBook.create({
+        ...req.body,
+        creditType: "Transfer",
+      });
 
-    // await transaction.commit();
-    console.log("Transaction committed successfully.");
+      // Fetch the product and products with the same departmentId
+      const product = await Products.findOne({ where: { id: productId } });
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      const {departmentId} = product.dataValues
+
+      const latestEntry = await SupplierLedger.findOne({
+        where: { supplierId, productId },
+        order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: Products,
+            as: "product",
+            include: [
+              {
+                model: Departments,
+                as: "department",
+                where: { id: departmentId },
+                attributes: ["id", "name"]
+              }
+            ],
+            attributes: ["id", "name", "departmentId"]
+          }
+        ]
+      });
+    
+
+      const supplierPrevBalance = latestEntry
+        ? new Decimal(latestEntry.dataValues.balance)
+        : new Decimal(0);
+      const supplierNewBalance = supplierPrevBalance.plus(parsedAmount);
+
+      await SupplierLedger.create({
+        ...req.body,
+        supplierId,
+        productId,
+        unit: "N/A",
+        quantity: 0,
+        credit: parsedAmount.toNumber(),
+        debit: 0,
+        balance: supplierNewBalance.toNumber(),
+        creditType: "Transfer",
+      });
+    }
+    
 
     return res.status(201).json({
       message: "Account and ledger created successfully",
@@ -84,13 +132,6 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
     });
   } catch (error: unknown) {
     console.error("Transaction failed, rolling back:", error);
-
-    // try {
-    //   // await transaction.rollback();
-    // } catch (rollbackError) {
-    //   console.error("Rollback failed:", rollbackError);
-    //   return res.status(500).json({ error: "Rollback failed. Check logs." });
-    // }
 
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });

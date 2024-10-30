@@ -3,45 +3,40 @@ import { QueryInterface, DataTypes } from "sequelize";
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
-    await queryInterface.createTable("CashierBooks", {
+    await queryInterface.createTable("CollectFromGenStore", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         allowNull: false,
         primaryKey: true,
       },
-      // amount: {
-      //   type: Sequelize.DECIMAL(15, 2),
-      // },
-      name: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      approvedByAdminId: {
-        type: Sequelize.UUID,
-        allowNull: true,
-        references: {
-          model: "Admins",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "CASCADE",
-      },
-      comment: {
+      raisedByAdminId: {
         type: Sequelize.STRING,
         allowNull: true,
       },
-      credit: {
-        type: Sequelize.DECIMAL(15, 2),
-        allowNull: true,
-      },
-      debit: {
-        type: Sequelize.DECIMAL(15, 2),
-        allowNull: true,
-      },
-      balance: {
-        type: Sequelize.DECIMAL(15, 2),
+
+      recievedBy: {
+        type: Sequelize.STRING,
         allowNull: false,
+      },
+
+      items: {
+        type: Sequelize.JSON,
+        allowNull: false,
+      },
+
+      comments: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      status: {
+        type: Sequelize.ENUM("pending", "approved", "rejected", "completed"),
+        defaultValue: "pending",
+      },
+
+      approvedBySuperAdminId: {
+        type: Sequelize.STRING,
+        allowNull: true,
       },
       createdAt: {
         allowNull: false,
@@ -54,6 +49,6 @@ module.exports = {
     });
   },
   async down(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
-    await queryInterface.dropTable("CashierBooks");
+    await queryInterface.dropTable("CollectFromGenStore");
   },
 };

@@ -38,7 +38,7 @@ GeneralStore.init(
       allowNull: false,
     },
     quantity: {
-      type: DataTypes.NUMBER,
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     unit: {
