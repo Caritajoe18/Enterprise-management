@@ -5,7 +5,7 @@ import { getDepartmentForPurchase, getDepartmentForSale, getDepartmentProducts }
 import upload from "../utilities/multer";
 import { createOrder, createStore, deletePharmStore, editStore, getPharmStores, getStoreForPurchase, getStoreForSale, uploadImage, viewOrder } from "../controller/pharmacyStore";
 import { createGenOrder, createGenStore, deleteGenStore, editGenStore, getGenStores, viewGenOrder } from "../controller/generalStore";
-import { createDeptStore, deleteDeptStore, editDeptStore, getDeptStoreForPurchase, getDeptStoreForSale } from "../controller/departmentStoreController";
+import { createDeptOrder, createDeptStore, deleteDeptStore, editDeptStore, getDeptStoreForPurchase, getDeptStoreForSale, viewDeptOrder } from "../controller/departmentStoreController";
 
 const router = express.Router();
 
@@ -30,6 +30,7 @@ router.post("/raise-pharm-order",authorize(), createOrder);
 router.get("/view-pharm-order",authorize(), viewOrder);
 router.delete("/delete-pharmstore/:id",authorize(), deletePharmStore);
 
+
 //general Store
 router.post("/create-gen-store", createGenStore);
 router.get("/view-gen-store",authorize(), getGenStores);
@@ -44,6 +45,8 @@ router.get('/view-deptstore-prod', authorize(), getDeptStoreForSale);
 router.get('/view-deptstore-raw',authorize(), getDeptStoreForPurchase);
 router.patch('/edit-deptstore/:id',authorize(), editDeptStore);
 router.delete("/delete-deptstore/:id",authorize(), deleteDeptStore);
+router.post("/create-deptstore-order",authorize(), createDeptOrder);
+router.get("/view-deptstore-order",authorize(), viewDeptOrder);
 
 
 export default router;

@@ -4,21 +4,22 @@ import db from "../db";
 interface GeneralOrderAttributes {
   id: string;
   productId: string;
+  departmentId: string;
   quantity: number;
   unit: string;
   expectedDeliveryDate: Date;
 }
 
-export class GeneralOrder extends Model<GeneralOrderAttributes> {
+export class DepartmentOrder extends Model<GeneralOrderAttributes> {
   static associate(models: any) {
-    GeneralOrder.belongsTo(models.Products, {
+    DepartmentOrder.belongsTo(models.Products, {
       as: "store",
       foreignKey: "productId",
     });
   }
 }
 
-GeneralOrder.init(
+DepartmentOrder.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -31,6 +32,16 @@ GeneralOrder.init(
       allowNull: false,
       references: {
         model: "Products",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
+    },
+    departmentId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: "Departments",
         key: "id",
       },
       onUpdate: "CASCADE",
@@ -51,9 +62,9 @@ GeneralOrder.init(
   },
   {
     sequelize: db,
-    modelName: "GeneralOrder",
-    tableName: "GeneralOrders",
+    modelName: "DepartmentOrder",
+    tableName: "DepartmentOrders",
   }
 );
 
-export default GeneralOrder;
+export default DepartmentOrder;
