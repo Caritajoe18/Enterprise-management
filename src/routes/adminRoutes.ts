@@ -24,6 +24,7 @@ import {
   suspendStaff,
   updateStaff,
   orderStaffFirstname,
+  getAdmin,
 } from "../controller/staffController";
 import { addRole, getAllRoles, getRoles } from "../controller/roleController";
 import {
@@ -94,6 +95,7 @@ router.patch("/suspend-staff/:id", authorize(), suspendStaff);
 router.patch("/restore-staff/:id", authorize(), restoreStaff);
 router.delete("/delete-staff/:id", authorize(), deleteStaff);
 router.get("/all-staff", authorize(), getAllStaff);
+router.get("/all-admin", getAdmin);
 router.get("/search-staff", searchStaff);
 router.get("/suspended-staff", authorize(), getSuspendedStaff);
 router.get("/order-staff", authorize(), orderStaffFirstname);
