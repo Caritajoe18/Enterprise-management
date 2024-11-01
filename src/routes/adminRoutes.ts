@@ -44,6 +44,9 @@ import {
 import { authenticateAdmin } from "../middleware/adminAuth";
 import {
   approveCashTicket,
+  raiseAuthToCollectFromStore,
+  raiseAuthToLoad,
+  raiseAuthToWeight,
   raiseCashTicket,
   raiseLPO,
   rejectCashTicket,
@@ -108,6 +111,9 @@ router.get("/cashier-ledger", authorize(), getCashierEntry);
 //tickets
 router.post("/cash-ticket", authorize(), raiseCashTicket);
 router.post("/raise-lpo", authorize(), raiseLPO);
+router.post("/raise-store-collection", authorize(), raiseAuthToCollectFromStore);
+router.post("/raise-auth-weigh", authorize(), raiseAuthToWeight);
+router.post("/raise-auth-load", authorize(), raiseAuthToLoad);
 router.post("/send-ticket/:Id", authorize(), sendTicketToAdmin);
 router.patch("/approve-cash-ticket/:Id", authorize(), approveCashTicket);
 router.patch('/reject-cashticket/:ticketId', authorize(), rejectCashTicket)
