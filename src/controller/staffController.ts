@@ -203,6 +203,28 @@ export const getAllStaff = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: "An unexpected error occurred" });
   }
 };
+export const getAdmin = async (req: AuthRequest, res: Response) => {
+  try {
+
+    const staffList = await AdminInstance.findAll({
+      where: {isAdmin: true},
+      order:[["createdAt", "DESC"]],
+    });
+    if (staffList.length === 0) {
+      return res.status(204).json(
+        { message: "No admin found in the database", staffList}
+      );
+    }
+    res
+      .status(200)
+      .json({ message: "Admin retrieved successfully", staffList });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred" });
+  }
+};
 
 export const getSuspendedStaff = async (req: Request, res: Response) => {
   try {
