@@ -63,7 +63,7 @@ export const addPermissionsToRole = async (req: Request, res: Response) => {
 
     const role = await Role.findByPk(roleId);
 
-    console.log("roleid1", roleId);
+    //console.log("roleid1", roleId);
 
     if (!role) {
       return res.status(404).json({ message: "Role not found" });

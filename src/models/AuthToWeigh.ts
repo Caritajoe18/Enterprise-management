@@ -4,7 +4,7 @@ import db from "../db";
 export interface AuthToWeighAttributes {
   id: string;
   raisedByAdminId?: string;
-  customer: string;
+  customerId: string;
   driver?: string;
   vehicleNo?: string;
   status: "pending" | "approved" | "rejected" | "completed";
@@ -29,7 +29,7 @@ AuthToWeigh.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    customer: {
+    customerId: {
       type: DataTypes.STRING,
       allowNull: false,
     },

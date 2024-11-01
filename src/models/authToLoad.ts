@@ -20,7 +20,7 @@ AuthToLoad.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    customer: {
+    customerId: {
       type: DataTypes.STRING,
       allowNull: false,
     },

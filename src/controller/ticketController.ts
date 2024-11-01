@@ -9,6 +9,9 @@ import { getAdminConnection } from "../utilities/web-push";
 import CashierBook from "../models/cashierbook";
 import Supplier from "../models/suppliers";
 import { LPO } from "../models/lpo";
+import CollectFromGenStore from "../models/collectFromGenStore";
+import AuthToWeigh from "../models/AuthToWeigh";
+import AuthToLoad from "../models/authToLoad";
 
 export const raiseCashTicket = async (req: AuthRequest, res: Response) => {
   const admin = req.admin as Admins;
@@ -66,15 +69,15 @@ export const sendTicketToAdmin = async (req: Request, res: Response) => {
       adminId,
       message: `A new ticket has sent to you.`,
       type: "ticket_recieved",
-      ticketId: Id,
+      ticket,
     });
 
     const adminWs = getAdminConnection(adminId);
     if (adminWs) {
       adminWs.send(
         JSON.stringify({
-          message: `A new ticket with ID ${Id} has been sent to you.`,
-          ticketId: Id,
+          message: `A new ticket for cash has been sent to you.`,
+          ticket,
         })
       );
     }
@@ -197,12 +200,229 @@ export const raiseLPO = async (req: AuthRequest, res: Response) => {
     const ticket = await LPO.create({
       ...req.body,
       raisedByAdminId: roleId,
-      status: "pending",
     });
 
     return res
       .status(201)
       .json({ message: "Ticket created successfully", ticket });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred." });
+  }
+};
+export const raiseAuthToCollectFromStore = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  const admin = req.admin as Admins;
+  const { roleId } = admin.dataValues;
+
+  try {
+    const ticket = await CollectFromGenStore.create({
+      ...req.body,
+      raisedByAdminId: roleId,
+    });
+
+    return res
+      .status(201)
+      .json({ message: "Ticket created successfully", ticket });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred." });
+  }
+};
+export const raiseAuthToWeight = async (req: AuthRequest, res: Response) => {
+  const admin = req.admin as Admins;
+  const { roleId } = admin.dataValues;
+  const { customerId } = req.body;
+
+  try {
+    const customer = Customer.findByPk(customerId);
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+    const ticket = await AuthToWeigh.create({
+      ...req.body,
+      raisedByAdminId: roleId,
+    });
+
+    return res
+      .status(201)
+      .json({ message: "Ticket created successfully", ticket });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred." });
+  }
+};
+export const raiseAuthToLoad = async (req: AuthRequest, res: Response) => {
+  const admin = req.admin as Admins;
+  const { roleId } = admin.dataValues;
+  const { customerId } = req.body;
+
+  try {
+    const customer = Customer.findByPk(customerId);
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+    const ticket = await AuthToLoad.create({
+      ...req.body,
+      raisedByAdminId: roleId,
+    });
+
+    return res
+      .status(201)
+      .json({ message: "Ticket created successfully", ticket });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred." });
+  }
+};
+
+export const sendLPOToAdmin = async (req: Request, res: Response) => {
+  const { Id } = req.params;
+  const { adminId } = req.body;
+
+  try {
+    const ticket = await LPO.findByPk(Id);
+
+    await Notify.create({
+      ...req.body,
+      adminId,
+      message: `A new LPO has sent to you.`,
+      type: "ticket_recieved",
+      ticket,
+    });
+
+    const adminWs = getAdminConnection(adminId);
+    if (adminWs) {
+      adminWs.send(
+        JSON.stringify({
+          message: `A new LPO has been sent to you.`,
+          ticket,
+        })
+      );
+    }
+
+    return res.status(200).json({
+      message: "Ticket successfully sent to admin.",
+      ticket,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred." });
+  }
+};
+export const sendStoreCollectionAdmin = async (req: Request, res: Response) => {
+  const { Id } = req.params;
+  const { adminId } = req.body;
+
+  try {
+    const ticket = await CollectFromGenStore.findByPk(Id);
+
+    await Notify.create({
+      ...req.body,
+      adminId,
+      message: `A new Authority to collect from General Store has sent to you.`,
+      type: "ticket_recieved",
+      ticket,
+    });
+
+    const adminWs = getAdminConnection(adminId);
+    if (adminWs) {
+      adminWs.send(
+        JSON.stringify({
+          message: `A new Authority to collect From General store has been sent to you.`,
+          ticket,
+        })
+      );
+    }
+
+    return res.status(200).json({
+      message: "Ticket successfully sent to admin.",
+      ticket,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred." });
+  }
+};
+export const sendAuthtoweigh = async (req: Request, res: Response) => {
+  const { Id } = req.params;
+  const { adminId } = req.body;
+
+  try {
+    const ticket = await AuthToWeigh.findByPk(Id);
+
+    await Notify.create({
+      ...req.body,
+      adminId,
+      message: `A new Authority to weigh has been sent to you.`,
+      type: "ticket_recieved",
+      ticket,
+    });
+
+    const adminWs = getAdminConnection(adminId);
+    if (adminWs) {
+      adminWs.send(
+        JSON.stringify({
+          message: `A new Authority to weight has been sent to you.`,
+          ticket,
+        })
+      );
+    }
+
+    return res.status(200).json({
+      message: "Ticket successfully sent to admin.",
+      ticket,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred." });
+  }
+};
+export const sendAuthtoLoad = async (req: Request, res: Response) => {
+  const { Id } = req.params;
+  const { adminId } = req.body;
+
+  try {
+    const ticket = await AuthToLoad.findByPk(Id);
+
+    await Notify.create({
+      ...req.body,
+      adminId,
+      message: `A new Authority to Load has been sent to you.`,
+      type: "ticket_recieved",
+      ticket,
+    });
+
+    const adminWs = getAdminConnection(adminId);
+    if (adminWs) {
+      adminWs.send(
+        JSON.stringify({
+          message: `A new Authority to load has been sent to you.`,
+          ticket,
+        })
+      );
+    }
+
+    return res.status(200).json({
+      message: "Ticket successfully sent to admin.",
+      ticket,
+    });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });

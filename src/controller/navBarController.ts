@@ -130,7 +130,10 @@ export const getUserNavPermissions = async (
         where: { isNav: true },
         order: [["orderIndex", "ASC"]],
       });
-      const permissions = await Permissions.findAll({ where: { isNav: true } });
+      const permissions = await Permissions.findAll({
+        where: { isNav: true },
+        order: [["orderIndex", "ASC"]],
+      });
 
       const navParentMap: Record<number, any> = {};
       navParents.forEach((navParent: any) => {
