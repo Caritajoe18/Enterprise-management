@@ -9,9 +9,13 @@ import DepartmentStore from "../models/departmentStore";
 import Departments from "../models/department";
 import Products from "../models/products";
 import DepartmentOrder from "../models/departmentOrders";
+import { AuthRequest } from "../middleware/adminAuth";
+import Admins from "../models/admin";
 
-export const createDeptStore = async (req: Request, res: Response) => {
+export const createDeptStore = async (req: AuthRequest, res: Response) => {
   try {
+    const admin = req.admin as Admins;
+    const { roleId: adminId } = admin.dataValues;
     const { productId, departmentId } = req.body;
     const { error, value } = genStoreValidationSchema.validate(req.body, {
       abortEarly: false,
@@ -43,7 +47,7 @@ export const createDeptStore = async (req: Request, res: Response) => {
     if (exist) {
       return res.status(409).json({ message: "Product already exists" });
     }
-    const store = await DepartmentStore.create(value);
+    const store = await DepartmentStore.create({...value, createdBy: adminId});
     const storeData = {
       ...store.get(),
       status: store.status,
@@ -60,9 +64,12 @@ export const createDeptStore = async (req: Request, res: Response) => {
   }
 };
 
-export const getDeptStoreForSale = async (req: Request, res: Response) => {
+export const getDeptStoreForSale = async (req: AuthRequest, res: Response) => {
+  const admin = req.admin as Admins;
+  const { roleId : adminId, isAdmin} = admin.dataValues;
   try {
     const stores = await DepartmentStore.findAll({
+      where: isAdmin ? {} : { createdBy: adminId }, 
       order: [["createdAt", "DESC"]],
       include: [
         {
@@ -101,9 +108,15 @@ export const getDeptStoreForSale = async (req: Request, res: Response) => {
     res.status(500).json({ error: "An unexpected error occurred." });
   }
 };
-export const getDeptStoreForPurchase = async (req: Request, res: Response) => {
+export const getDeptStoreForPurchase = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  const admin = req.admin as Admins;
+  const { roleId: adminId, isAdmin } = admin.dataValues;
   try {
     const stores = await DepartmentStore.findAll({
+      where: isAdmin ? {} : { createdBy: adminId }, 
       order: [["createdAt", "DESC"]],
       include: [
         {
@@ -132,7 +145,7 @@ export const getDeptStoreForPurchase = async (req: Request, res: Response) => {
     }));
 
     return res.status(200).json({
-      message: "stores with products for sale retrieved successfully",
+      message: "stores with raw materials retrieved successfully",
       stores: parsedStores,
     });
   } catch (error: unknown) {
@@ -202,10 +215,11 @@ export const deleteDeptStore = async (req: Request, res: Response) => {
   }
 };
 
-export const createDeptOrder = async (req: Request, res: Response) => {
+export const createDeptOrder = async (req: AuthRequest, res: Response) => {
   try {
+    const admin = req.admin as Admins;
+    const { roleId: adminId } = admin.dataValues;
     const { orders } = req.body;
-    
 
     const validatedOrders = [];
     for (const order of orders) {
@@ -232,12 +246,8 @@ export const createDeptOrder = async (req: Request, res: Response) => {
 
     const newOrders = await DepartmentOrder.bulkCreate(
       validatedOrders.map((order) => ({
-        ...req.body,
-        departmentId:order.departmentId,
-        productId: order.productId,
-        quantity: order.quantity,
-        unit: order.unit,
-        expectedDeliveryDate: order.expectedDeliveryDate,
+        ...order,
+        createdBy: adminId,
       }))
     );
 
@@ -253,9 +263,12 @@ export const createDeptOrder = async (req: Request, res: Response) => {
   }
 };
 
-export const viewDeptOrder = async (req: Request, res: Response) => {
+export const viewDeptOrder = async (req: AuthRequest, res: Response) => {
+  const admin = req.admin as Admins;
+  const { roleId: adminId, isAdmin } = admin.dataValues;
   try {
     const stores = await DepartmentOrder.findAll({
+      where: isAdmin ? {} : { createdBy: adminId }, 
       order: [["createdAt", "DESC"]],
     });
 

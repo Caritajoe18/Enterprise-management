@@ -5,11 +5,12 @@ import NavParent from "./navparent";
 export interface PermissionAttributes {
   id: string;
   name: string;
-  isNav:boolean;
-  navParentId:string;
-  isAssigned:boolean;
-  url:string;
-  slug:string;
+  isNav: boolean;
+  orderIndex: number;
+  navParentId: string;
+  isAssigned: boolean;
+  url: string;
+  slug: string;
 }
 
 // export default (sequelize, DataTypes) => {
@@ -21,7 +22,6 @@ class Permission extends Model<PermissionAttributes> {
    * The `models/index` file will call this method automatically.
    */
   static associate(models: any) {
-
     Permission.belongsTo(models.NavParent, {
       foreignKey: "navParentId",
       as: "navParent",
@@ -30,8 +30,8 @@ class Permission extends Model<PermissionAttributes> {
     Permission.belongsToMany(models.Role, {
       through: "RolePermission",
       as: "roles",
-        foreignKey: 'permissionId',
-     otherKey: 'roleId'
+      foreignKey: "permissionId",
+      otherKey: "roleId",
     });
   }
 }
@@ -48,38 +48,41 @@ Permission.init(
       allowNull: false,
       unique: true,
     },
-  isNav:{
-    type:DataTypes.BOOLEAN,
-    defaultValue:false
-  },
-  isAssigned:{
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
- navParentId:{
-  type: DataTypes.UUID,
-  allowNull: true,
-  references: {
-    model: "NavParents", 
-    key: "id",
-  },
-
- },
- url:{
-  type: DataTypes.STRING,
-  allowNull: false,
-  unique:false,
- },
- slug:{
-  type: DataTypes.STRING,
-  allowNull: false,
-  unique: true,
- }
+    isNav: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    isAssigned: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    navParentId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: "NavParents",
+        key: "id",
+      },
+    },
+    orderIndex: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    url: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: false,
+    },
+    slug: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
   },
   {
     sequelize: db,
     modelName: "Permission",
-    tableName: "Permissions"
+    tableName: "Permissions",
   }
 );
 

@@ -9,6 +9,7 @@ export interface PharmacyStoreAttributes {
   unit: string;
   quantity:number;
   thresholdValue: number;
+  createdBy:string;
 }
 
 export class DepartmentStore extends Model<PharmacyStoreAttributes> {
@@ -87,6 +88,10 @@ DepartmentStore.init(
       type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: 0,
+    },
+    createdBy: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   },
   { sequelize: db, tableName: "DepartmentStores",

@@ -8,6 +8,7 @@ interface GeneralOrderAttributes {
   quantity: number;
   unit: string;
   expectedDeliveryDate: Date;
+  createdBy:string;
 }
 
 export class DepartmentOrder extends Model<GeneralOrderAttributes> {
@@ -57,6 +58,10 @@ DepartmentOrder.init(
     },
     expectedDeliveryDate: {
       type: DataTypes.DATE,
+      allowNull: true,
+    },
+    createdBy: {
+      type: DataTypes.STRING,
       allowNull: true,
     },
   },

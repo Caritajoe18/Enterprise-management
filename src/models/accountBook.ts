@@ -45,7 +45,7 @@ AccountBook.init(
       type: DataTypes.UUID,
       allowNull: true,
       references: {
-        model: "Supplierss",
+        model: "Suppliers",
         key: "id",
       },
       onUpdate: "CASCADE",

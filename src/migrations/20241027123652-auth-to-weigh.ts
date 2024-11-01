@@ -14,7 +14,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true,
       },
-      customer: {
+      customerId: {
         type: Sequelize.STRING,
         allowNull: false,
       },
