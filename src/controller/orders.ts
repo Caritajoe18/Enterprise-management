@@ -36,9 +36,13 @@ export const raiseCustomerOrder = async (req: Request, res: Response) => {
     if (!Array.isArray(prices)) prices = [prices];
     
     // Find product price based on unit
+    console.log("unit:",unit)
+    console.log("prices:", prices)
     let productPrice = prices.find((p: any) => p.unit === unit);
+    console.log("product price:", productPrice)
     if (!productPrice) {
       const availableUnits = prices.map((p) => p.unit).join(", ");
+      console.log("Available units:", availableUnits);
       throw new Error(`Price not found for unit "${unit}". Available units: [${availableUnits}].`);
     }
 
