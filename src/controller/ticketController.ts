@@ -12,6 +12,7 @@ import { LPO } from "../models/lpo";
 import CollectFromGenStore from "../models/collectFromGenStore";
 import AuthToWeigh from "../models/AuthToWeigh";
 import AuthToLoad from "../models/authToLoad";
+import { getRecords } from "../utilities/modules";
 
 export const raiseCashTicket = async (req: AuthRequest, res: Response) => {
   const admin = req.admin as Admins;
@@ -302,7 +303,7 @@ export const sendLPOToAdmin = async (req: Request, res: Response) => {
       adminId,
       message: `A new LPO has sent to you.`,
       type: "ticket_recieved",
-      ticket,
+      ticketId: Id
     });
 
     const adminWs = getAdminConnection(adminId);
@@ -342,7 +343,7 @@ export const sendStoreCollectionAdmin = async (req: Request, res: Response) => {
       adminId,
       message: `A new Authority to collect from General Store has sent to you.`,
       type: "ticket_recieved",
-      ticket,
+      ticketId: Id
     });
 
     const adminWs = getAdminConnection(adminId);
@@ -382,7 +383,7 @@ export const sendAuthtoweigh = async (req: Request, res: Response) => {
       adminId,
       message: `A new Authority to weigh has been sent to you.`,
       type: "ticket_recieved",
-      ticket,
+      ticketId: Id
     });
 
     const adminWs = getAdminConnection(adminId);
@@ -422,7 +423,7 @@ export const sendAuthtoLoad = async (req: Request, res: Response) => {
       adminId,
       message: `A new Authority to Load has been sent to you.`,
       type: "ticket_recieved",
-      ticket,
+      ticketId: Id
     });
 
     const adminWs = getAdminConnection(adminId);
@@ -445,4 +446,20 @@ export const sendAuthtoLoad = async (req: Request, res: Response) => {
     }
     res.status(500).json({ error: "An unexpected error occurred." });
   }
+};
+
+export const getCashTicket = (req: Request, res: Response) => {
+  getRecords(req, res, CashTicket, "cashTickets");
+};
+export const getLPO = (req: Request, res: Response) => {
+  getRecords(req, res, LPO, "LPOs");
+};
+export const getStoreAuth = (req: Request, res: Response) => {
+  getRecords(req, res, CollectFromGenStore, "General Store Authorities");
+};
+export const getAuthToWeigh = (req: Request, res: Response) => {
+  getRecords(req, res, AuthToWeigh, "Authorities to Weigh");
+};
+export const getAuthToLoad = (req: Request, res: Response) => {
+  getRecords(req, res, AuthToLoad, "Authorities to load");
 };
