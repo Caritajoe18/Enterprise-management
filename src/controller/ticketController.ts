@@ -241,7 +241,7 @@ export const raiseAuthToWeight = async (req: AuthRequest, res: Response) => {
   const { customerId } = req.body;
 
   try {
-    const customer = Customer.findByPk(customerId);
+    const customer = await Customer.findByPk(customerId);
     if (!customer) {
       return res.status(404).json({ message: "Customer not found" });
     }
@@ -266,7 +266,7 @@ export const raiseAuthToLoad = async (req: AuthRequest, res: Response) => {
   const { customerId } = req.body;
 
   try {
-    const customer = Customer.findByPk(customerId);
+    const customer = await Customer.findByPk(customerId);
     if (!customer) {
       return res.status(404).json({ message: "Customer not found" });
     }
@@ -292,6 +292,10 @@ export const sendLPOToAdmin = async (req: Request, res: Response) => {
 
   try {
     const ticket = await LPO.findByPk(Id);
+    const admin = await Admins.findByPk(adminId);
+    if(! ticket || ! admin){
+      return res.status(404).json({ message: "Ticket or admin not found" });
+    }
 
     await Notify.create({
       ...req.body,
@@ -328,6 +332,10 @@ export const sendStoreCollectionAdmin = async (req: Request, res: Response) => {
 
   try {
     const ticket = await CollectFromGenStore.findByPk(Id);
+    const admin = await Admins.findByPk(adminId);
+    if(! ticket || ! admin){
+      return res.status(404).json({ message: "Ticket or admin not found" });
+    }
 
     await Notify.create({
       ...req.body,
@@ -364,6 +372,10 @@ export const sendAuthtoweigh = async (req: Request, res: Response) => {
 
   try {
     const ticket = await AuthToWeigh.findByPk(Id);
+    const admin = await Admins.findByPk(adminId);
+    if(! ticket || ! admin){
+      return res.status(404).json({ message: "Ticket or admin not found" });
+    }
 
     await Notify.create({
       ...req.body,
@@ -400,6 +412,10 @@ export const sendAuthtoLoad = async (req: Request, res: Response) => {
 
   try {
     const ticket = await AuthToLoad.findByPk(Id);
+    const admin = await Admins.findByPk(adminId);
+    if(! ticket || ! admin){
+      return res.status(404).json({ message: "Ticket or admin not found" });
+    }
 
     await Notify.create({
       ...req.body,

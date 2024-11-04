@@ -12,10 +12,9 @@ export const option = {
 
 const passwordSchema = Joi.string()
   .min(5)
-  .max(15)
-  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{5,15}$/)
+  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{5,}$/)
   .message(
-    "Password must be between 5 and 15 characters, contain at least one lowercase letter, one uppercase letter and one digit"
+    "Password must be at least 5 characters long, contain at least one lowercase letter, one uppercase letter and one digit"
   )
   .required();
 
