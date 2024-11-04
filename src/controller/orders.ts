@@ -9,8 +9,8 @@ import Decimal from "decimal.js";
 import db from "../db";
 
 export const raiseCustomerOrder = async (req: Request, res: Response) => {
-  const { customerId, productId, quantity, unit } = req.body;
-  //const transaction = await db.transaction();
+  const { customerId, productId, quantity, unit, selectedPlanCategory } = req.body;
+  
   try {
     const validationResult = customerOrderSchema.validate(req.body, option);
     if (validationResult.error) {
@@ -18,61 +18,51 @@ export const raiseCustomerOrder = async (req: Request, res: Response) => {
         .status(400)
         .json({ error: validationResult.error.details[0].message });
     }
-    const customer = await Customer.findOne({
-      where: { id: customerId },
-    });
 
+    // Check if customer exists
+    const customer = await Customer.findOne({ where: { id: customerId } });
     if (!customer) {
-      return res.status(404).json({ message: "customer not found" });
+      return res.status(404).json({ message: "Customer not found" });
     }
-    const product = await Products.findOne({
-      where: { id: productId },
-    });
 
+    // Check if product exists
+    const product = await Products.findOne({ where: { id: productId } });
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-    //   const prices = Array.isArray(product.dataValues.price)
-    // ? product.dataValues.price
-    // : [product.dataValues.price];
-    console.log("Product price field:", product.dataValues.price); //
+
+    // Validate and wrap the price array
     let prices = product.dataValues.price;
-    if (!Array.isArray(prices)) {
-      //console.log("Wrapping price in an array:", prices);
-      prices = [prices];
-    }
-
-    //console.log("Prices after wrapping:", prices);
-
-    //const productPrice = prices.find((p: any) => p.unit === unit);
-    let productPrice = null;
-    for (const price of prices) {
-      if (price.unit === unit) {
-        productPrice = price;
-        break; 
-      }
-    }
-    // console.log("Product data:", product.dataValues);
-     console.log("ProductPrice:", productPrice);
-
+    if (!Array.isArray(prices)) prices = [prices];
+    
+    // Find product price based on unit
+    let productPrice = prices.find((p: any) => p.unit === unit);
     if (!productPrice) {
       const availableUnits = prices.map((p) => p.unit).join(", ");
-      const productId = product.dataValues.id;
-      const productName = product.dataValues.name;
-
-      throw new Error(
-        `Price not found for unit: "${unit}". ` +
-          `Available units for product "${productName}" (ID: ${productId}): [${availableUnits}].`
-      );
+      throw new Error(`Price not found for unit "${unit}". Available units: [${availableUnits}].`);
     }
 
-    const unitPrice = new Decimal(productPrice.amount);
-    const parsedQuantity = new Decimal(quantity);
-    const totalPrice = unitPrice.mul(parsedQuantity);
-    console.log(
-      `${unitPrice} * ${parsedQuantity} = ${totalPrice} (Total Price)`
-    );
+    // Determine price based on the selected plan or default product price
+    let priceToUse: Decimal;
+    if (selectedPlanCategory && product.dataValues.pricePlan) {
+      const selectedPlan = product.dataValues.pricePlan.find(
+        (plan: any) => plan.category === selectedPlanCategory
+      );
+      if (selectedPlan) {
+        priceToUse = new Decimal(selectedPlan.amount);
+      } else {
+        throw new Error(`Price plan for category "${selectedPlanCategory}" not found.`);
+      }
+    } else {
+      priceToUse = new Decimal(productPrice.amount);
+    }
 
+    // Calculate total price
+    const parsedQuantity = new Decimal(quantity);
+    const totalPrice = priceToUse.mul(parsedQuantity);
+    console.log(`Unit Price: ${priceToUse} * Quantity: ${parsedQuantity} = Total Price: ${totalPrice}`);
+
+    // Create new customer order
     const newOrder = await CustomerOrder.create({
       ...req.body,
       customerId,
@@ -81,21 +71,16 @@ export const raiseCustomerOrder = async (req: Request, res: Response) => {
       quantity,
       price: totalPrice.toNumber(),
     });
-
     console.log("Order created successfully:", newOrder);
 
+    // Update ledger with new balance
     const latestEntry = await Ledger.findOne({
       where: { customerId, productId },
       order: [["createdAt", "DESC"]],
-      //transaction,
     });
 
-    const prevBalance = latestEntry
-      ? new Decimal(latestEntry.dataValues.balance)
-      : new Decimal(0);
-
+    const prevBalance = latestEntry ? new Decimal(latestEntry.dataValues.balance) : new Decimal(0);
     const newBalance = prevBalance.minus(totalPrice);
-    console.log(`Previous Balance: ${prevBalance}, New Balance: ${newBalance}`);
     console.log(`Previous Balance: ${prevBalance}, New Balance: ${newBalance}`);
 
     await Ledger.create({
@@ -108,28 +93,16 @@ export const raiseCustomerOrder = async (req: Request, res: Response) => {
       debit: totalPrice.toNumber(),
       balance: newBalance.toNumber(),
     });
-    // await transaction.commit();
-    // console.log("Transaction committed successfully.");
 
     return res.status(201).json({
       message: "Order raised and ledger updated successfully",
       order: newOrder,
     });
-  } catch (error: unknown) {
+  } catch (error) {
     console.error("Transaction failed:", error);
-
-    // Attempt to rollback the transaction
-    // try {
-    //   await transaction.rollback();
-    // } catch (rollbackError) {
-    //   console.error("Rollback failed:", rollbackError);
-    //   return res.status(500).json({ error: "Rollback failed. Check logs." });
-    // }
-
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
     }
-
     return res.status(500).json({ error: "An unknown error occurred" });
   }
 };
@@ -144,12 +117,12 @@ export const getOrdersByProduct = async (req: Request, res: Response) => {
         {
           model: Customer,
           as: "corder",
-          attributes: ["customerTag", "firstname", "lastname"],
+          attributes: ["id","customerTag", "firstname", "lastname"],
         },
         {
           model: Products,
           as: "porders",
-          attributes: ["name", "price", "pricePlan"],
+          attributes: ["id","name", "price", "pricePlan"],
         },
       ],
       order: [["createdAt", "DESC"]],
