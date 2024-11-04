@@ -43,7 +43,7 @@ export const raiseCustomerOrder = async (req: Request, res: Response) => {
     if (!productPrice) {
       const availableUnits = prices.map((p) => p.unit).join(", ");
       console.log("Available units:", availableUnits);
-      throw new Error(`Price not found for unit "${unit}". Available units: [${availableUnits}].`);
+      throw new Error(`Price not found for unit "${unit}". Available units: [${availableUnits}] for  product prices: ${productPrice}.`);
     }
 
     // Determine price based on the selected plan or default product price
