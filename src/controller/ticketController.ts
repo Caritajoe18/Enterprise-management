@@ -294,7 +294,7 @@ export const sendLPOToAdmin = async (req: Request, res: Response) => {
   try {
     const ticket = await LPO.findByPk(Id);
     const admin = await Admins.findByPk(adminId);
-    if(! ticket || ! admin){
+    if (!ticket || !admin) {
       return res.status(404).json({ message: "Ticket or admin not found" });
     }
 
@@ -303,7 +303,7 @@ export const sendLPOToAdmin = async (req: Request, res: Response) => {
       adminId,
       message: `A new LPO has sent to you.`,
       type: "ticket_recieved",
-      ticketId: Id
+      ticketId: Id,
     });
 
     const adminWs = getAdminConnection(adminId);
@@ -334,7 +334,7 @@ export const sendStoreCollectionAdmin = async (req: Request, res: Response) => {
   try {
     const ticket = await CollectFromGenStore.findByPk(Id);
     const admin = await Admins.findByPk(adminId);
-    if(! ticket || ! admin){
+    if (!ticket || !admin) {
       return res.status(404).json({ message: "Ticket or admin not found" });
     }
 
@@ -343,7 +343,7 @@ export const sendStoreCollectionAdmin = async (req: Request, res: Response) => {
       adminId,
       message: `A new Authority to collect from General Store has sent to you.`,
       type: "ticket_recieved",
-      ticketId: Id
+      ticketId: Id,
     });
 
     const adminWs = getAdminConnection(adminId);
@@ -374,7 +374,7 @@ export const sendAuthtoweigh = async (req: Request, res: Response) => {
   try {
     const ticket = await AuthToWeigh.findByPk(Id);
     const admin = await Admins.findByPk(adminId);
-    if(! ticket || ! admin){
+    if (!ticket || !admin) {
       return res.status(404).json({ message: "Ticket or admin not found" });
     }
 
@@ -383,7 +383,7 @@ export const sendAuthtoweigh = async (req: Request, res: Response) => {
       adminId,
       message: `A new Authority to weigh has been sent to you.`,
       type: "ticket_recieved",
-      ticketId: Id
+      ticketId: Id,
     });
 
     const adminWs = getAdminConnection(adminId);
@@ -414,7 +414,7 @@ export const sendAuthtoLoad = async (req: Request, res: Response) => {
   try {
     const ticket = await AuthToLoad.findByPk(Id);
     const admin = await Admins.findByPk(adminId);
-    if(! ticket || ! admin){
+    if (!ticket || !admin) {
       return res.status(404).json({ message: "Ticket or admin not found" });
     }
 
@@ -423,7 +423,7 @@ export const sendAuthtoLoad = async (req: Request, res: Response) => {
       adminId,
       message: `A new Authority to Load has been sent to you.`,
       type: "ticket_recieved",
-      ticketId: Id
+      ticketId: Id,
     });
 
     const adminWs = getAdminConnection(adminId);
@@ -454,9 +454,44 @@ export const getCashTicket = (req: Request, res: Response) => {
 export const getLPO = (req: Request, res: Response) => {
   getRecords(req, res, LPO, "LPOs");
 };
-export const getStoreAuth = (req: Request, res: Response) => {
-  getRecords(req, res, CollectFromGenStore, "General Store Authorities");
+export const getStoreAuth = async (req: Request, res: Response) => {
+  try {
+    const records = await CollectFromGenStore.findAll({
+      order: [["createdAt", "DESC"]],
+    });
+
+    if (records.length === 0) {
+      return res
+        .status(200)
+        .json({
+          message: `No Authorities To collect From General Store Found`,
+          records,
+        });
+    }
+
+    const parsedRecords = records.map((record) => {
+      return {
+        ...record.toJSON(),
+        items:
+          typeof record.dataValues.items === "string"
+            ? JSON.parse(record.dataValues.items)
+            : record.dataValues.items,
+      };
+    });
+
+    res.status(200).json({
+      message: `Successfully retrieved Authorities to collects from General store`,
+      records: parsedRecords,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "An unexpected error occurred." });
+    }
+  }
 };
+
 export const getAuthToWeigh = (req: Request, res: Response) => {
   getRecords(req, res, AuthToWeigh, "Authorities to Weigh");
 };
