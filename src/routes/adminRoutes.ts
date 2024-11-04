@@ -44,6 +44,11 @@ import {
 import { authenticateAdmin } from "../middleware/adminAuth";
 import {
   approveCashTicket,
+  getAuthToLoad,
+  getAuthToWeigh,
+  getCashTicket,
+  getLPO,
+  getStoreAuth,
   raiseAuthToCollectFromStore,
   raiseAuthToLoad,
   raiseAuthToWeight,
@@ -124,6 +129,11 @@ router.post("/send-store-auth/:Id", sendStoreCollectionAdmin);
 router.post("/send-weigh-auth/:Id", authorize(), sendAuthtoweigh);
 router.post("/send-load-auth/:Id", authorize(), sendAuthtoLoad);
 router.patch("/approve-cash-ticket/:Id", authorize(), approveCashTicket);
-router.patch('/reject-cashticket/:ticketId', authorize(), rejectCashTicket)
+router.patch('/reject-cashticket/:ticketId', authorize(), rejectCashTicket);
+router.get('/view-cash-ticket',getCashTicket)
+router.get('/view-lpo',getLPO)
+router.get('/view-store-auth',getStoreAuth)
+router.get('/view-auth-weigh',getAuthToWeigh)
+router.get('/view-auth-load',getAuthToLoad)
 
 export default router;
