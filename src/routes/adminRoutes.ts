@@ -11,6 +11,7 @@ import {
   createProducts,
   deleteProduct,
   getProducts,
+  getRawMaterials,
   searchProducts,
   updateProducts,
 } from "../controller/productController";
@@ -80,6 +81,7 @@ router.get("/get-permissions", authorize(), getAllPermissions);
 router.post("/add-product", authorize(), createProducts);
 router.patch("/edit-product/:id", authorize(), updateProducts);
 router.get("/get-products", authorize(), getProducts);
+router.get("/get-raw-materials", authorize(), getRawMaterials);
 router.get("/search-products", authorize(), searchProducts);
 router.delete("/delete-product/:id", authorize(), deleteProduct);
 
@@ -114,13 +116,17 @@ router.get("/suspended-staff", authorize(), getSuspendedStaff);
 router.get("/order-staff", authorize(), orderStaffFirstname);
 
 //cashier
-router.post("/create-cashier-book",authorize(), createCashierEntry);
+router.post("/create-cashier-book", authorize(), createCashierEntry);
 router.get("/cashier-ledger", authorize(), getCashierEntry);
 
 //tickets
 router.post("/cash-ticket", authorize(), raiseCashTicket);
 router.post("/raise-lpo", authorize(), raiseLPO);
-router.post("/raise-store-collection", authorize(), raiseAuthToCollectFromStore);
+router.post(
+  "/raise-store-collection",
+  authorize(),
+  raiseAuthToCollectFromStore
+);
 router.post("/raise-auth-weigh", authorize(), raiseAuthToWeight);
 router.post("/raise-auth-load", authorize(), raiseAuthToLoad);
 router.post("/send-ticket/:Id", authorize(), sendTicketToAdmin);
@@ -129,11 +135,11 @@ router.post("/send-store-auth/:Id", sendStoreCollectionAdmin);
 router.post("/send-weigh-auth/:Id", authorize(), sendAuthtoweigh);
 router.post("/send-load-auth/:Id", authorize(), sendAuthtoLoad);
 router.patch("/approve-cash-ticket/:Id", authorize(), approveCashTicket);
-router.patch('/reject-cashticket/:ticketId', authorize(), rejectCashTicket);
-router.get('/view-cash-ticket',getCashTicket)
-router.get('/view-lpo',getLPO)
-router.get('/view-store-auth',getStoreAuth)
-router.get('/view-auth-weigh',getAuthToWeigh)
-router.get('/view-auth-load',getAuthToLoad)
+router.patch("/reject-cashticket/:ticketId", authorize(), rejectCashTicket);
+router.get("/view-cash-ticket", getCashTicket);
+router.get("/view-lpo", getLPO);
+router.get("/view-store-auth", getStoreAuth);
+router.get("/view-auth-weigh", getAuthToWeigh);
+router.get("/view-auth-load", getAuthToLoad);
 
 export default router;

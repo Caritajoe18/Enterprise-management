@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import { Products } from "../models/products";
-import { createProductSchema, updateProductSchema } from "../validations/productValidations";
+import {
+  createProductSchema,
+  updateProductSchema,
+} from "../validations/productValidations";
 import { option } from "../validations/adminValidation";
 import { Op } from "sequelize";
 import { toPascalCase } from "../utilities/auths";
@@ -15,7 +18,7 @@ export const createProducts = async (req: Request, res: Response) => {
         .json({ error: validationResult.error.details[0].message });
     }
 
-  const { name, price, pricePlan, departmentId} = req.body;
+    const { name, price, pricePlan, departmentId } = req.body;
 
     const exist = await Products.findOne({ where: { name } });
     if (exist) {
@@ -36,9 +39,7 @@ export const createProducts = async (req: Request, res: Response) => {
       departmentId: departmentId || null,
     });
 
-    res
-      .status(201)
-      .json({ message: "product added successfully", product });
+    res.status(201).json({ message: "product added successfully", product });
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
@@ -64,25 +65,31 @@ export const updateProducts = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "product not found" });
     }
 
-    const updatedPrices = price ? price : product.dataValues.price;  
-    const updatedPricePlan = pricePlan ? pricePlan : product.dataValues.pricePlan;
-   await Products.update(
-      { name, category, price: updatedPrices, pricePlan: updatedPricePlan},
+    const updatedPrices = price ? price : product.dataValues.price;
+    const updatedPricePlan = pricePlan
+      ? pricePlan
+      : product.dataValues.pricePlan;
+    await Products.update(
+      { name, category, price: updatedPrices, pricePlan: updatedPricePlan },
       { where: { id } }
     );
 
     const updatedProducts = await Products.findByPk(id);
 
     if (updatedProducts) {
-      if (typeof updatedProducts.dataValues.price == 'string') {
-        updatedProducts.dataValues.price = JSON.parse(updatedProducts.dataValues.price);
+      if (typeof updatedProducts.dataValues.price == "string") {
+        updatedProducts.dataValues.price = JSON.parse(
+          updatedProducts.dataValues.price
+        );
       }
 
-      if (typeof updatedProducts.dataValues.pricePlan == 'string') {
-        updatedProducts.dataValues.pricePlan = JSON.parse(updatedProducts.dataValues.pricePlan);
+      if (typeof updatedProducts.dataValues.pricePlan == "string") {
+        updatedProducts.dataValues.pricePlan = JSON.parse(
+          updatedProducts.dataValues.pricePlan
+        );
       }
     }
-    
+
     res
       .status(200)
       .json({ message: "Products updated successfully", updatedProducts });
@@ -126,16 +133,25 @@ export const searchProducts = async (req: Request, res: Response) => {
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
-    const products = await Products.findAll({order:[["createdAt", "DESC"]]});
+    const products = await Products.findAll({
+      where: { category: "For Sale" },
+      order: [["createdAt", "DESC"]],
+    });
     if (products.length === 0) {
-      return res.status(404).json({message:"No products found", products});
+      return res.status(200).json({ message: "No products found", products });
     }
 
-    const parsedProducts = products.map(product => {
+    const parsedProducts = products.map((product) => {
       return {
         ...product.toJSON(),
-        price: typeof product.dataValues.price === 'string' ? JSON.parse(product.dataValues.price) : product.dataValues.price,
-        pricePlan: typeof product.dataValues.pricePlan === 'string' ? JSON.parse(product.dataValues.pricePlan) : product.dataValues.pricePlan,
+        price:
+          typeof product.dataValues.price === "string"
+            ? JSON.parse(product.dataValues.price)
+            : product.dataValues.price,
+        pricePlan:
+          typeof product.dataValues.pricePlan === "string"
+            ? JSON.parse(product.dataValues.pricePlan)
+            : product.dataValues.pricePlan,
       };
     });
 
@@ -143,8 +159,41 @@ export const getProducts = async (req: Request, res: Response) => {
       message: "Company's products retrieved successfully",
       products: parsedProducts,
     });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred" });
+  }
+};
+export const getRawMaterials = async (req: Request, res: Response) => {
+  try {
+    const products = await Products.findAll({
+      where: { category: "For Purchase" },
+      order: [["createdAt", "DESC"]],
+    });
+    if (products.length === 0) {
+      return res.status(201).json({ message: "No Raw Materials found", products });
+    }
 
-    
+    const parsedProducts = products.map((product) => {
+      return {
+        ...product.toJSON(),
+        price:
+          typeof product.dataValues.price === "string"
+            ? JSON.parse(product.dataValues.price)
+            : product.dataValues.price,
+        pricePlan:
+          typeof product.dataValues.pricePlan === "string"
+            ? JSON.parse(product.dataValues.pricePlan)
+            : product.dataValues.pricePlan,
+      };
+    });
+
+    res.status(200).json({
+      message: "Company's products retrieved successfully",
+      products: parsedProducts,
+    });
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
@@ -162,7 +211,6 @@ export const deleteProduct = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "No product found" });
     }
 
-    
     await product.destroy();
 
     res.status(200).json({ message: "Product deleted successfully" });
@@ -177,10 +225,10 @@ export const deleteProduct = async (req: Request, res: Response) => {
 
 export const getDepartmentProducts = async (req: Request, res: Response) => {
   try {
-    const {departmentId} =req.params
+    const { departmentId } = req.params;
     const products = await Products.findAll({
       where: {
-        departmentId: departmentId, 
+        departmentId: departmentId,
       },
       order: [["createdAt", "DESC"]],
     });
@@ -214,11 +262,11 @@ export const getDepartmentProducts = async (req: Request, res: Response) => {
 };
 export const getDepartmentForSale = async (req: Request, res: Response) => {
   try {
-    const {departmentId} =req.params
+    const { departmentId } = req.params;
     const products = await Products.findAll({
       where: {
-        departmentId: departmentId, 
-        category: 'For Sale',
+        departmentId: departmentId,
+        category: "For Sale",
       },
       order: [["createdAt", "DESC"]],
     });
@@ -252,17 +300,19 @@ export const getDepartmentForSale = async (req: Request, res: Response) => {
 };
 export const getDepartmentForPurchase = async (req: Request, res: Response) => {
   try {
-    const {departmentId} =req.params
+    const { departmentId } = req.params;
     const products = await Products.findAll({
       where: {
-        departmentId: departmentId, 
-        category: 'For Purchase',
+        departmentId: departmentId,
+        category: "For Purchase",
       },
       order: [["createdAt", "DESC"]],
     });
 
     if (products.length === 0) {
-      return res.status(404).json({ message: "No raw materials found", products });
+      return res
+        .status(404)
+        .json({ message: "No raw materials found", products });
     }
 
     const parsedProducts = products.map((product) => ({
@@ -288,4 +338,3 @@ export const getDepartmentForPurchase = async (req: Request, res: Response) => {
     res.status(500).json({ error: "An unexpected error occurred" });
   }
 };
-

@@ -9,7 +9,7 @@ import Decimal from "decimal.js";
 import db from "../db";
 
 export const raiseCustomerOrder = async (req: Request, res: Response) => {
-  const { customerId, productId, quantity, unit, selectedPlanCategory } = req.body;
+  const { customerId, productId, quantity, unit, discount } = req.body;
   
   try {
     const validationResult = customerOrderSchema.validate(req.body, option);
@@ -36,26 +36,24 @@ export const raiseCustomerOrder = async (req: Request, res: Response) => {
     if (!Array.isArray(prices)) prices = [prices];
     
     // Find product price based on unit
-    console.log("unit:",unit)
-    console.log("prices:", prices)
+  
     let productPrice = prices.find((p: any) => p.unit === unit);
-    console.log("product price:", productPrice)
     if (!productPrice) {
       const availableUnits = prices.map((p: any) => p.unit).join(", ");
       console.log("Available units:", availableUnits);
-      throw new Error(`Price not found for unit "${unit}". Available units: [${availableUnits}] for  product prices: ${productPrice}.`);
+      throw new Error(`Price not found for unit "${unit}". Available units: [${availableUnits}].`);
     }
 
     // Determine price based on the selected plan or default product price
     let priceToUse: Decimal;
-    if (selectedPlanCategory && product.dataValues.pricePlan) {
+    if (discount && product.dataValues.pricePlan) {
       const selectedPlan = product.dataValues.pricePlan.find(
-        (plan: any) => plan.category === selectedPlanCategory
+        (plan: any) => plan.amount === discount
       );
       if (selectedPlan) {
         priceToUse = new Decimal(selectedPlan.amount);
       } else {
-        throw new Error(`Price plan for category "${selectedPlanCategory}" not found.`);
+        throw new Error(`Price plan for category "${discount}" not found.`);
       }
     } else {
       priceToUse = new Decimal(productPrice.amount);
