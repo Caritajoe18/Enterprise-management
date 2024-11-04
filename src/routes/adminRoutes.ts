@@ -50,6 +50,10 @@ import {
   raiseCashTicket,
   raiseLPO,
   rejectCashTicket,
+  sendAuthtoLoad,
+  sendAuthtoweigh,
+  sendLPOToAdmin,
+  sendStoreCollectionAdmin,
   sendTicketToAdmin,
 } from "../controller/ticketController";
 import { createCashierEntry, getCashierEntry } from "../controller/cashier";
@@ -115,6 +119,10 @@ router.post("/raise-store-collection", authorize(), raiseAuthToCollectFromStore)
 router.post("/raise-auth-weigh", authorize(), raiseAuthToWeight);
 router.post("/raise-auth-load", authorize(), raiseAuthToLoad);
 router.post("/send-ticket/:Id", authorize(), sendTicketToAdmin);
+router.post("/send-lpo/:Id", authorize(), sendLPOToAdmin);
+router.post("/send-store-auth/:Id", sendStoreCollectionAdmin);
+router.post("/send-weigh-auth/:Id", authorize(), sendAuthtoweigh);
+router.post("/send-load-auth/:Id", authorize(), sendAuthtoLoad);
 router.patch("/approve-cash-ticket/:Id", authorize(), approveCashTicket);
 router.patch('/reject-cashticket/:ticketId', authorize(), rejectCashTicket)
 
