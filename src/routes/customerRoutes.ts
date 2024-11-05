@@ -5,6 +5,7 @@ import { createSupplier, deleteSupplier, getAllSuppliers, getSupplier, orderSupp
 import { createAccountAndLedger, getAccountBook, getCustomerLedger, getCustomerLedgerByProduct, getProductLedger } from '../controller/ledgerController';
 import { approveCashTicket, raiseCashTicket, rejectCashTicket } from '../controller/ticketController';
 import { getAllOrders, getOrdersByCustomer, getOrdersByProduct, raiseCustomerOrder } from '../controller/orders';
+import { getAllSupplierOrders, raiseSupplierOrder } from '../controller/supplierOrder';
 const router = express.Router();
 
 router.post('/reg-customer',authorize() ,createCustomer);
@@ -31,11 +32,13 @@ router.get('/get-accountbook', authorize(), getAccountBook);
 router.get("/get-ledger/:productId/:customerId", authorize(), getCustomerLedgerByProduct);
 router.get("/get-product-ledger/:productId", authorize(), getProductLedger)
 router.get("/get-customer-ledger/:customerId",authorize(), getCustomerLedger)
-router.post('/raise-customer-order',raiseCustomerOrder);
+router.post('/raise-customer-order',authorize(),raiseCustomerOrder);
 router.get('/get-product-order/:productId', authorize(), getOrdersByProduct);
 router.get('/get-customer-order/:customerId', authorize(), getOrdersByCustomer);
 router.get('/get-all-orders', authorize(), getAllOrders);
-
+//supplier order
+router.post('/raise-supplier-order',authorize(),raiseSupplierOrder);
+router.get('/get-all-supplier-orders', authorize(), getAllSupplierOrders);
 
 
 export default router;

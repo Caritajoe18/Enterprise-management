@@ -36,6 +36,10 @@ export class Products extends Model<ProductsAttributes> {
       foreignKey: "productId",
       as: "stores",  // Alias should match what you use in queries
     });
+    Products.hasMany(models.SupplierLedger, {
+      foreignKey: "productId",
+      as: "supplierLedgers",
+    });
   }
 }
 
