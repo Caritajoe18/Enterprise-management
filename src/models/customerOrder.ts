@@ -9,6 +9,7 @@ interface CustomerOrderAttributes {
   quantity?: number;
   price: number;
   discount?: number;
+  createdBy:string;
 }
 
 class CustomerOrder extends Model<CustomerOrderAttributes> {
@@ -68,6 +69,10 @@ CustomerOrder.init(
     },
     discount: {
       type: DataTypes.DECIMAL(15, 2),
+      allowNull: true,
+    },
+    createdBy: {
+      type: DataTypes.STRING,
       allowNull: true,
     },
   },

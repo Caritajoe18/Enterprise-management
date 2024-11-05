@@ -239,7 +239,7 @@ export const createDeptOrder = async (req: AuthRequest, res: Response) => {
       if (!shelf) {
         return res
           .status(404)
-          .json({ message: "Product or products not found" });
+          .json({ message: "Product or products not found in store" });
       }
       validatedOrders.push(value);
     }

@@ -8,7 +8,7 @@ interface SupplierOrderAttributes {
   unit?: string;
   quantity?: number;
   price: number;
-  
+  createdBy: string;
 }
 
 class SupplierOrder extends Model<SupplierOrderAttributes> {
@@ -66,7 +66,10 @@ SupplierOrder.init(
       type: DataTypes.DECIMAL(15, 2),
       allowNull: false,
     },
-   
+    createdBy: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     sequelize: db,

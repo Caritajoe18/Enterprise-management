@@ -92,7 +92,7 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
         include: [
           {
             model: Products,
-            as: "product",
+            as: "customer",
             include: [
               {
                 model: Departments,
@@ -244,6 +244,38 @@ export const getCustomerLedger = async (req: Request, res: Response) => {
     if (ledgerEntries.length == 0) {
       return res.status(404).json({
         message: "No ledger entries found for this customer.",
+      });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "ledger retrieved successfully", ledgerEntries });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ message: error.message });
+    }
+    return res.status(500).json({ message: "An unexpected error occurred." });
+  }
+};
+export const getSupplierLedger = async (req: Request, res: Response) => {
+  const { supplierId } = req.params;
+  if (!supplierId) {
+    return res.status(400).json({ message: "customer ID is required." });
+  }
+  try {
+    const ledgerEntries = await SupplierLedger.findAll({
+      where: {
+        supplierId,
+      },
+      order: [["createdAt", "DESC"]],
+    });
+    if (!ledgerEntries) {
+      return res.status(404).json({ message: "Supplier Ledger entry not found" });
+    }
+
+    if (ledgerEntries.length == 0) {
+      return res.status(200).json({
+        message: "No ledger entries found for this customer.",ledgerEntries
       });
     }
 

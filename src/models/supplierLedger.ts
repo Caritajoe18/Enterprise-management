@@ -22,7 +22,7 @@ export class SupplierLedger extends Model<LedgerAttributes> {
       foreignKey: "productId",
       as: "customer", 
     });
-    SupplierLedger.belongsTo(models.Suppliers, {
+    SupplierLedger.belongsTo(models.Supplier, {
         foreignKey: "supplierId",
         as:"product"
     })
