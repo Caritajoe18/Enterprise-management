@@ -46,7 +46,6 @@ Permission.init(
     name: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
     },
     isNav: {
       type: DataTypes.BOOLEAN,

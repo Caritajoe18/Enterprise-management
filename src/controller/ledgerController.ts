@@ -9,6 +9,7 @@ import Products from "../models/products";
 import Decimal from "decimal.js";
 import SupplierLedger from "../models/supplierLedger";
 import Departments from "../models/department";
+import { Op } from "sequelize";
 
 export const createAccountAndLedger = async (req: Request, res: Response) => {
   const validationResult = createLedgerSchema.validate(req.body, option);
@@ -143,7 +144,14 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
 
 export const getAccountBook = async (req: Request, res: Response) => {
   try {
-    const acct = await AccountBook.findAll({ order: [["createdAt", "DESC"]] });
+    const acct : AccountBook[] = await AccountBook.findAll({
+      where: {
+        customerId: {
+          [Op.ne]: null, 
+        } as any,
+      },
+      order: [["createdAt", "DESC"]],
+    });
     if (acct.length === 0) {
       return res.status(404).json({ message: "Not found" });
     }
@@ -158,6 +166,31 @@ export const getAccountBook = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "An unknown error occurred" });
   }
 };
+export const getSupplierAccountBook = async (req: Request, res: Response) => {
+  try {
+    const acct : AccountBook[] = await AccountBook.findAll({
+      where: {
+        supplierId: {
+          [Op.ne]: null, 
+        } as any,
+      },
+      order: [["createdAt", "DESC"]],
+    });
+
+    if (acct.length === 0) {
+      return res.status(404).json({ message: "No accounts found with a supplierId" });
+    }
+
+    return res.status(200).json({ message: "Accounts retrieved successfully", acct });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.status(500).json({ error: "An unknown error occurred" });
+  }
+};
+
 
 export const getCustomerLedgerByProduct = async (
   req: Request,

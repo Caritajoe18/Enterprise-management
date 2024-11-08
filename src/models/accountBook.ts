@@ -8,6 +8,7 @@ export interface AccountAttributes {
   productId: string;
   amount: number;
   creditType: string;
+  bankName:string
 }
 
 export class AccountBook extends Model<AccountAttributes> {
@@ -64,6 +65,10 @@ AccountBook.init(
       },
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
+    },
+    bankName: {
+      type: DataTypes.STRING, 
+      allowNull: false
     },
 
     creditType: {

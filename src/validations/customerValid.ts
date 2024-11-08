@@ -95,4 +95,5 @@ export const createLedgerSchema = Joi.object({
   customerId: Joi.string(),
   productId: Joi.string().required(),
   amount: Joi.number().required(),
+  bankName: Joi.string().required(),
 });

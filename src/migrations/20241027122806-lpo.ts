@@ -16,11 +16,11 @@ module.exports = {
       },
       chequeNo: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       chequeVoucherNo: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       supplierId: {
         type: Sequelize.UUID,
@@ -51,11 +51,11 @@ module.exports = {
         type: Sequelize.DECIMAL(10, 3),
       },
       expires: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.DATE,
       },
       period: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.DATE,
       },
       comments: {

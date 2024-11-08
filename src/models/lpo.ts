@@ -43,11 +43,11 @@ LPO.init(
     },
     chequeNo: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     chequeVoucherNo: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     supplierId: {
       type: DataTypes.UUID,
@@ -79,11 +79,11 @@ LPO.init(
     },
     expires: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: true,
     },
     period: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: true,
     },
     comments: {
       type: DataTypes.STRING,
