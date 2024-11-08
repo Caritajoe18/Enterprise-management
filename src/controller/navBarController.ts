@@ -216,7 +216,6 @@ export const getUserNavPermissions = async (
     });
 
     const result = Object.values(navParentMap);
-    //console.timeEnd('getUserNavPermissions');
     return res.status(200).json({ navParentsWithPermissions: result });
   } catch (error: unknown) {
     if (error instanceof Error) {

@@ -165,3 +165,7 @@ export const permissionValidationSchema = Joi.object({
     }),
 });
 
+export const updateRoleSchema = Joi.object({
+  name: Joi.string().optional(),
+  permissionsId: Joi.array().items(Joi.string().uuid()).optional(),
+});

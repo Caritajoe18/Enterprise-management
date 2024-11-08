@@ -38,6 +38,10 @@ module.exports = {
         type: Sequelize.STRING, 
         allowNull: false
       },
+      bankName: {
+        type: Sequelize.STRING, 
+        allowNull: false
+      },
       productId: {
         type: Sequelize.UUID,
         allowNull: false,

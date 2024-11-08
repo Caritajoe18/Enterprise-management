@@ -12,6 +12,7 @@ export interface LedgerAttributes {
   creditType: 'Transfer' | 'Cash';
   debit:number;
   balance:number;
+  weighImage:string;
 
 }
 
@@ -77,6 +78,10 @@ Ledger.init(
       debit: {
         type: DataTypes.DECIMAL(15, 2)
         ,
+        allowNull: true
+      },
+      weighImage: {
+        type: DataTypes.STRING,
         allowNull: true
       },
       balance: {

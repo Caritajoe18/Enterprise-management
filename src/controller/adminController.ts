@@ -21,7 +21,7 @@ import {
 } from "../utilities/htmls";
 import { Op } from "sequelize";
 
-export const loginurl = `http/3000/frontend login`;
+export const loginurl = `https://polema-webapp.netlify.app/`;
 
 export const signupAdmin = async (req: Request, res: Response) => {
   try {

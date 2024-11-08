@@ -8,6 +8,7 @@ interface SupplierOrderAttributes {
   unit?: string;
   quantity?: number;
   price: number;
+  comments: string;
   createdBy: string;
 }
 
@@ -65,6 +66,10 @@ SupplierOrder.init(
     price: {
       type: DataTypes.DECIMAL(15, 2),
       allowNull: false,
+    },
+    comments: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     createdBy: {
       type: DataTypes.STRING,

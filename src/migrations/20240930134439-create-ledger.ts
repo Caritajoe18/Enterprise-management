@@ -57,6 +57,10 @@ module.exports = {
         ,
         allowNull: false
       },
+      weighImage: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

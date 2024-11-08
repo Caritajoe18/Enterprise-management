@@ -27,7 +27,7 @@ import {
   orderStaffFirstname,
   getAdmin,
 } from "../controller/staffController";
-import { addRole, getAllRoles, getRoles } from "../controller/roleController";
+import { addRole, editRole, editRolePermissions, getARoleWithPermission, getAllRoles, getRoles } from "../controller/roleController";
 import {
   addPermissionsToRole,
   createPermissions,
@@ -89,6 +89,9 @@ router.delete("/delete-product/:id", authorize(), deleteProduct);
 router.post("/create-role", authorize(), addRole);
 router.get("/get-roles", authorize(), getAllRoles);
 router.get("/get-rolePerm", authorize(), getRoles);
+router.get("/get-a-role/:roleId", authorize(), getARoleWithPermission);
+router.put("/edit-role/:roleId", authorize(), editRole);
+router.put("/editing-role/:roleId", authorize(), editRolePermissions);
 router.patch(
   "/add-permission/:roleId/permissions",
   authorize(),

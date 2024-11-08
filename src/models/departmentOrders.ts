@@ -8,6 +8,7 @@ interface GeneralOrderAttributes {
   quantity: number;
   unit: string;
   expectedDeliveryDate: Date;
+  comments:string;
   createdBy:string;
 }
 
@@ -58,6 +59,10 @@ DepartmentOrder.init(
     },
     expectedDeliveryDate: {
       type: DataTypes.DATE,
+      allowNull: true,
+    },
+    comments: {
+      type: DataTypes.STRING,
       allowNull: true,
     },
     createdBy: {

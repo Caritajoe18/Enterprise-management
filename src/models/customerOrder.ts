@@ -9,6 +9,7 @@ interface CustomerOrderAttributes {
   quantity?: number;
   price: number;
   discount?: number;
+  comments:string;
   createdBy:string;
 }
 
@@ -69,6 +70,10 @@ CustomerOrder.init(
     },
     discount: {
       type: DataTypes.DECIMAL(15, 2),
+      allowNull: true,
+    },
+    comments: {
+      type: DataTypes.STRING,
       allowNull: true,
     },
     createdBy: {

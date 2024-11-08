@@ -7,6 +7,7 @@ interface PharmacyOrderAttributes {
   quantity: number;
   unit: string;
   expectedDeliveryDate: Date;
+  comments:string;
 }
 
 export class PharmacyOrder extends Model<PharmacyOrderAttributes> {}
@@ -36,6 +37,10 @@ PharmacyOrder.init(
     unit: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    comments: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     expectedDeliveryDate: {
       type: DataTypes.DATE,
