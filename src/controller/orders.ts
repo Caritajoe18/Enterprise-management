@@ -6,12 +6,18 @@ import { option } from "../validations/adminValidation";
 import Customer from "../models/customers";
 import Ledger from "../models/ledger";
 import Decimal from "decimal.js";
-import { Op } from "sequelize";
+import { Op, Transaction } from "sequelize";
 
 import { AuthRequest } from "../middleware/adminAuth";
 import Admins from "../models/admin";
+import {
+  createDepartmentLedgerEntry,
+  fetchCustomerAndProduct,
+} from "../utilities/modules";
+import db from "../db";
 
 export const raiseCustomerOrder = async (req: AuthRequest, res: Response) => {
+  const transaction: Transaction = await db.transaction();
   try {
     const admin = req.admin as Admins;
     const { roleId: adminId } = admin.dataValues;
@@ -25,16 +31,10 @@ export const raiseCustomerOrder = async (req: AuthRequest, res: Response) => {
     }
 
     // Check if customer exists
-    const customer = await Customer.findOne({ where: { id: customerId } });
-    if (!customer) {
-      return res.status(404).json({ message: "Customer not found" });
-    }
-
-    // Check if product exists
-    const product = await Products.findOne({ where: { id: productId } });
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
+    const { customer, product } = await fetchCustomerAndProduct(
+      customerId,
+      productId
+    );
 
     let prices;
     // Validate and wrap the price array
@@ -102,20 +102,24 @@ export const raiseCustomerOrder = async (req: AuthRequest, res: Response) => {
     const totalPrice = priceToUse.mul(parsedQuantity);
 
     // Create new customer order
-    const newOrder = await CustomerOrder.create({
-      ...req.body,
-      customerId,
-      productId,
-      createdBy: adminId,
-      unit,
-      quantity,
-      price: totalPrice.toNumber(),
-    });
+    const newOrder = await CustomerOrder.create(
+      {
+        ...req.body,
+        customerId,
+        productId,
+        createdBy: adminId,
+        unit,
+        quantity,
+        price: totalPrice.toNumber(),
+      },
+      { transaction }
+    );
 
     // Update ledger with new balance
     const latestEntry = await Ledger.findOne({
-      where: { customerId},
+      where: { customerId },
       order: [["createdAt", "DESC"]],
+      transaction,
     });
 
     const prevBalance = latestEntry
@@ -123,16 +127,30 @@ export const raiseCustomerOrder = async (req: AuthRequest, res: Response) => {
       : new Decimal(0);
     const newBalance = prevBalance.minus(totalPrice);
 
-    await Ledger.create({
-      ...req.body,
-      customerId,
-      productId,
-      unit,
-      quantity,
-      credit: 0,
-      debit: totalPrice.toNumber(),
-      balance: newBalance.toNumber(),
-    });
+    await Ledger.create(
+      {
+        ...req.body,
+        customerId,
+        productId,
+        unit,
+        quantity,
+        credit: 0,
+        debit: totalPrice.toNumber(),
+        balance: newBalance.toNumber(),
+      },
+      { transaction }
+    );
+    await createDepartmentLedgerEntry(
+      req.body,
+      product.dataValues.departmentId,
+      product.dataValues.name,
+      `${customer.dataValues.firstname} ${customer.dataValues.lastname}`,
+      totalPrice,
+      false,
+      transaction
+    );
+
+    await transaction.commit();
 
     return res.status(201).json({
       message: "Order raised and ledger updated successfully",
@@ -175,7 +193,7 @@ export const getOrdersByProduct = async (req: AuthRequest, res: Response) => {
     if (orders.length === 0) {
       return res
         .status(404)
-        .json({ message: "No orders found for this product" });
+        .json({ message: "No orders found for this product", orders });
     }
 
     return res.status(200).json(orders);

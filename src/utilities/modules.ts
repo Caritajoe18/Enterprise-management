@@ -6,6 +6,8 @@ import { getAdminConnection } from "../utilities/web-push";
 import AccountBook from "../models/accountBook";
 import Decimal from "decimal.js";
 import DepartmentLedger from "../models/departmentLedger";
+import Customer from "../models/customers";
+import Products, { Plan } from "../models/products";
 export const getRecords = async (
   req: Request,
   res: Response,
@@ -131,3 +133,50 @@ export const createDepartmentLedgerEntry = async (
     { transaction }
   );
 };
+
+export const  fetchCustomerAndProduct = async(customerId: string, productId: string)=> {
+  const [customer, product] = await Promise.all([
+    Customer.findOne({ where: { id: customerId } }),
+    Products.findOne({ where: { id: productId } }),
+  ]);
+  if (!customer) throw new Error("Customer not found");
+  if (!product) throw new Error("Product not found");
+  return { customer, product };
+};
+
+export const  getProductPrice = (product: Products, unit: string): Decimal =>{
+  let prices = Array.isArray(product.dataValues.price)
+    ? product.dataValues.price
+    : JSON.parse(product.dataValues.price || "[]");
+  const productPrice = prices.find((p: any) => p.unit === unit);
+  if (!productPrice) {
+    const availableUnits = prices.map((p: any) => p.unit).join(", ");
+    throw new Error(
+      `Price not found for unit "${unit}". Available units: [${availableUnits}].`
+    );
+  }
+  return new Decimal(productPrice.amount);
+}
+
+
+export const applyDiscount = (priceToUse: Decimal, discount: number | null, pricePlan: Plan[] | undefined): Decimal => {
+  if (discount && pricePlan) {
+    const matchingPlan = pricePlan.find((plan: Plan) => plan.amount === discount);
+    if (!matchingPlan) {
+      throw new Error(
+        `Discount of ${discount} does not match any available price plan. Available plans: ${pricePlan
+          .map((plan) => plan.amount)
+          .join(", ")}`
+      );
+    }
+    const discountedPrice = priceToUse.minus(new Decimal(discount));
+    if (discountedPrice.lessThan(0)) throw new Error("Discount cannot exceed product price.");
+    return discountedPrice;
+  }
+  if (discount && !pricePlan) {
+    throw new Error("Discounts are not applicable as no price plan is available.");
+  }
+  return priceToUse;
+}
+
+

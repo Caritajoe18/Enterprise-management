@@ -11,8 +11,8 @@ import Supplier from "../models/suppliers";
 import { LPO } from "../models/lpo";
 import CollectFromGenStore from "../models/collectFromGenStore";
 import AuthToWeigh from "../models/AuthToWeigh";
-import AuthToLoad from "../models/authToLoad";
 import { getRecords } from "../utilities/modules";
+import CustomerOrder from "../models/customerOrder";
 
 export const raiseCashTicket = async (req: AuthRequest, res: Response) => {
   const admin = req.admin as Admins;
@@ -243,41 +243,19 @@ export const raiseAuthToCollectFromStore = async (
 export const raiseAuthToWeight = async (req: AuthRequest, res: Response) => {
   const admin = req.admin as Admins;
   const { roleId } = admin.dataValues;
-  const { customerId } = req.body;
+  // const { customerId } = req.body;
+  const {orderId} = req.params
 
   try {
-    const customer = await Customer.findByPk(customerId);
-    if (!customer) {
-      return res.status(404).json({ message: "Customer not found" });
+    const Order = await CustomerOrder.findByPk(orderId);
+    if (!Order) {
+      return res.status(404).json({ message: "Order not found" });
     }
     const ticket = await AuthToWeigh.create({
       ...req.body,
+      customerId:Order.dataValues.customerId,
       raisedByAdminId: roleId,
-    });
-
-    return res
-      .status(201)
-      .json({ message: "Ticket created successfully", ticket });
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return res.status(500).json({ error: error.message });
-    }
-    res.status(500).json({ error: "An unexpected error occurred." });
-  }
-};
-export const raiseAuthToLoad = async (req: AuthRequest, res: Response) => {
-  const admin = req.admin as Admins;
-  const { roleId } = admin.dataValues;
-  const { customerId } = req.body;
-
-  try {
-    const customer = await Customer.findByPk(customerId);
-    if (!customer) {
-      return res.status(404).json({ message: "Customer not found" });
-    }
-    const ticket = await AuthToLoad.create({
-      ...req.body,
-      raisedByAdminId: roleId,
+      tranxId:orderId,
     });
 
     return res
@@ -411,47 +389,6 @@ export const sendAuthtoweigh = async (req: Request, res: Response) => {
     res.status(500).json({ error: "An unexpected error occurred." });
   }
 };
-export const sendAuthtoLoad = async (req: Request, res: Response) => {
-  const { Id } = req.params;
-  const { adminId } = req.body;
-
-  try {
-    const ticket = await AuthToLoad.findByPk(Id);
-    const admin = await Admins.findByPk(adminId);
-    if (!ticket || !admin) {
-      return res.status(404).json({ message: "Ticket or admin not found" });
-    }
-
-    await Notify.create({
-      ...req.body,
-      adminId,
-      message: `A new Authority to Load has been sent to you.`,
-      type: "ticket_recieved",
-      ticketId: Id,
-    });
-
-    const adminWs = getAdminConnection(adminId);
-    if (adminWs) {
-      adminWs.send(
-        JSON.stringify({
-          message: `A new Authority to load has been sent to you.`,
-          ticket,
-        })
-      );
-    }
-
-    return res.status(200).json({
-      message: "Ticket successfully sent to admin.",
-      ticket,
-    });
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return res.status(500).json({ error: error.message });
-    }
-    res.status(500).json({ error: "An unexpected error occurred." });
-  }
-};
-
 export const getCashTicket = (req: Request, res: Response) => {
   getRecords(req, res, CashTicket, "cashTickets");
 };
@@ -498,7 +435,4 @@ export const getStoreAuth = async (req: Request, res: Response) => {
 
 export const getAuthToWeigh = (req: Request, res: Response) => {
   getRecords(req, res, AuthToWeigh, "Authorities to Weigh");
-};
-export const getAuthToLoad = (req: Request, res: Response) => {
-  getRecords(req, res, AuthToLoad, "Authorities to load");
 };

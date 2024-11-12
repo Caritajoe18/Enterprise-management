@@ -9,11 +9,17 @@ export interface AuthToWeighAttributes {
   vehicleNo?: string;
   status: "pending" | "approved" | "rejected" | "completed";
   approvedBySuperAdminId?: string;
+  tranxId: string;
 }
 
 export class AuthToWeigh extends Model<AuthToWeighAttributes> {
   static associate(models: any) {
     // Define associations here, if needed
+    AuthToWeigh.belongsTo(models.CustomerOrder, {
+      foreignKey: "tranxId",
+      as: "transaction", // Alias for the association
+    });
+    
   }
 }
 
@@ -48,6 +54,16 @@ AuthToWeigh.init(
     approvedBySuperAdminId: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    tranxId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: "CustomerOrders",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
     },
   },
   {

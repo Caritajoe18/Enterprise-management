@@ -55,10 +55,8 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
         return res.status(404).json({ message: "Product not found" });
       }
 
-      //console.log("Creating account book entry...");
       accountBook = await createAccountBookEntry(req.body, "Transfer");
 
-      //console.log("Fetching latest ledger entry...");
       const latestCustomerEntry = await Ledger.findOne({
         where: { customerId },
         order: [["createdAt", "DESC"]],
@@ -70,7 +68,6 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
         parsedAmount
       );
 
-      // console.log("Creating new ledger entry...");
       await Ledger.create(
         {
           ...req.body,
@@ -85,18 +82,7 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
         },
         { transaction }
       );
-
-      await createDepartmentLedgerEntry(
-        req.body,
-        product.dataValues.departmentId,
-        product.dataValues.name,
-        `${customer.dataValues.firstname} ${customer.dataValues.lastname}`,
-        parsedAmount,
-        false,
-        transaction
-      );
     } else if (supplierId) {
-      // console.log("Creating account book entry for supplier...");
       accountBook = await createAccountBookEntry(req.body, "Transfer");
 
       // Fetch the product and products with the same departmentId
@@ -138,15 +124,6 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
           creditType: "Transfer",
         },
         { transaction }
-      );
-      await createDepartmentLedgerEntry(
-        req.body,
-        product.dataValues.departmentId,
-        product.dataValues.name,
-        `${supplier.dataValues.firstname} ${supplier.dataValues.lastname}`,
-        parsedAmount,
-        true,
-        transaction
       );
     } else if (other) {
       accountBook = await createAccountBookEntry(req.body, "Transfer");

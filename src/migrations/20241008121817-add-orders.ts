@@ -36,7 +36,7 @@ module.exports = {
       },
       quantity: {
         type: DataTypes.DECIMAL(10, 3),
-        allowNull: true,
+        allowNull: false,
       },
       price: {
         type: Sequelize.DECIMAL(15, 2),

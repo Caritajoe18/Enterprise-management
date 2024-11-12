@@ -62,7 +62,7 @@ CustomerOrder.init(
     },
     quantity: {
       type: DataTypes.DECIMAL(10, 3),
-      allowNull: true,
+      allowNull: false,
     },
     price: {
       type: DataTypes.DECIMAL(15, 2),
@@ -80,6 +80,7 @@ CustomerOrder.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    
   },
   {
     sequelize: db,
