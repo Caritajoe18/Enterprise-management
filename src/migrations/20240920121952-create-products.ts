@@ -33,7 +33,7 @@ module.exports = {
           model: "Departments",  
           key: "id",
         },
-        allowNull: true,
+        allowNull: false,
         onDelete: 'SET NULL',  
       },
       createdAt: {

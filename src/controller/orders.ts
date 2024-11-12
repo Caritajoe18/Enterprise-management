@@ -6,16 +6,16 @@ import { option } from "../validations/adminValidation";
 import Customer from "../models/customers";
 import Ledger from "../models/ledger";
 import Decimal from "decimal.js";
-import db from "../db";
+import { Op } from "sequelize";
+
 import { AuthRequest } from "../middleware/adminAuth";
 import Admins from "../models/admin";
 
 export const raiseCustomerOrder = async (req: AuthRequest, res: Response) => {
   try {
-  const admin = req.admin as Admins;
-  console.log("Admin from request:", admin);
-  const { roleId: adminId } = admin.dataValues;
-  const { customerId, productId, quantity, unit, discount } = req.body;
+    const admin = req.admin as Admins;
+    const { roleId: adminId } = admin.dataValues;
+    const { customerId, productId, quantity, unit, discount } = req.body;
 
     const validationResult = customerOrderSchema.validate(req.body, option);
     if (validationResult.error) {
@@ -35,11 +35,12 @@ export const raiseCustomerOrder = async (req: AuthRequest, res: Response) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+
     let prices;
     // Validate and wrap the price array
     try {
       prices =
-        typeof product.dataValues.price == "object"
+        typeof product.dataValues.price === "object"
           ? product.dataValues.price
           : JSON.parse(product.dataValues.price);
     } catch (error) {
@@ -49,30 +50,32 @@ export const raiseCustomerOrder = async (req: AuthRequest, res: Response) => {
     if (!Array.isArray(prices)) prices = [prices];
 
     // Find product price based on unit
-
     let productPrice = prices.find((p: any) => p.unit === unit);
     if (!productPrice) {
       const availableUnits = prices.map((p: any) => p.unit).join(", ");
-      //console.log("Available units:", availableUnits);
       throw new Error(
         `Price not found for unit "${unit}". Available units: [${availableUnits}].`
       );
     }
-    let pricePlan: Plan[];
-    if (product.dataValues.pricePlan) {
+
+    let pricePlan: Plan[] | undefined;
+    if (
+      product.dataValues.pricePlan &&
+      Object.keys(product.dataValues.pricePlan).length !== 0
+    ) {
       try {
-      pricePlan = Array.isArray(product.dataValues.pricePlan)
-        ? product.dataValues.pricePlan
-        : JSON.parse(product.dataValues.pricePlan);
+        pricePlan = Array.isArray(product.dataValues.pricePlan)
+          ? product.dataValues.pricePlan
+          : JSON.parse(product.dataValues.pricePlan);
       } catch (error) {
         throw new Error("Invalid price plan format.");
       }
-    } else {
-      throw new Error("No discountPlan available for this product.");
     }
 
     let priceToUse = new Decimal(productPrice.amount);
-    if (discount) {
+
+    // Apply discount if provided and if a price plan is available
+    if (discount && pricePlan) {
       const matchingPlan = pricePlan.find(
         (plan: Plan) => plan.amount === discount
       );
@@ -88,30 +91,30 @@ export const raiseCustomerOrder = async (req: AuthRequest, res: Response) => {
         throw new Error("Discount cannot exceed product price.");
       }
       priceToUse = discountedPrice;
+    } else if (discount && !pricePlan) {
+      throw new Error(
+        "Discounts are not applicable for this product as no price plan is available."
+      );
     }
 
     // Calculate total price
     const parsedQuantity = new Decimal(quantity);
     const totalPrice = priceToUse.mul(parsedQuantity);
-    console.log(
-      `Unit Price: ${priceToUse} * Quantity: ${parsedQuantity} = Total Price: ${totalPrice}`
-    );
 
     // Create new customer order
     const newOrder = await CustomerOrder.create({
       ...req.body,
       customerId,
       productId,
-     createdBy: adminId,
+      createdBy: adminId,
       unit,
       quantity,
       price: totalPrice.toNumber(),
     });
-    //console.log("Order created successfully:", newOrder);
 
     // Update ledger with new balance
     const latestEntry = await Ledger.findOne({
-      where: { customerId, productId },
+      where: { customerId},
       order: [["createdAt", "DESC"]],
     });
 
@@ -119,7 +122,6 @@ export const raiseCustomerOrder = async (req: AuthRequest, res: Response) => {
       ? new Decimal(latestEntry.dataValues.balance)
       : new Decimal(0);
     const newBalance = prevBalance.minus(totalPrice);
-    console.log(`Previous Balance: ${prevBalance}, New Balance: ${newBalance}`);
 
     await Ledger.create({
       ...req.body,
@@ -145,12 +147,15 @@ export const raiseCustomerOrder = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getOrdersByProduct = async (req: Request, res: Response) => {
+export const getOrdersByProduct = async (req: AuthRequest, res: Response) => {
+  const admin = req.admin as Admins;
+  const { roleId: adminId, isAdmin } = admin.dataValues;
   const { productId } = req.params;
 
   try {
     const orders = await CustomerOrder.findAll({
-      where: { productId },
+      where: isAdmin ? {} : { createdBy: adminId, productId },
+
       include: [
         {
           model: Customer,
@@ -206,12 +211,14 @@ export const getAllOrders = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getOrdersByCustomer = async (req: Request, res: Response) => {
+export const getOrdersByCustomer = async (req: AuthRequest, res: Response) => {
+  const admin = req.admin as Admins;
+  const { roleId: adminId, isAdmin } = admin.dataValues;
   const { customerId } = req.params;
 
   try {
     const orders = await CustomerOrder.findAll({
-      where: { customerId },
+      where: isAdmin ? {} : { createdBy: adminId, customerId },
       include: [
         {
           model: Customer,
@@ -241,6 +248,57 @@ export const getOrdersByCustomer = async (req: Request, res: Response) => {
       return res.status(500).json({ error: error.message });
     }
 
+    return res.status(500).json({ error: "An unknown error occurred" });
+  }
+};
+
+export const searchCustomersFromOrders = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const admin = req.admin as Admins;
+    const { roleId: adminId, isAdmin } = admin.dataValues;
+    const { searchQuery } = req.query;
+
+    // Fetch orders based on the admin's permissions
+    const orders = await CustomerOrder.findAll({
+      where: isAdmin ? {} : { createdBy: adminId },
+      attributes: ["customerId"],
+    });
+
+    const customerIds = [
+      ...new Set(orders.map((order) => order.dataValues.customerId)),
+    ];
+
+    if (customerIds.length === 0) {
+      return res.status(404).json({ message: "No customers entries found." });
+    }
+
+    // Search for customers with the obtained IDs and matching search criteria
+    const customers = await Customer.findAll({
+      where: {
+        id: { [Op.in]: customerIds },
+        [Op.or]: [
+          { firstname: { [Op.like]: `%${searchQuery}%` } },
+          { lastname: { [Op.like]: `%${searchQuery}%` } },
+          { customerTag: { [Op.like]: `%${searchQuery}%` } },
+        ],
+      },
+      attributes: ["id", "customerTag", "firstname", "lastname"],
+    });
+
+    if (customers.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No matching customers found.", customers });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Customers retrieves successfully.", customers });
+  } catch (error) {
+    console.error("Error retrieving customers from orders:", error);
     return res.status(500).json({ error: "An unknown error occurred" });
   }
 };

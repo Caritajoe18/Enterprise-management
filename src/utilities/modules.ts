@@ -1,8 +1,11 @@
 import { Request, Response } from "express";
-import { Model, ModelStatic } from "sequelize";
+import { Model, ModelStatic, Transaction } from "sequelize";
 import Admins from "../models/admin";
 import Notify from "../models/notification";
 import { getAdminConnection } from "../utilities/web-push";
+import AccountBook from "../models/accountBook";
+import Decimal from "decimal.js";
+import DepartmentLedger from "../models/departmentLedger";
 export const getRecords = async (
   req: Request,
   res: Response,
@@ -79,4 +82,52 @@ export const sendTicketToAdmin = async (
     }
     return res.status(500).json({ error: "An unexpected error occurred." });
   }
+};
+
+export const createAccountBookEntry = async (data: any, creditType: string) => {
+  return await AccountBook.create({ ...data, creditType });
+};
+
+export const calculateNewBalance = (
+  latestEntry: any,
+  amount: Decimal,
+  isDebit: boolean = false
+) => {
+  const prevBalance = latestEntry
+    ? new Decimal(latestEntry.dataValues.balance)
+    : new Decimal(0);
+  return isDebit ? prevBalance.minus(amount) : prevBalance.plus(amount);
+};
+
+export const createDepartmentLedgerEntry = async (
+  data: any,
+  departmentId: string,
+  productName: string | null,
+  name: string,
+  amount: Decimal,
+  isDebit: boolean,
+  transaction?: Transaction
+) => {
+  const departmentLatestEntry = await DepartmentLedger.findOne({
+    where: { departmentId },
+    order: [["createdAt", "DESC"]],
+    transaction,
+  });
+
+  const departmentNewBalance = calculateNewBalance(
+    departmentLatestEntry,
+    amount,
+    isDebit
+  );
+  await DepartmentLedger.create(
+    {
+      ...data,
+      departmentId,
+      name,
+      productName,
+      balance: departmentNewBalance.toNumber(),
+      [isDebit ? "debit" : "credit"]: amount.toNumber(),
+    },
+    { transaction }
+  );
 };
