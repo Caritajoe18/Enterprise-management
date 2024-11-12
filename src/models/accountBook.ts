@@ -8,7 +8,10 @@ export interface AccountAttributes {
   productId: string;
   amount: number;
   creditType: string;
-  bankName:string
+  bankName:string;
+  other:string;
+  departmentId:string;
+  comments:string;
 }
 
 export class AccountBook extends Model<AccountAttributes> {
@@ -54,11 +57,11 @@ AccountBook.init(
     },
     amount: {
       type: DataTypes.DECIMAL(15, 2),
-      allowNull: true,
+      allowNull: false,
     },
     productId: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: "Products",
         key: "id",
@@ -66,9 +69,27 @@ AccountBook.init(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
+    other:{
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    comments:{
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    departmentId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: "Departments",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
+    },
     bankName: {
       type: DataTypes.STRING, 
-      allowNull: false
+      allowNull: true
     },
 
     creditType: {

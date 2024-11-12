@@ -1,5 +1,5 @@
 import express from "express";
-import { createDepartment, deleteDept, editDepartment, getAllDepartments, getDepartments, getDepartmentsLikePharm } from "../controller/departmentController";
+import { createDepartment, deleteDept, editDepartment, getAllDepartments, getDepartmentLedgerByDepartmentId, getDepartments, getDepartmentsLikePharm } from "../controller/departmentController";
 import { authorize } from "../middleware/staffPermissions";
 import { getDepartmentForPurchase, getDepartmentForSale, getDepartmentProducts } from "../controller/productController";
 import upload from "../utilities/multer";
@@ -47,6 +47,9 @@ router.patch('/edit-deptstore/:id',authorize(), editDeptStore);
 router.delete("/delete-deptstore/:id",authorize(), deleteDeptStore);
 router.post("/create-deptstore-order",authorize(), createDeptOrder);
 router.get("/view-deptstore-order",authorize(), viewDeptOrder);
+
+//department ledger
+router.get("/department-ledger/:departmentId", getDepartmentLedgerByDepartmentId);
 
 
 export default router;

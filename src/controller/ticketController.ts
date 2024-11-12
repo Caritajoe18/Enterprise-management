@@ -191,11 +191,15 @@ export const recieveCashTicket = async (req: AuthRequest, res: Response) => {
 export const raiseLPO = async (req: AuthRequest, res: Response) => {
   const admin = req.admin as Admins;
   const { roleId } = admin.dataValues;
-  const { supplierId } = req.body;
+  const { supplierId, rawMaterial } = req.body;
   try {
     const supplier = Supplier.findByPk(supplierId);
     if (!supplier) {
       return res.status(404).json({ message: "Supplier not found" });
+    }
+    const product = Products.findByPk(rawMaterial);
+    if (!product) {
+      return res.status(404).json({ message: "Raw material not found" });
     }
 
     const ticket = await LPO.create({

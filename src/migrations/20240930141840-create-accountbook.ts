@@ -1,4 +1,4 @@
-import { QueryInterface, DataTypes } from "sequelize";
+import { DataTypes, QueryInterface } from "sequelize";
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -40,13 +40,31 @@ module.exports = {
       },
       bankName: {
         type: Sequelize.STRING, 
-        allowNull: false
+        allowNull: true
       },
       productId: {
         type: Sequelize.UUID,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: 'Products', 
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE' 
+      },
+      other: {
+        type: Sequelize.STRING, 
+        allowNull: true
+      },
+      comments: {
+        type: Sequelize.STRING, 
+        allowNull: true
+      },
+      departmentId: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: 'Departments', 
           key: 'id',
         },
         onUpdate: 'CASCADE',

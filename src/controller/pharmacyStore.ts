@@ -67,7 +67,7 @@ export const getPharmStores = async (req: Request, res: Response) => {
     });
 
     if (stores.length === 0) {
-      return res.status(404).json({ message: "No stores found" });
+      return res.status(404).json({ message: "No stores found", stores });
     }
 
     const parsedStores = stores.map((store) => ({
@@ -102,7 +102,7 @@ export const getStoreForSale = async (req: Request, res: Response) => {
 
 
     if (!stores.length) {
-      return res.status(404).json({ message: "No stores found for sale" });
+      return res.status(404).json({ message: "No stores found for sale", stores });
     }
     const parsedStores = stores.map((store) => ({
       ...store.toJSON(),
@@ -137,7 +137,7 @@ export const getStoreForPurchase = async (req: Request, res: Response) => {
 
 
     if (!stores.length) {
-      return res.status(404).json({ message: "No stores found for raw materils" });
+      return res.status(404).json({ message: "No stores found for raw materils", stores });
     }
     const parsedStores = stores.map((store) => ({
       ...store.toJSON(),
@@ -247,7 +247,7 @@ export const viewOrder = async (req: Request, res: Response) =>{
     });
 
     if (stores.length === 0) {
-      return res.status(404).json({ message: "No stores found" });
+      return res.status(404).json({ message: "No stores found", stores });
     }
 
 

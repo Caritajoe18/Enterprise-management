@@ -14,6 +14,7 @@ import GeneralStore from './generalStore';
 import DepartmentStore from './departmentStore';
 import SupplierLedger from './supplierLedger';
 import Supplier from './suppliers';
+import DepartmentLedger from './departmentLedger';
 
 const models = {
   Admins,
@@ -30,7 +31,8 @@ const models = {
   GeneralStore,
   DepartmentStore,
   SupplierLedger,
-  Supplier
+  Supplier,
+  DepartmentLedger
 };
 
 

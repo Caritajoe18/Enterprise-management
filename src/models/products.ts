@@ -15,7 +15,7 @@ export interface ProductsAttributes {
   category: "For Sale" | "For Purchase";
   price: IProduct[];
   pricePlan?: Plan[];
-  departmentId: string | null;
+  departmentId: string ;
 }
 
 export class Products extends Model<ProductsAttributes> {
@@ -72,7 +72,7 @@ Products.init(
     },
     departmentId: {
       type: DataTypes.UUID,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: "Departments",
         key: "id",

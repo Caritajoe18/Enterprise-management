@@ -3,7 +3,7 @@ import { createCustomer, deleteCustomer, getAllCustomers, getCustomer, orderCust
 import { authorize } from '../middleware/staffPermissions';
 import { createSupplier, deleteSupplier, getAllSuppliers, getSupplier, orderSupplierFirstname, searchSupplier, updateSupplier } from '../controller/supplierController';
 import { createAccountAndLedger, getAccountBook, getCustomerLedger, getCustomerLedgerByProduct, getProductLedger, getSupplierAccountBook } from '../controller/ledgerController';
-import { getAllOrders, getOrdersByCustomer, getOrdersByProduct, raiseCustomerOrder } from '../controller/orders';
+import { getAllOrders, getOrdersByCustomer, getOrdersByProduct, raiseCustomerOrder, searchCustomersFromOrders } from '../controller/orders';
 import { getAllSupplierOrders, raiseSupplierOrder } from '../controller/supplierOrder';
 const router = express.Router();
 
@@ -29,9 +29,10 @@ router.get('/order-customers',authorize(), orderCustomersFirstname);
 router.post('/create-account', authorize(), createAccountAndLedger);
 router.get('/get-accountbook', authorize(), getAccountBook);
 router.get('/get-supplier-accountbook', authorize(), getSupplierAccountBook);
+router.get('/search-customer-for-ledger', authorize(), searchCustomersFromOrders);
+router.get("/get-customer-ledger/:customerId",authorize(), getCustomerLedger)
 router.get("/get-ledger/:productId/:customerId", authorize(), getCustomerLedgerByProduct);
 router.get("/get-product-ledger/:productId", authorize(), getProductLedger)
-router.get("/get-customer-ledger/:customerId",authorize(), getCustomerLedger)
 router.post('/raise-customer-order',authorize(),raiseCustomerOrder);
 router.get('/get-product-order/:productId', authorize(), getOrdersByProduct);
 router.get('/get-customer-order/:customerId', authorize(), getOrdersByCustomer);

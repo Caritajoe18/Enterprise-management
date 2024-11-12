@@ -8,6 +8,7 @@ import { option } from "../validations/adminValidation";
 import { toPascalCase } from "../utilities/auths";
 import Products from "../models/products";
 import { Op } from "sequelize";
+import DepartmentLedger from "../models/departmentLedger";
 
 export const createDepartment = async (req: Request, res: Response) => {
   try {
@@ -171,5 +172,40 @@ export const deleteDept = async (req: Request, res: Response) => {
       return res.status(500).json({ error: error.message });
     }
     return res.status(500).json({ error: "An error occurred" });
+  }
+};
+
+
+export const getDepartmentLedgerByDepartmentId = async (req: Request, res: Response) => {
+  const { departmentId } = req.params;
+
+  try {
+    // Validate that departmentId is provided
+    const dept = await Departments.findByPk(departmentId)
+    if (!dept) {
+      return res.status(400).json({ message: "Department is not found" });
+    }
+
+    // Find all entries in DepartmentLedger with the specified departmentId
+    const departmentLedgerEntries = await DepartmentLedger.findAll({
+      where: { departmentId },
+      order: [["createdAt", "DESC"]], // Orders entries by creation date, latest first
+    });
+
+    // If no entries are found, return a 404 response
+    if (!departmentLedgerEntries.length) {
+      return res.status(404).json({ message: "No entries found for this department", departmentLedgerEntries });
+    }
+
+    // Return the department ledger entries
+    return res.status(200).json(departmentLedgerEntries);
+  } catch (error: unknown) {
+    console.error("Error retrieving department ledger:", error);
+
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.status(500).json({ error: "An unknown error occurred" });
   }
 };
