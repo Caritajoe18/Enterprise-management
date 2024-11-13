@@ -3,9 +3,9 @@ import { createDepartment, deleteDept, editDepartment, getAllDepartments, getDep
 import { authorize } from "../middleware/staffPermissions";
 import { getDepartmentForPurchase, getDepartmentForSale, getDepartmentProducts } from "../controller/productController";
 import upload from "../utilities/multer";
-import { createOrder, createStore, deletePharmStore, editStore, getPharmStores, getStoreForPurchase, getStoreForSale, uploadImage, viewOrder } from "../controller/pharmacyStore";
-import { createGenOrder, createGenStore, deleteGenStore, editGenStore, getGenStores, viewGenOrder } from "../controller/generalStore";
-import { createDeptOrder, createDeptStore, deleteDeptStore, editDeptStore, getDeptStoreForPurchase, getDeptStoreForSale, viewDeptOrder } from "../controller/departmentStoreController";
+import { addQuantityToPharmacyStore, createOrder, createStore, deletePharmStore, editStore, getPharmStores, getStoreForPurchase, getStoreForSale, removeQuantityFromPharmacyStore, uploadImage, viewOrder } from "../controller/pharmacyStore";
+import { addQuantityToGeneralStore, createGenOrder, createGenStore, deleteGenStore, editGenStore, getGenStores, removeQuantityFromGeneralStore, viewGenOrder } from "../controller/generalStore";
+import { addQuantityToDepartmentStore, createDeptOrder, createDeptStore, deleteDeptStore, editDeptStore, getDeptStoreForPurchase, getDeptStoreForSale, removeQuantityFromDepartmentStore, viewDeptOrder } from "../controller/departmentStoreController";
 
 const router = express.Router();
 
@@ -29,6 +29,8 @@ router.patch("/edit-pharmstore/:id",authorize(), editStore);
 router.post("/raise-pharm-order",authorize(), createOrder);
 router.get("/view-pharm-order",authorize(), viewOrder);
 router.delete("/delete-pharmstore/:id",authorize(), deletePharmStore);
+router.patch("/remove-quantity-pharm/:Id", removeQuantityFromPharmacyStore);
+router.patch("/add-quantity-pharm/:Id", addQuantityToPharmacyStore);
 
 
 //general Store
@@ -38,6 +40,8 @@ router.patch("/edit-genstore/:id",authorize(), editGenStore);
 router.delete("/delete-genstore/:id",authorize(), deleteGenStore);
 router.get("/view-gen-order",authorize(), viewGenOrder);
 router.post("/create-genstore-order", createGenOrder);
+router.patch("/remove-quantity-gen/:Id", removeQuantityFromGeneralStore);
+router.patch("/add-quantity-gen/:Id", addQuantityToGeneralStore);
 
 //dept store
 router.post('/create-dept-store',authorize(), createDeptStore);
@@ -47,6 +51,8 @@ router.patch('/edit-deptstore/:id',authorize(), editDeptStore);
 router.delete("/delete-deptstore/:id",authorize(), deleteDeptStore);
 router.post("/create-deptstore-order",authorize(), createDeptOrder);
 router.get("/view-deptstore-order",authorize(), viewDeptOrder);
+router.patch("/remove-quantity-dept/:Id", removeQuantityFromDepartmentStore);
+router.patch("/add-quantity-dept/:Id", addQuantityToDepartmentStore);
 
 //department ledger
 router.get("/department-ledger/:departmentId", getDepartmentLedgerByDepartmentId);

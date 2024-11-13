@@ -6,6 +6,7 @@ import {
 } from "../validations/productValidations";
 import GeneralStore from "../models/generalStore";
 import GeneralOrder from "../models/generalOrders";
+import { addQuantityToStore, removeQuantityFromStore } from "../utilities/modules";
 
 export const createGenStore = async (req: Request, res: Response) => {
   try {
@@ -187,4 +188,12 @@ export const deleteGenStore = async (req: Request, res: Response) => {
       error: "Failed to delete store",
     });
   }
+};
+
+export const addQuantityToGeneralStore = async (req: Request, res: Response) => {
+  return addQuantityToStore(req, res, GeneralStore);
+};
+
+export const removeQuantityFromGeneralStore = async (req: Request, res: Response) => {
+  return removeQuantityFromStore(req, res, GeneralStore);
 };

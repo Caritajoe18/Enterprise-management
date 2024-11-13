@@ -57,13 +57,13 @@ AuthToWeigh.init(
     },
     tranxId: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: "CustomerOrders",
         key: "id",
       },
       onUpdate: "CASCADE",
-      onDelete: "CASCADE",
+      onDelete: "SET NULL",
     },
   },
   {

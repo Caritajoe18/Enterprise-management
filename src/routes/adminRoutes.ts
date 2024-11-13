@@ -52,7 +52,6 @@ import {
 import { authenticateAdmin } from "../middleware/adminAuth";
 import {
   approveCashTicket,
-  getAuthToWeigh,
   getCashTicket,
   getLPO,
   getStoreAuth,
@@ -67,6 +66,7 @@ import {
   sendTicketToAdmin,
 } from "../controller/ticketController";
 import { createCashierEntry, getCashierEntry } from "../controller/cashier";
+import { getAuthToWeighDetails } from "../controller/weighBridge";
 
 const router = express.Router();
 router.post("/sign-up", signupAdmin);
@@ -144,5 +144,10 @@ router.patch("/reject-cashticket/:ticketId", authorize(), rejectCashTicket);
 router.get("/view-cash-ticket", getCashTicket);
 router.get("/view-lpo", getLPO);
 router.get("/view-store-auth", getStoreAuth);
-router.get("/view-auth-weigh", getAuthToWeigh);
+
+//weighinsss
+router.get("/view-auth-weigh/:ticketId", getAuthToWeighDetails);
+
+
+
 export default router;

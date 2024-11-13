@@ -36,13 +36,13 @@ module.exports = {
       },
       tranxId: {
         type: Sequelize.UUID,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: "CustomerOrders",
           key: "id",
         },
         onUpdate: "CASCADE",
-        onDelete: "CASCADE",
+        onDelete: "SET NULL",
       },
       createdAt: {
         allowNull: false,

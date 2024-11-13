@@ -6,9 +6,13 @@ dotenv.config();
 const MAIL_SETTINGS = {
   host: "host57.registrar-servers.com",
   port: 465,
+  secure: true,
   auth: {
     user: process.env.MAIL_TRAP_USER,
     pass: process.env.MAIL_TRAP_PASS,
+  },
+  tls: {
+    rejectUnauthorized: true,
   },
 };
 

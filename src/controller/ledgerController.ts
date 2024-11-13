@@ -30,7 +30,8 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
   try {
     const {
       customerId,
-      amount,
+      credit,
+      debit,
       productId,
       supplierId,
       other,
@@ -38,7 +39,7 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
       departmentId,
     } = req.body;
 
-    const parsedAmount = new Decimal(amount);
+    const parsedAmount = new Decimal(credit || debit || 0);
     let accountBook;
     if (customerId) {
       const [customer, product] = await Promise.all([
@@ -65,7 +66,8 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
 
       const customerNewBalance = calculateNewBalance(
         latestCustomerEntry,
-        parsedAmount
+        parsedAmount,
+        !!credit  // Pass true if credit, false if debit
       );
 
       await Ledger.create(
@@ -75,8 +77,8 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
           productId,
           unit: "N/A",
           quantity: 0,
-          credit: parsedAmount.toNumber(),
-          debit: 0,
+          credit: credit ? parsedAmount.toNumber() : 0, 
+          debit: debit ? parsedAmount.toNumber() : 0,    
           balance: customerNewBalance.toNumber(),
           creditType: "Transfer",
         },
@@ -108,7 +110,8 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
 
       const supplierNewBalance = calculateNewBalance(
         latestSupplierEntry,
-        parsedAmount
+        parsedAmount,
+        !!credit 
       );
 
       await SupplierLedger.create(
@@ -118,8 +121,8 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
           productId,
           unit: "N/A",
           quantity: 0,
-          credit: parsedAmount.toNumber(),
-          debit: 0,
+          credit: credit ? parsedAmount.toNumber() : 0,  
+          debit: debit ? parsedAmount.toNumber() : 0, 
           balance: supplierNewBalance.toNumber(),
           creditType: "Transfer",
         },
@@ -128,15 +131,18 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
     } else if (other) {
       accountBook = await createAccountBookEntry(req.body, "Transfer");
 
+      const isCredit = credit ? true: false; 
       await createDepartmentLedgerEntry(
         req.body,
         departmentId,
-        null,
+        null, 
         other,
         parsedAmount,
-        true
+        isCredit, 
+        transaction
       );
     }
+
     await transaction.commit();
     return res.status(201).json({
       message: "Account and ledger created successfully",

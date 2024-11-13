@@ -6,7 +6,7 @@ interface CustomerOrderAttributes {
   customerId: string;
   productId: string;
   unit?: string;
-  quantity?: number;
+  quantity: number;
   price: number;
   discount?: number;
   comments:string;
@@ -25,6 +25,11 @@ class CustomerOrder extends Model<CustomerOrderAttributes> {
       foreignKey: "customerId",
       as: "corder",
     });
+    CustomerOrder.hasOne(models.AuthToWeigh, {
+      foreignKey: "tranxId",  
+      as: "authToWeighTickets",
+    });
+    
   }
 }
 

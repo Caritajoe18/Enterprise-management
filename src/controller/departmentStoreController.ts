@@ -11,6 +11,7 @@ import Products from "../models/products";
 import DepartmentOrder from "../models/departmentOrders";
 import { AuthRequest } from "../middleware/adminAuth";
 import Admins from "../models/admin";
+import { addQuantityToStore, removeQuantityFromStore } from "../utilities/modules";
 
 export const createDeptStore = async (req: AuthRequest, res: Response) => {
   try {
@@ -285,3 +286,16 @@ export const viewDeptOrder = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ error: "Failed to retrieve stores" });
   }
 };
+
+
+export const addQuantityToDepartmentStore = async (req: Request, res: Response) => {
+  return addQuantityToStore(req, res, DepartmentStore);
+};
+
+export const removeQuantityFromDepartmentStore = async (req: Request, res: Response) => {
+  return removeQuantityFromStore(req, res, DepartmentStore);
+};
+
+
+
+
