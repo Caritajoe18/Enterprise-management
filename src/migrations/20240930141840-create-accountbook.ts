@@ -30,7 +30,11 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE' 
       },
-      amount: {
+      credit: {
+        type: Sequelize.DECIMAL(15, 2), 
+        allowNull: false
+      },
+      debit: {
         type: Sequelize.DECIMAL(15, 2), 
         allowNull: false
       },

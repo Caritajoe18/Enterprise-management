@@ -6,7 +6,7 @@ interface CustomerOrderAttributes {
   customerId: string;
   productId: string;
   unit?: string;
-  quantity?: number;
+  quantity: number;
   price: number;
   discount?: number;
   comments:string;
@@ -25,6 +25,11 @@ class CustomerOrder extends Model<CustomerOrderAttributes> {
       foreignKey: "customerId",
       as: "corder",
     });
+    CustomerOrder.hasOne(models.AuthToWeigh, {
+      foreignKey: "tranxId",  
+      as: "authToWeighTickets",
+    });
+    
   }
 }
 
@@ -62,7 +67,7 @@ CustomerOrder.init(
     },
     quantity: {
       type: DataTypes.DECIMAL(10, 3),
-      allowNull: true,
+      allowNull: false,
     },
     price: {
       type: DataTypes.DECIMAL(15, 2),
@@ -80,6 +85,7 @@ CustomerOrder.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    
   },
   {
     sequelize: db,

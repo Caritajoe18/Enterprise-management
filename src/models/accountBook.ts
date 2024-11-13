@@ -6,7 +6,8 @@ export interface AccountAttributes {
   supplierId: string;
   customerId: string;
   productId: string;
-  amount: number;
+  credit: number;
+  debit: number;
   creditType: string;
   bankName:string;
   other:string;
@@ -55,9 +56,13 @@ AccountBook.init(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
-    amount: {
-      type: DataTypes.DECIMAL(15, 2),
-      allowNull: false,
+    credit: {
+      type: DataTypes.DECIMAL(15, 2), 
+      allowNull: true
+    },
+    debit: {
+      type: DataTypes.DECIMAL(15, 2), 
+      allowNull: true
     },
     productId: {
       type: DataTypes.UUID,

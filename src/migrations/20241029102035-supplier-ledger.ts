@@ -35,7 +35,7 @@ module.exports = {
         allowNull: false
       },
       quantity: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.DECIMAL(10,3),
         allowNull: false
       },
       creditType: {

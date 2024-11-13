@@ -8,10 +8,13 @@ import Products from "../models/products";
 import Decimal from "decimal.js";
 import SupplierOrder from "../models/supplierOrder";
 import SupplierLedger from "../models/supplierLedger";
+import db from "../db";
+import { Transaction } from "sequelize";
+import { createDepartmentLedgerEntry } from "../utilities/modules";
 export const raiseSupplierOrder = async (req: AuthRequest, res: Response) => {
+  const transaction: Transaction = await db.transaction();
   try {
     const admin = req.admin as Admins;
-    console.log("Admin from request:", admin);
     const { roleId: adminId } = admin.dataValues;
     const { supplierId, productId, quantity, unit } = req.body;
 
@@ -23,14 +26,22 @@ export const raiseSupplierOrder = async (req: AuthRequest, res: Response) => {
     }
 
     // Check if customer exists
-    const customer = await Supplier.findOne({ where: { id: supplierId } });
-    if (!customer) {
+    const supplier = await Supplier.findOne({
+      where: { id: supplierId },
+      transaction,
+    });
+    if (!supplier) {
+      await transaction.rollback();
       return res.status(404).json({ message: "Supplier not found" });
     }
 
     // Check if product exists
-    const product = await Products.findOne({ where: { id: productId } });
+    const product = await Products.findOne({
+      where: { id: productId },
+      transaction,
+    });
     if (!product) {
+      await transaction.rollback();
       return res.status(404).json({ message: "Product not found" });
     }
     let prices;
@@ -65,22 +76,23 @@ export const raiseSupplierOrder = async (req: AuthRequest, res: Response) => {
       `Unit Price: ${priceToUse} * Quantity: ${parsedQuantity} = Total Price: ${totalPrice}`
     );
 
-    // Create new customer order
-    const newOrder = await SupplierOrder.create({
-      ...req.body,
-      supplierId,
-      productId,
-      createdBy: adminId,
-      unit,
-      quantity,
-      price: totalPrice.toNumber(),
-    });
-    //console.log("Order created successfully:", newOrder);
+    const newOrder = await SupplierOrder.create(
+      {
+        ...req.body,
+        supplierId,
+        productId,
+        createdBy: adminId,
+        unit,
+        quantity,
+        price: totalPrice.toNumber(),
+      },
+      { transaction }
+    );
 
-    // Update ledger with new balance
     const latestEntry = await SupplierLedger.findOne({
-      where: { supplierId, productId },
+      where: { supplierId },
       order: [["createdAt", "DESC"]],
+      transaction,
     });
 
     const prevBalance = latestEntry
@@ -89,23 +101,36 @@ export const raiseSupplierOrder = async (req: AuthRequest, res: Response) => {
     const newBalance = prevBalance.minus(totalPrice);
     console.log(`Previous Balance: ${prevBalance}, New Balance: ${newBalance}`);
 
-    await SupplierLedger.create({
-      ...req.body,
-      supplierId,
-      productId,
-      unit,
-      quantity,
-      credit: 0,
-      debit: totalPrice.toNumber(),
-      balance: newBalance.toNumber(),
-    });
+    await SupplierLedger.create(
+      {
+        ...req.body,
+        supplierId,
+        productId,
+        unit,
+        quantity,
+        credit: 0,
+        debit: totalPrice.toNumber(),
+        balance: newBalance.toNumber(),
+      },
+      { transaction }
+    );
+    await createDepartmentLedgerEntry(
+      req.body,
+      product.dataValues.departmentId,
+      product.dataValues.name,
+      `${supplier.dataValues.firstname} ${supplier.dataValues.lastname}`,
+      totalPrice,
+      true, // Setting `isDebit` to true for a debit transaction
+      transaction
+    );
 
+    await transaction.commit();
     return res.status(201).json({
       message: "Order raised and supplier ledger updated successfully",
       order: newOrder,
     });
   } catch (error) {
-    console.error("Transaction failed:", error);
+    await transaction.rollback();
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
     }

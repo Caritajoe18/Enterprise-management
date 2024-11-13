@@ -34,6 +34,16 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true,
       },
+      tranxId: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: "CustomerOrders",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

@@ -65,38 +65,31 @@ export const updateSupplierSchema = Joi.object({
 
 export const customerOrderSchema = Joi.object({
   customerId: Joi.string().required(),
-
   productId: Joi.string().required(),
-
   unit: Joi.string(),
-
   quantity: Joi.number().required(),
-
   price: Joi.number(),
-
   discount: Joi.number(),
 });
+
 export const supplierOrderSchema = Joi.object({
   supplierId: Joi.string().required(),
-
   productId: Joi.string().required(),
-
   unit: Joi.string(),
-
   quantity: Joi.number().required(),
-
   price: Joi.number(),
-
   discount: Joi.number(),
+  comments: Joi.string(),
 });
 
 export const createLedgerSchema = Joi.object({
   supplierId: Joi.string(),
   customerId: Joi.string(),
   productId: Joi.string(),
-  amount: Joi.number().required(),
+  credit: Joi.number(),
+  debit: Joi.number(),
   bankName: Joi.string(),
-  other:Joi.string(),
-  departmentId:Joi.string(),
-  comments:Joi.string()
+  other: Joi.string(),
+  departmentId: Joi.string(),
+  comments: Joi.string(),
 });

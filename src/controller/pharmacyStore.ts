@@ -8,6 +8,7 @@ import {
 } from "../validations/productValidations";
 import Products from "../models/products";
 import PharmacyOrder from "../models/pharmacyOrders";
+import { addQuantityToStore, removeQuantityFromStore } from "../utilities/modules";
 
 export const uploadImage = async (req: Request, res: Response) => {
   try {
@@ -282,4 +283,12 @@ export const deletePharmStore = async (req: Request, res: Response) => {
       error: "Failed to delete store",
     });
   }
+};
+
+export const addQuantityToPharmacyStore = async (req: Request, res: Response) => {
+  return addQuantityToStore(req, res, PharmacyStore);
+};
+
+export const removeQuantityFromPharmacyStore = async (req: Request, res: Response) => {
+  return removeQuantityFromStore(req, res, PharmacyStore);
 };

@@ -6,6 +6,8 @@ import { getAdminConnection } from "../utilities/web-push";
 import AccountBook from "../models/accountBook";
 import Decimal from "decimal.js";
 import DepartmentLedger from "../models/departmentLedger";
+import Customer from "../models/customers";
+import Products, { Plan } from "../models/products";
 export const getRecords = async (
   req: Request,
   res: Response,
@@ -91,12 +93,12 @@ export const createAccountBookEntry = async (data: any, creditType: string) => {
 export const calculateNewBalance = (
   latestEntry: any,
   amount: Decimal,
-  isDebit: boolean = false
-) => {
+  isCredit: boolean
+): Decimal => {
   const prevBalance = latestEntry
     ? new Decimal(latestEntry.dataValues.balance)
     : new Decimal(0);
-  return isDebit ? prevBalance.minus(amount) : prevBalance.plus(amount);
+  return isCredit ? prevBalance.plus(amount) : prevBalance.minus(amount);
 };
 
 export const createDepartmentLedgerEntry = async (
@@ -105,7 +107,7 @@ export const createDepartmentLedgerEntry = async (
   productName: string | null,
   name: string,
   amount: Decimal,
-  isDebit: boolean,
+  isCredit: boolean,
   transaction?: Transaction
 ) => {
   const departmentLatestEntry = await DepartmentLedger.findOne({
@@ -117,8 +119,9 @@ export const createDepartmentLedgerEntry = async (
   const departmentNewBalance = calculateNewBalance(
     departmentLatestEntry,
     amount,
-    isDebit
+    isCredit
   );
+
   await DepartmentLedger.create(
     {
       ...data,
@@ -126,8 +129,144 @@ export const createDepartmentLedgerEntry = async (
       name,
       productName,
       balance: departmentNewBalance.toNumber(),
-      [isDebit ? "debit" : "credit"]: amount.toNumber(),
+      credit: isCredit ? amount.toNumber() : 0,
+      debit: !isCredit ? amount.toNumber() : 0,
     },
     { transaction }
   );
+};
+export const fetchCustomerAndProduct = async (
+  customerId: string,
+  productId: string
+) => {
+  const [customer, product] = await Promise.all([
+    Customer.findOne({ where: { id: customerId } }),
+    Products.findOne({ where: { id: productId } }),
+  ]);
+  if (!customer) throw new Error("Customer not found");
+  if (!product) throw new Error("Product not found");
+  return { customer, product };
+};
+
+export const getProductPrice = (product: Products, unit: string): Decimal => {
+  let prices = Array.isArray(product.dataValues.price)
+    ? product.dataValues.price
+    : JSON.parse(product.dataValues.price || "[]");
+  const productPrice = prices.find((p: any) => p.unit === unit);
+  if (!productPrice) {
+    const availableUnits = prices.map((p: any) => p.unit).join(", ");
+    throw new Error(
+      `Price not found for unit "${unit}". Available units: [${availableUnits}].`
+    );
+  }
+  return new Decimal(productPrice.amount);
+};
+
+export const applyDiscount = (
+  priceToUse: Decimal,
+  discount: number | null,
+  pricePlan: Plan[] | undefined
+): Decimal => {
+  if (discount && pricePlan) {
+    const matchingPlan = pricePlan.find(
+      (plan: Plan) => plan.amount === discount
+    );
+    if (!matchingPlan) {
+      throw new Error(
+        `Discount of ${discount} does not match any available price plan. Available plans: ${pricePlan
+          .map((plan) => plan.amount)
+          .join(", ")}`
+      );
+    }
+    const discountedPrice = priceToUse.minus(new Decimal(discount));
+    if (discountedPrice.lessThan(0))
+      throw new Error("Discount cannot exceed product price.");
+    return discountedPrice;
+  }
+  if (discount && !pricePlan) {
+    throw new Error(
+      "Discounts are not applicable as no price plan is available."
+    );
+  }
+  return priceToUse;
+};
+
+export const removeQuantityFromStore = async (
+  req: Request,
+  res: Response,
+  StoreModel: ModelStatic<Model>
+) => {
+  const { amount } = req.body;
+  const { Id } = req.params;
+
+  try {
+    if (!amount || isNaN(amount) || amount <= 0) {
+      return res.status(400).json({ message: "Invalid amount value" });
+    }
+
+    const storeEntry = await StoreModel.findByPk(Id);
+
+    if (!storeEntry) {
+      return res
+        .status(404)
+        .json({ message: `${StoreModel.name} entry not found` });
+    }
+
+    if (storeEntry.dataValues.quantity < amount) {
+      return res
+        .status(400)
+        .json({ message: "Insufficient quantity to remove" });
+    }
+
+    storeEntry.dataValues.quantity -= amount;
+
+    await storeEntry.save();
+
+    return res.status(200).json({
+      message: "Quantity removed successfully",
+      data: storeEntry,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "An error occurred" });
+  }
+};
+
+export const addQuantityToStore = async (
+  req: Request,
+  res: Response,
+  StoreModel: ModelStatic<Model>
+) => {
+  const { amount } = req.body;
+  const { Id } = req.params;
+
+  try {
+    if (!amount || isNaN(amount) || amount <= 0) {
+      return res.status(400).json({ message: "Invalid amount value" });
+    }
+
+    const storeEntry = await StoreModel.findByPk(Id);
+
+    if (!storeEntry) {
+      return res
+        .status(404)
+        .json({ message: `${StoreModel.name} entry not found` });
+    }
+
+    storeEntry.dataValues.quantity += amount;
+
+    await storeEntry.save();
+
+    return res.status(200).json({
+      message: "Quantity added successfully",
+      data: storeEntry,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "An error occurred" });
+  }
 };

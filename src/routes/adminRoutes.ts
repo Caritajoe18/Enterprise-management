@@ -27,7 +27,14 @@ import {
   orderStaffFirstname,
   getAdmin,
 } from "../controller/staffController";
-import { addRole, editRole, editRolePermissions, getARoleWithPermission, getAllRoles, getRoles } from "../controller/roleController";
+import {
+  addRole,
+  editRole,
+  editRolePermissions,
+  getARoleWithPermission,
+  getAllRoles,
+  getRoles,
+} from "../controller/roleController";
 import {
   addPermissionsToRole,
   createPermissions,
@@ -45,24 +52,21 @@ import {
 import { authenticateAdmin } from "../middleware/adminAuth";
 import {
   approveCashTicket,
-  getAuthToLoad,
-  getAuthToWeigh,
   getCashTicket,
   getLPO,
   getStoreAuth,
   raiseAuthToCollectFromStore,
-  raiseAuthToLoad,
   raiseAuthToWeight,
   raiseCashTicket,
   raiseLPO,
   rejectCashTicket,
-  sendAuthtoLoad,
   sendAuthtoweigh,
   sendLPOToAdmin,
   sendStoreCollectionAdmin,
   sendTicketToAdmin,
 } from "../controller/ticketController";
 import { createCashierEntry, getCashierEntry } from "../controller/cashier";
+import { getAuthToWeighDetails } from "../controller/weighBridge";
 
 const router = express.Router();
 router.post("/sign-up", signupAdmin);
@@ -130,19 +134,20 @@ router.post(
   authorize(),
   raiseAuthToCollectFromStore
 );
-router.post("/raise-auth-weigh", authorize(), raiseAuthToWeight);
-router.post("/raise-auth-load", authorize(), raiseAuthToLoad);
+router.post("/raise-auth-weigh/:orderId", authorize(), raiseAuthToWeight);
 router.post("/send-ticket/:Id", authorize(), sendTicketToAdmin);
 router.post("/send-lpo/:Id", authorize(), sendLPOToAdmin);
 router.post("/send-store-auth/:Id", sendStoreCollectionAdmin);
 router.post("/send-weigh-auth/:Id", authorize(), sendAuthtoweigh);
-router.post("/send-load-auth/:Id", authorize(), sendAuthtoLoad);
 router.patch("/approve-cash-ticket/:Id", authorize(), approveCashTicket);
 router.patch("/reject-cashticket/:ticketId", authorize(), rejectCashTicket);
 router.get("/view-cash-ticket", getCashTicket);
 router.get("/view-lpo", getLPO);
 router.get("/view-store-auth", getStoreAuth);
-router.get("/view-auth-weigh", getAuthToWeigh);
-router.get("/view-auth-load", getAuthToLoad);
+
+//weighinsss
+router.get("/view-auth-weigh/:ticketId", getAuthToWeighDetails);
+
+
 
 export default router;

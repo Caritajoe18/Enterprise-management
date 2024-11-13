@@ -1,50 +1,25 @@
-import { QueryInterface, DataTypes } from "sequelize";
+import { DataTypes, QueryInterface } from 'sequelize';
 
-/** @type {import('sequelize-cli').Migration} */
-module.exports = {
-  async up(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
-    await queryInterface.createTable("AuthToLoad", {
+export default {
+  up: async (queryInterface: QueryInterface) => {
+    await queryInterface.createTable('AuthToLoad', {
       id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
-        allowNull: false,
+        type: DataTypes.INTEGER,
         primaryKey: true,
-      },
-      raisedByAdminId: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
-      customerId: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      driver: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
-      vehicleNo: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
-      status: {
-        type: Sequelize.ENUM("pending", "approved", "rejected", "completed"),
-        defaultValue: "pending",
-      },
-      approvedBySuperAdminId: {
-        type: Sequelize.STRING,
-        allowNull: true,
+        autoIncrement: true,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
       },
     });
   },
-  async down(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
-    await queryInterface.dropTable("AuthToLoad");
+
+  down: async (queryInterface: QueryInterface) => {
+    await queryInterface.dropTable('AuthToLoad');
   },
 };

@@ -62,7 +62,7 @@ SupplierLedger.init(
         allowNull: true
       },
       quantity: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.DECIMAL(10,3),
         allowNull: false
       },
       creditType: {

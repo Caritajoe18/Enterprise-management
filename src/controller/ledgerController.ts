@@ -30,7 +30,8 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
   try {
     const {
       customerId,
-      amount,
+      credit,
+      debit,
       productId,
       supplierId,
       other,
@@ -38,7 +39,7 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
       departmentId,
     } = req.body;
 
-    const parsedAmount = new Decimal(amount);
+    const parsedAmount = new Decimal(credit || debit || 0);
     let accountBook;
     if (customerId) {
       const [customer, product] = await Promise.all([
@@ -55,10 +56,8 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
         return res.status(404).json({ message: "Product not found" });
       }
 
-      //console.log("Creating account book entry...");
       accountBook = await createAccountBookEntry(req.body, "Transfer");
 
-      //console.log("Fetching latest ledger entry...");
       const latestCustomerEntry = await Ledger.findOne({
         where: { customerId },
         order: [["createdAt", "DESC"]],
@@ -67,10 +66,10 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
 
       const customerNewBalance = calculateNewBalance(
         latestCustomerEntry,
-        parsedAmount
+        parsedAmount,
+        !!credit  // Pass true if credit, false if debit
       );
 
-      // console.log("Creating new ledger entry...");
       await Ledger.create(
         {
           ...req.body,
@@ -78,25 +77,14 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
           productId,
           unit: "N/A",
           quantity: 0,
-          credit: parsedAmount.toNumber(),
-          debit: 0,
+          credit: credit ? parsedAmount.toNumber() : 0, 
+          debit: debit ? parsedAmount.toNumber() : 0,    
           balance: customerNewBalance.toNumber(),
           creditType: "Transfer",
         },
         { transaction }
       );
-
-      await createDepartmentLedgerEntry(
-        req.body,
-        product.dataValues.departmentId,
-        product.dataValues.name,
-        `${customer.dataValues.firstname} ${customer.dataValues.lastname}`,
-        parsedAmount,
-        false,
-        transaction
-      );
     } else if (supplierId) {
-      // console.log("Creating account book entry for supplier...");
       accountBook = await createAccountBookEntry(req.body, "Transfer");
 
       // Fetch the product and products with the same departmentId
@@ -122,7 +110,8 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
 
       const supplierNewBalance = calculateNewBalance(
         latestSupplierEntry,
-        parsedAmount
+        parsedAmount,
+        !!credit 
       );
 
       await SupplierLedger.create(
@@ -132,34 +121,28 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
           productId,
           unit: "N/A",
           quantity: 0,
-          credit: parsedAmount.toNumber(),
-          debit: 0,
+          credit: credit ? parsedAmount.toNumber() : 0,  
+          debit: debit ? parsedAmount.toNumber() : 0, 
           balance: supplierNewBalance.toNumber(),
           creditType: "Transfer",
         },
         { transaction }
       );
-      await createDepartmentLedgerEntry(
-        req.body,
-        product.dataValues.departmentId,
-        product.dataValues.name,
-        `${supplier.dataValues.firstname} ${supplier.dataValues.lastname}`,
-        parsedAmount,
-        true,
-        transaction
-      );
     } else if (other) {
       accountBook = await createAccountBookEntry(req.body, "Transfer");
 
+      const isCredit = credit ? true: false; 
       await createDepartmentLedgerEntry(
         req.body,
         departmentId,
-        null,
+        null, 
         other,
         parsedAmount,
-        true
+        isCredit, 
+        transaction
       );
     }
+
     await transaction.commit();
     return res.status(201).json({
       message: "Account and ledger created successfully",

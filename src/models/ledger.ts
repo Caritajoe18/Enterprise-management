@@ -4,6 +4,7 @@ import db from "../db";
 
 export interface LedgerAttributes { 
   id: string;
+  tranxId:string;
   customerId: string;
   productId: string | null;
   unit:string;
@@ -37,6 +38,16 @@ Ledger.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
       allowNull: false,
+    },
+    tranxId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'CustomerOrders', 
+        key: 'id',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL',
     },
     productId: {
         type: DataTypes.UUID,
