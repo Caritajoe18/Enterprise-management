@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import CashierBook from "../models/cashierbook";
+import DepartmentLedger from "../models/departmentLedger";
 
 export const createCashierEntry = async (req: Request, res: Response) => {
   try {
-    const { approvedByAdminId, comment, credit, debit } =
+    const { name,approvedByAdminId, comment, credit, debit, departmentId } =
       req.body;
 
     const lastEntry = await CashierBook.findOne({
@@ -26,6 +27,33 @@ export const createCashierEntry = async (req: Request, res: Response) => {
       debit,
       balance: newBalance,
     });
+
+    if (departmentId) {
+      const lastDeptLedgerEntry = await DepartmentLedger.findOne({
+        where: { departmentId },
+        order: [["createdAt", "DESC"]],
+      });
+
+      const lastDeptBalance = lastDeptLedgerEntry
+        ? parseFloat(lastDeptLedgerEntry.dataValues.balance as unknown as string)
+        : 0;
+
+      const newDeptBalance =
+        lastDeptBalance +
+        (credit ? parseFloat(credit) : 0) -
+        (debit ? parseFloat(debit) : 0);
+
+        await DepartmentLedger.create({
+          ...req.body,
+          name,
+          departmentId,
+          credit,
+          debit,
+          balance: newDeptBalance,
+          comments:comment,
+        });
+      }
+
 
     return res.status(201).json({
       message: "Cashier entry created successfully",

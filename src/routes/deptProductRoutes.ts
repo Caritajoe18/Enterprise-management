@@ -6,6 +6,7 @@ import upload from "../utilities/multer";
 import { addQuantityToPharmacyStore, createOrder, createStore, deletePharmStore, editStore, getPharmStores, getStoreForPurchase, getStoreForSale, removeQuantityFromPharmacyStore, uploadImage, viewOrder } from "../controller/pharmacyStore";
 import { addQuantityToGeneralStore, createGenOrder, createGenStore, deleteGenStore, editGenStore, getGenStores, removeQuantityFromGeneralStore, viewGenOrder } from "../controller/generalStore";
 import { addQuantityToDepartmentStore, createDeptOrder, createDeptStore, deleteDeptStore, editDeptStore, getDeptStoreForPurchase, getDeptStoreForSale, removeQuantityFromDepartmentStore, viewDeptOrder } from "../controller/departmentStoreController";
+import { checkDepartmentAccess } from "../middleware/deptLedgerAuth";
 
 const router = express.Router();
 
@@ -55,7 +56,7 @@ router.patch("/remove-quantity-dept/:Id", removeQuantityFromDepartmentStore);
 router.patch("/add-quantity-dept/:Id", addQuantityToDepartmentStore);
 
 //department ledger
-router.get("/department-ledger/:departmentId", getDepartmentLedgerByDepartmentId);
+router.get("/department-ledger/:departmentId", checkDepartmentAccess, getDepartmentLedgerByDepartmentId);
 
 
 export default router;

@@ -212,6 +212,34 @@ export const getSupplierAccountBook = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "An unknown error occurred" });
   }
 };
+export const getOtherAccountBook = async (req: Request, res: Response) => {
+  try {
+    const acct: AccountBook[] = await AccountBook.findAll({
+      where: {
+        other: {
+          [Op.ne]: null,
+        } as any,
+      },
+      order: [["createdAt", "DESC"]],
+    });
+
+    if (acct.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No accounts found for Other" });
+    }
+
+    return res
+      .status(200)
+      .json({ message: "Accounts retrieved successfully", acct });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    return res.status(500).json({ error: "An unknown error occurred" });
+  }
+};
 
 export const getCustomerLedgerByProduct = async (
   req: Request,

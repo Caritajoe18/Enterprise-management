@@ -10,6 +10,7 @@ export interface WeighAttributes {
   gross: number;
   net: number;
   extra?: number;
+  image:string
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -75,6 +76,10 @@ Weigh.init(
       type: DataTypes.DECIMAL(10, 3),
       allowNull: true,
     },
+    image:{
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
