@@ -2,7 +2,7 @@ import { DataTypes, Model } from "sequelize";
 import db from "../db";
 export interface CashierAttributes {
   id: string;
-  //amount: number;
+  departmentId: string;
   name:string;
   approvedByAdminId:string;
   comment: string;
@@ -25,10 +25,15 @@ CashierBook.init(
       allowNull: false,
       primaryKey:true
     },
-    // amount: {
-    //   type: DataTypes.DECIMAL(15,2),
-    //   allowNull:false,
-    // },
+    departmentId: {
+      type: DataTypes.UUID,
+      references: {
+        model: "Departments",  
+        key: "id",
+      },
+      allowNull: true,
+      onDelete: 'SET NULL',  
+    },
     name: {
       type: DataTypes.STRING,
       allowNull: false,

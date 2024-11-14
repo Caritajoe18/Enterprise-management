@@ -67,6 +67,7 @@ import {
 } from "../controller/ticketController";
 import { createCashierEntry, getCashierEntry } from "../controller/cashier";
 import { getAuthToWeighDetails } from "../controller/weighBridge";
+import { getNotifications } from "../controller/notification";
 
 const router = express.Router();
 router.post("/sign-up", signupAdmin);
@@ -147,6 +148,10 @@ router.get("/view-store-auth", getStoreAuth);
 
 //weighinsss
 router.get("/view-auth-weigh/:ticketId", getAuthToWeighDetails);
+
+//notification
+router.get("/get-notifications", authorize(),getNotifications);
+
 
 
 

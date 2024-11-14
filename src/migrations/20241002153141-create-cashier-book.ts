@@ -10,9 +10,15 @@ module.exports = {
         allowNull: false,
         primaryKey: true,
       },
-      // amount: {
-      //   type: Sequelize.DECIMAL(15, 2),
-      // },
+      departmentId: {
+        type: Sequelize.UUID,
+        references: {
+          model: "Departments",  
+          key: "id",
+        },
+        allowNull: true,
+        onDelete: 'SET NULL',  
+      },
       name: {
         type: Sequelize.STRING,
         allowNull: false,

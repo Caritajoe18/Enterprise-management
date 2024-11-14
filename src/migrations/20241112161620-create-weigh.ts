@@ -49,6 +49,10 @@ export default {
         type: DataTypes.DECIMAL(10, 3),
         allowNull: true,
       },
+      image:{
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       createdAt: {
         allowNull: false,
         type: DataTypes.DATE,

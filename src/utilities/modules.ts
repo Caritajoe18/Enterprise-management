@@ -17,6 +17,7 @@ export const getRecords = async (
   try {
     const records = await model.findAll({
       order: [["createdAt", "DESC"]],
+      where:{status: "approved"}
     });
 
     if (records.length === 0) {
