@@ -104,7 +104,7 @@ export const generateTokenEmailHTML = (
         <style>
           body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #000000;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -115,7 +115,7 @@ export const generateTokenEmailHTML = (
           .container {
             max-width: 600px;
             margin: auto;
-            background-color: #fff;
+            background-color: #f4f4f4;
             border-radius: 4px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             padding: 20px;
