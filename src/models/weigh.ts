@@ -9,7 +9,7 @@ export interface WeighAttributes {
   tar: number;
   gross: number;
   net: number;
-  extra?: number;
+  extra?: number| null;
   image:string
   createdAt?: Date;
   updatedAt?: Date;
@@ -23,7 +23,7 @@ export class Weigh extends Model<WeighAttributes> {
     });
     Weigh.belongsTo(models.CustomerOrder, {
       foreignKey: "tranxId",
-      as: "transaction",
+      as: "transactions",
     });
   }
 }

@@ -130,6 +130,7 @@ export const raiseCustomerOrder = async (req: AuthRequest, res: Response) => {
     await Ledger.create(
       {
         ...req.body,
+        tranxId: newOrder.dataValues.id,
         customerId,
         productId,
         unit,

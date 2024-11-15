@@ -12,7 +12,7 @@ interface GeneralOrderAttributes {
 
 export class GeneralOrder extends Model<GeneralOrderAttributes> {
   static associate(models: any) {
-    GeneralOrder.belongsTo(models.Products, {
+    GeneralOrder.belongsTo(models.GeneralStore, {
       as: "store",
       foreignKey: "productId",
     });
@@ -31,7 +31,7 @@ GeneralOrder.init(
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: "Products",
+        model: "GeneralStores",
         key: "id",
       },
       onUpdate: "CASCADE",

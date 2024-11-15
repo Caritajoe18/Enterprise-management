@@ -17,7 +17,11 @@ export class AuthToWeigh extends Model<AuthToWeighAttributes> {
     // Define associations here, if needed
     AuthToWeigh.belongsTo(models.CustomerOrder, {
       foreignKey: "tranxId",
-      as: "transaction", // Alias for the association
+      as: "transactions", // Alias for the association
+    });
+    AuthToWeigh.belongsTo(models.Customer, {
+      foreignKey: "customerId",
+      as: "customer", // Alias for the association
     });
     
   }
@@ -36,8 +40,14 @@ AuthToWeigh.init(
       allowNull: true,
     },
     customerId: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: "Customer",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
     },
     driver: {
       type: DataTypes.STRING,
