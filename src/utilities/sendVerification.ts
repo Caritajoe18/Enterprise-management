@@ -12,7 +12,7 @@ const MAIL_SETTINGS = {
     pass: process.env.MAIL_TRAP_PASS,
   },
   tls: {
-    rejectUnauthorized: true,
+    rejectUnauthorized: false,
   },
 };
 
