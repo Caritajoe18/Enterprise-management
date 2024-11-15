@@ -15,7 +15,7 @@ const MAIL_SETTINGS = {
     rejectUnauthorized: false,
   },
 };
-
+// added tls
 export const sendVerificationMail = async (
   email: string,
   item: number | string,
