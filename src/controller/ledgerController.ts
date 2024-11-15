@@ -67,7 +67,7 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
       const customerNewBalance = calculateNewBalance(
         latestCustomerEntry,
         parsedAmount,
-        !!credit  // Pass true if credit, false if debit
+        !!credit // Pass true if credit, false if debit
       );
 
       await Ledger.create(
@@ -77,8 +77,8 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
           productId,
           unit: "N/A",
           quantity: 0,
-          credit: credit ? parsedAmount.toNumber() : 0, 
-          debit: debit ? parsedAmount.toNumber() : 0,    
+          credit: credit ? parsedAmount.toNumber() : 0,
+          debit: debit ? parsedAmount.toNumber() : 0,
           balance: customerNewBalance.toNumber(),
           creditType: "Transfer",
         },
@@ -111,7 +111,7 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
       const supplierNewBalance = calculateNewBalance(
         latestSupplierEntry,
         parsedAmount,
-        !!credit 
+        !!credit
       );
 
       await SupplierLedger.create(
@@ -121,8 +121,8 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
           productId,
           unit: "N/A",
           quantity: 0,
-          credit: credit ? parsedAmount.toNumber() : 0,  
-          debit: debit ? parsedAmount.toNumber() : 0, 
+          credit: credit ? parsedAmount.toNumber() : 0,
+          debit: debit ? parsedAmount.toNumber() : 0,
           balance: supplierNewBalance.toNumber(),
           creditType: "Transfer",
         },
@@ -131,14 +131,14 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
     } else if (other) {
       accountBook = await createAccountBookEntry(req.body, "Transfer");
 
-      const isCredit = credit ? true: false; 
+      const isCredit = credit ? true : false;
       await createDepartmentLedgerEntry(
         req.body,
         departmentId,
-        null, 
+        null,
         other,
         parsedAmount,
-        isCredit, 
+        isCredit,
         transaction
       );
     }
@@ -163,12 +163,24 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
 export const getAccountBook = async (req: Request, res: Response) => {
   try {
     const acct: AccountBook[] = await AccountBook.findAll({
-      where: {
-        customerId: {
-          [Op.ne]: null,
-        } as any,
-      },
       order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: Customer,
+          as: "theCustomer",
+          attributes: ["firstname", "lastname"],
+        },
+        {
+          model: Supplier,
+          as: "theSupplier",
+          attributes: ["firstname", "lastname"],
+        },
+        {
+          model: Products,
+          as: "theProduct",
+          attributes: ["name"],
+        },
+      ],
     });
     if (acct.length === 0) {
       return res.status(404).json({ message: "Not found" });
@@ -224,9 +236,7 @@ export const getOtherAccountBook = async (req: Request, res: Response) => {
     });
 
     if (acct.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No accounts found for Other" });
+      return res.status(404).json({ message: "No accounts found for Other" });
     }
 
     return res

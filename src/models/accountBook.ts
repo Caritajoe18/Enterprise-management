@@ -19,11 +19,15 @@ export class AccountBook extends Model<AccountAttributes> {
   static associate(models: any) {
     AccountBook.belongsTo(models.Customer, {
       foreignKey: "customerId",
-      as: "account",
+      as: "theCustomer",
     });
-    AccountBook.belongsTo(models.Suppliers, {
+    AccountBook.belongsTo(models.Supplier, {
       foreignKey: "supplierId",
-      as: "accounts",
+      as: "theSupplier",
+    });
+    AccountBook.belongsTo(models.Products, {
+      foreignKey: "productId",
+      as: "theProduct",
     });
   }
 }

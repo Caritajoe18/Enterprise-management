@@ -433,3 +433,7 @@ export const getStoreAuth = async (req: Request, res: Response) => {
   }
 };
 
+export const getAuthToWeigh = (req: Request, res: Response) => {
+  getRecords(req, res, AuthToWeigh, "Authorities to weigh");
+};
+

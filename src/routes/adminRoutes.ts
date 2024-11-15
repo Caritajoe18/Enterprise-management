@@ -37,6 +37,7 @@ import {
 } from "../controller/roleController";
 import {
   addPermissionsToRole,
+  bulkEditPermissions,
   createPermissions,
   getAllPermissions,
   removePermissionsFromRole,
@@ -52,6 +53,7 @@ import {
 import { authenticateAdmin } from "../middleware/adminAuth";
 import {
   approveCashTicket,
+  getAuthToWeigh,
   getCashTicket,
   getLPO,
   getStoreAuth,
@@ -76,6 +78,7 @@ router.post("/login", loginAdmin);
 //permissions
 router.get("/get-all-nav", getAllNavandPerm);
 router.post("/add-permissions", authorize(), createPermissions);
+router.patch("/edit-permissions", authorize(), bulkEditPermissions);
 router.post("/add-nav", authorize(), createNavParent);
 router.get("/get-nav", authenticateAdmin, getUserNavPermissions);
 router.get("/get-permissions", authorize(), getAllPermissions);
@@ -145,6 +148,7 @@ router.patch("/reject-cashticket/:ticketId", authorize(), rejectCashTicket);
 router.get("/view-cash-ticket", getCashTicket);
 router.get("/view-lpo", getLPO);
 router.get("/view-store-auth", getStoreAuth);
+router.get("/view-all-auth-weigh", getAuthToWeigh);
 
 //weighinsss
 router.get("/view-auth-weigh/:ticketId", getAuthToWeighDetails);
