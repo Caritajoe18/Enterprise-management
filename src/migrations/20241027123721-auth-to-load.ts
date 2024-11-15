@@ -8,6 +8,16 @@ export default {
         primaryKey: true,
         autoIncrement: true,
       },
+      customerId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+          model: "Customers",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
+      },
       createdAt: {
         allowNull: false,
         type: DataTypes.DATE,

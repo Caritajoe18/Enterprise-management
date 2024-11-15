@@ -8,21 +8,23 @@ export interface CustomerAttributes {
   firstname: string;
   lastname: string;
   date: Date;
-  email:string;
-  profilePic?:string;
+  email: string;
+  profilePic?: string;
   phoneNumber: string;
   address?: string;
-  
 }
 
 export class Customer extends Model<CustomerAttributes> {
-
   static associate(models: any) {
-    Customer.hasMany(models.CustomerOrder, { foreignKey: 'customerId', as : 'orders'  });
- 
-    
+    Customer.hasMany(models.CustomerOrder, {
+      foreignKey: "customerId",
+      as: "orders",
+    });
+    Customer.hasMany(models.AccountBook, {
+      foreignKey: "customerId",
+      as: "accountBooks",
+    });
   }
-
 }
 
 Customer.init(
@@ -33,16 +35,15 @@ Customer.init(
       primaryKey: true,
       allowNull: false,
     },
-    idCount:{
+    idCount: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
-      unique:true
+      unique: true,
     },
-    customerTag :{
+    customerTag: {
       type: DataTypes.STRING,
       allowNull: true,
-      unique:true
-
+      unique: true,
     },
     firstname: {
       type: DataTypes.STRING,
@@ -73,7 +74,6 @@ Customer.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-  
   },
   {
     sequelize: db,
