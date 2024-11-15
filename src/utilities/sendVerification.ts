@@ -12,10 +12,10 @@ const MAIL_SETTINGS = {
     pass: process.env.MAIL_TRAP_PASS,
   },
   tls: {
-    rejectUnauthorized: true,
+    rejectUnauthorized: false,
   },
 };
-
+// added tls
 export const sendVerificationMail = async (
   email: string,
   item: number | string,

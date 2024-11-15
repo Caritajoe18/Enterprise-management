@@ -77,7 +77,7 @@ export const generateVerificationEmailHTML = (
               below to login and complete the verification process:
             </p>
             <p><button style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
-            <a href="http://localhost:5000/admin/reset-password?token=${item}" style="color: white; text-decoration: none;">Login</a>
+            <a href="${item}" style="color: white; text-decoration: none;">Login</a>
           </button></p>
             <p>If you did not request this, please ignore this email.</p>
           </div>
@@ -90,7 +90,10 @@ export const generateVerificationEmailHTML = (
   `;
 };
 
-export const generateTokenEmailHTML = (fullname: string, item: number | string) => {
+export const generateTokenEmailHTML = (
+  fullname: string,
+  item: number | string
+) => {
   return `
     <!DOCTYPE html>
     <html lang="en">
