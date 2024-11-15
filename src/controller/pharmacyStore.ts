@@ -197,9 +197,21 @@ export const editStore = async (req: Request, res: Response) => {
 export const createOrder = async (req: Request, res: Response) => {
   try {
     const { orders } = req.body;
+    if (!Array.isArray(orders) || orders.length === 0) {
+      return res.status(400).json({ message: "Orders array cannot be empty." });
+    }
 
+
+    const rawMaterial = new Set();
     const validatedOrders = [];
     for (const order of orders) {
+      if (rawMaterial.has(order.rawMaterial)) {
+        return res.status(400).json({
+          message: `Duplicate order for product ID ${order.rawMaterial} is not allowed.`,
+        });
+      }
+      rawMaterial.add(order.rawMaterial);
+
       const { error, value } = orderValidationSchema.validate(order, {
         abortEarly: false,
       });

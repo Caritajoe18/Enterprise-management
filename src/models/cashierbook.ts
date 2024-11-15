@@ -10,6 +10,7 @@ export interface CashierAttributes {
   debit: number;
   balance: number;
   createdAt:Date;
+
 }
 
 export class CashierBook extends Model<CashierAttributes> {

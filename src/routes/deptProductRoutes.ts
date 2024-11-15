@@ -40,7 +40,7 @@ router.get("/view-gen-store",authorize(), getGenStores);
 router.patch("/edit-genstore/:id",authorize(), editGenStore);
 router.delete("/delete-genstore/:id",authorize(), deleteGenStore);
 router.get("/view-gen-order",authorize(), viewGenOrder);
-router.post("/create-genstore-order", createGenOrder);
+router.post("/create-genstore-order",authorize(), createGenOrder);
 router.patch("/remove-quantity-gen/:Id", removeQuantityFromGeneralStore);
 router.patch("/add-quantity-gen/:Id", addQuantityToGeneralStore);
 
