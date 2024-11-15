@@ -1,12 +1,12 @@
 import { QueryInterface, DataTypes } from "sequelize";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
     await queryInterface.bulkInsert("NavParents", [
       {
-        id: uuidv4(), 
+        id: uuidv4(),
         name: "Account Book",
         iconUrl: "fa-hat",
         slug: "account-book",
@@ -14,7 +14,6 @@ module.exports = {
         isNav: true,
         createdAt: new Date(),
         updatedAt: new Date(),
-
       },
       {
         id: uuidv4(),
@@ -25,10 +24,9 @@ module.exports = {
         isNav: true,
         createdAt: new Date(),
         updatedAt: new Date(),
-
       },
       {
-        id: uuidv4(), 
+        id: uuidv4(),
         name: "Suppliers",
         iconUrl: "fa-truck-loading",
         slug: "suppliers",
@@ -36,10 +34,9 @@ module.exports = {
         isNav: true,
         createdAt: new Date(),
         updatedAt: new Date(),
-
       },
       {
-        id: uuidv4() ,
+        id: uuidv4(),
         name: "Products",
         iconUrl: "fa-box-open",
         slug: "products",
@@ -47,7 +44,6 @@ module.exports = {
         isNav: true,
         createdAt: new Date(),
         updatedAt: new Date(),
-
       },
       {
         id: uuidv4(),
@@ -58,7 +54,6 @@ module.exports = {
         isNav: true,
         createdAt: new Date(),
         updatedAt: new Date(),
-
       },
       {
         id: uuidv4(),
@@ -90,22 +85,13 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
-      {
-        id: uuidv4(),
-        name: "Raise Ticket",
-        iconUrl: "fa-ticket-alt",
-        slug: "raise-ticket",
-        orderIndex: 10,
-        isNav: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+
       {
         id: uuidv4(),
         name: "Pharmacy Store",
         iconUrl: "fa-pills",
         slug: "pharmacy-store",
-        orderIndex: 11,
+        orderIndex: 9,
         isNav: true,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -115,7 +101,7 @@ module.exports = {
         name: "Department",
         iconUrl: "fa-buildings",
         slug: "department",
-        orderIndex: 12,
+        orderIndex: 10,
         isNav: true,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -125,38 +111,38 @@ module.exports = {
         name: "Tickets",
         iconUrl: "fa-tags",
         slug: "tickets",
-        orderIndex: 13,
+        orderIndex: 11,
         isNav: true,
         createdAt: new Date(),
         updatedAt: new Date(),
-
+      },
+      {
+        id: uuidv4(),
+        name: "Receipt",
+        iconUrl: "fa-receipt",
+        slug: "reciept",
+        orderIndex: 12,
+        isNav: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       {
         id: uuidv4(),
         name: "Cashier",
         iconUrl: "fa-money-bill-wave",
         slug: "cash-managment",
-        orderIndex: 14,
+        orderIndex: 13,
         isNav: true,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
-      {
-        id: uuidv4(),
-        name: "Accounting",
-        iconUrl: "fa-calculator",
-        slug: "accounting",
-        orderIndex: 15,
-        isNav: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+
       {
         id: uuidv4(),
         name: "Weigh Brigde",
         iconUrl: "fa-balance-scale",
         slug: "weighing-operations",
-        orderIndex: 16,
+        orderIndex: 14,
         isNav: true,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -166,17 +152,7 @@ module.exports = {
         name: "Report",
         iconUrl: "fa-file-alt",
         slug: "report",
-        orderIndex: 17,
-        isNav: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id:uuidv4() ,
-        name: "Notification",
-        iconUrl: "fa-bell",
-        slug: "notification",
-        orderIndex: 18,
+        orderIndex: 15,
         isNav: true,
         createdAt: new Date(),
         updatedAt: new Date(),

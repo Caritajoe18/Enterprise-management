@@ -37,6 +37,7 @@ import {
 } from "../controller/roleController";
 import {
   addPermissionsToRole,
+  bulkEditPermissions,
   createPermissions,
   getAllPermissions,
   removePermissionsFromRole,
@@ -77,6 +78,7 @@ router.post("/login", loginAdmin);
 //permissions
 router.get("/get-all-nav", getAllNavandPerm);
 router.post("/add-permissions", authorize(), createPermissions);
+router.patch("/edit-permissions", authorize(), bulkEditPermissions);
 router.post("/add-nav", authorize(), createNavParent);
 router.get("/get-nav", authenticateAdmin, getUserNavPermissions);
 router.get("/get-permissions", authorize(), getAllPermissions);
