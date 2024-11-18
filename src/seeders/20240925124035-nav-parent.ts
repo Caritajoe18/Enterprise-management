@@ -118,9 +118,9 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        name: "Receipt",
+        name: "Receipts",
         iconUrl: "fa-receipt",
-        slug: "reciept",
+        slug: "reciepts",
         orderIndex: 12,
         isNav: true,
         createdAt: new Date(),
@@ -149,7 +149,7 @@ module.exports = {
       },
       {
         id: uuidv4(),
-        name: "Report",
+        name: "Report and Analysis",
         iconUrl: "fa-file-alt",
         slug: "report",
         orderIndex: 15,
