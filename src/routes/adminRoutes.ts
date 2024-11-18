@@ -83,8 +83,6 @@ router.post("/add-nav", authorize(), createNavParent);
 router.get("/get-nav", authenticateAdmin, getUserNavPermissions);
 router.get("/get-permissions", authorize(), getAllPermissions);
 
-//router.get("/get-permissi", getNavWithPermissions ); //testing
-
 //products
 router.post("/add-product", authorize(), createProducts);
 router.patch("/edit-product/:id", authorize(), updateProducts);
@@ -99,7 +97,7 @@ router.get("/get-roles", authorize(), getAllRoles);
 router.get("/get-rolePerm", authorize(), getRoles);
 router.get("/get-a-role/:roleId", authorize(), getARoleWithPermission);
 router.put("/edit-role/:roleId", authorize(), editRole);
-router.put("/editing-role/:roleId", authorize(), editRolePermissions);
+router.put("/editing-role/:roleId", authorize(), editRolePermissions); // on review
 router.patch(
   "/add-permission/:roleId/permissions",
   authorize(),
@@ -113,7 +111,7 @@ router.delete(
 
 router.post("/reg-staff", authorize(), signupStaff);
 router.post("/login-mail", loginMial);
-router.post("/forgot", limiter, authorize(), forgotPassword);
+router.post("/forgot", limiter, forgotPassword);
 
 router.patch("/reset-password", limiter, resetPassword);
 router.patch("/update-staff/:id", authorize(), updateStaff);
@@ -124,7 +122,7 @@ router.get("/all-staff", authorize(), getAllStaff);
 router.get("/all-admin", getAdmin);
 router.get("/search-staff", searchStaff);
 router.get("/suspended-staff", authorize(), getSuspendedStaff);
-router.get("/order-staff", authorize(), orderStaffFirstname);
+router.get("/order-staff", orderStaffFirstname);
 
 //cashier
 router.post("/create-cashier-book", authorize(), createCashierEntry);
@@ -139,10 +137,10 @@ router.post(
   raiseAuthToCollectFromStore
 );
 router.post("/raise-auth-weigh/:orderId", authorize(), raiseAuthToWeight);
-router.post("/send-ticket/:Id", authorize(), sendTicketToAdmin);
-router.post("/send-lpo/:Id", authorize(), sendLPOToAdmin);
+router.post("/send-ticket/:Id", sendTicketToAdmin);
+router.post("/send-lpo/:Id", sendLPOToAdmin);
 router.post("/send-store-auth/:Id", sendStoreCollectionAdmin);
-router.post("/send-weigh-auth/:Id", authorize(), sendAuthtoweigh);
+router.post("/send-weigh-auth/:Id", sendAuthtoweigh);
 router.patch("/approve-cash-ticket/:Id", authorize(), approveCashTicket);
 router.patch("/reject-cashticket/:ticketId", authorize(), rejectCashTicket);
 router.get("/view-cash-ticket", getCashTicket);

@@ -26,6 +26,7 @@ import {
   getOtherAccountBook,
   getProductLedger,
   getSupplierAccountBook,
+  getSupplierLedger,
 } from "../controller/ledgerController";
 import {
   getAllOrders,
@@ -69,6 +70,7 @@ router.get(
   searchCustomersFromOrders
 );
 router.get("/get-customer-ledger/:customerId", authorize(), getCustomerLedger);
+router.get("/get-supplier-ledger/:supplierId", authorize(), getSupplierLedger);
 router.get(
   "/get-ledger/:productId/:customerId",
   authorize(),
@@ -85,8 +87,18 @@ router.get("/get-all-supplier-orders", authorize(), getAllSupplierOrders);
 
 //weigh operations
 router.post("/create-weigh/:authToWeighId", authorize(), createWeigh);
-router.get("/view-weigh/:weighId", authorize(), viewWeigh);
+router.get("/view-weigh/:weighId", viewWeigh);
 router.get("/view-weighs", authorize(), viewAllWeigh);
+
+//receipts
+router.post("/create-invoice")
+router.get("/get-invoice")
+router.post("/create-waybill")
+router.get("/get-waybill")
+router.post("/create-gatepass")
+router.get("/get-gatepass")
+router.post("/create-vehicle-dispatch")
+router.get("/get-vehicle-dispatch")
 
 
 export default router;

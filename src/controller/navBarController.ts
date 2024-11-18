@@ -52,6 +52,7 @@ export const getAllNavandPerm = async (req: Request, res: Response) => {
         navParentId: navParentIds,
       },
       attributes: ["id", "name", "slug", "url", "navParentId"],
+      order: [["orderIndex", "ASC"]],
     });
 
     const navParentMap: Record<number, any> = {};
