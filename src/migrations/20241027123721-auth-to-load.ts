@@ -52,6 +52,16 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
+      acctbookId: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        references: {
+          model: "AccountBooks",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
+      },
       quantityOrdered: {
         type: DataTypes.DECIMAL(10, 3),
         allowNull: false,
@@ -62,10 +72,6 @@ module.exports = {
       },
       credit: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: true,
-      },
-      bankName: {
-        type: DataTypes.STRING,
         allowNull: true,
       },
       balanceBeforeDebit: {
@@ -80,26 +86,26 @@ module.exports = {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
       },
+      bankName: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
       preparedBy: {
         type: DataTypes.STRING,
-        allowNull: false,
-      },
-      deliveredBy: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      checkedBy: {
-        type: DataTypes.STRING,
         allowNull: true,
       },
-      customerSig: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
+      // deliveredBy: {
+      //   type: DataTypes.STRING,
+      //   allowNull: false,
+      // },
+      // checkedBy: {
+      //   type: DataTypes.STRING,
+      //   allowNull: true,
+      // },
       invoiceNumber: {
-        type: DataTypes.STRING,
-        unique: true,
+        type: DataTypes.INTEGER,
         allowNull: false,
+        autoIncrement: true,
       },
       createdAt: {
         allowNull: false,

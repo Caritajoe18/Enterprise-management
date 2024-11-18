@@ -107,27 +107,31 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
         order: [["createdAt", "DESC"]],
         transaction,
       });
+      const isCredit = credit ? true : false;
 
       const supplierNewBalance = calculateNewBalance(
         latestSupplierEntry,
         parsedAmount,
-        !!credit
+        isCredit
       );
+      const supplierDebit = credit ? 0 : parsedAmount.toNumber();
+      const supplierCredit = credit ? parsedAmount.toNumber() : 0;
 
-      await SupplierLedger.create(
+      const supLedgerEntry = await SupplierLedger.create(
         {
           ...req.body,
           supplierId,
           productId,
           unit: "N/A",
           quantity: 0,
-          credit: credit ? parsedAmount.toNumber() : 0,
-          debit: debit ? parsedAmount.toNumber() : 0,
+          credit: supplierDebit,
+          debit: supplierCredit,
           balance: supplierNewBalance.toNumber(),
           creditType: "Transfer",
         },
         { transaction }
       );
+      console.log("sup", supLedgerEntry);
     } else if (other) {
       accountBook = await createAccountBookEntry(req.body, "Transfer");
 
