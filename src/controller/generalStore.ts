@@ -14,7 +14,7 @@ import Products from "../models/products";
 
 export const createGenStore = async (req: Request, res: Response) => {
   try {
-    const { name, productId, departmentId } = req.body;
+    const { name } = req.body;
     const { error, value } = genStoreValidationSchema.validate(req.body, {
       abortEarly: false,
     });
@@ -22,14 +22,6 @@ export const createGenStore = async (req: Request, res: Response) => {
     if (error) {
       const errors = error.details.map((detail) => detail.message);
       return res.status(400).json({ errors });
-    }
-    const product = await Products.findOne({
-      where: { id: productId, departmentId },
-    });
-    if (!product) {
-      return res.status(404).json({
-        message: `Product not found in department or does not exist`,
-      });
     }
 
     const exist = await GeneralStore.findOne({ where: { name } });

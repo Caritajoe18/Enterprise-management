@@ -19,13 +19,7 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
     const { tranxId } = req.params;
     const ledger = await Ledger.findOne({
       where: { tranxId },
-      include: [
-        {
-          model: AccountBook,
-          as: "accountBook",
-          attributes: ["id", "bankName"],
-        },
-      ],
+      
     });
     if (!ledger) {
       return res.status(404).json({ message: "Ledger not found" });
@@ -39,6 +33,14 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
       },
       order: [["createdAt", "ASC"]],
       attributes: ["productId","quantity","unit","credit", "debit","balance"],
+    });
+    const previousEntries = await Ledger.findAll({
+      where: {
+        customerId,
+        id: { [Op.lt]: ledger.dataValues.id },
+      },
+      order: [["id", "DESC"]],
+      limit: 2,
       include: [
         {
           model: AccountBook,
@@ -48,14 +50,6 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
       ],
     });
 
-    const previousEntries = await Ledger.findAll({
-      where: {
-        customerId,
-        id: { [Op.lt]: ledger.dataValues.id },
-      },
-      order: [["id", "DESC"]],
-      limit: 2,
-    });
     let prevBalance = null;
     let credit = null;
     let bankName = null;
@@ -67,12 +61,11 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
       if (lastEntry.dataValues.credit) {
         credit = lastEntry.dataValues.credit;
         balanceBeforeDebit = lastEntry.dataValues.balance
-        bankName = await AccountBook.findOne({
-          where: { id: lastEntry.dataValues.acctBookId },
-          attributes: ["bankName"],
-        }).then((book) => book?.dataValues.bankName);
+        const accountBook = lastEntry.get("accountBook") as AccountBook | null;
+        console.log("acct", accountBook)
+        bankName = accountBook?.dataValues.bankName
 
-        // Balance before credit
+
         prevBalance = secondLastEntry.dataValues.balance;
       } else {
         credit = null;
@@ -85,11 +78,11 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
     const order = await CustomerOrder.findByPk(tranxId, {
       attributes: ["id", "price", "quantity"],
       include: [
-        {
-          model: Customer,
-          as: "corder",
-          attributes: ["id", "firstname", "lastname"],
-        },
+        // {
+        //   model: Customer,
+        //   as: "corder",
+        //   attributes: ["id", "firstname", "lastname"],
+        // },
         {
           model: Products,
           as: "porders",
@@ -106,12 +99,12 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
-    const { id, corder, porder, authToWeighTickets } = order.get() as any;
+    const { porder, authToWeighTickets } = order.get() as any;
 
     const productId = porder?.id;
     const vehicleNo = authToWeighTickets.vehicleId;
     const latestLedgerEntry = await Ledger.findOne({
-      where: { customerId: ledger.dataValues.customerId },
+      where: { customerId},
       order: [["createdAt", "DESC"]],
       attributes: ["balance"],
     });
@@ -132,6 +125,7 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
       balanceBeforeDebit: prevBalance,
       currentBalance,
       bankName,
+      ledgerEntries,
       preparedBy: adminId,
     });
     const formattedInvoiceNumber = invoice.dataValues.invoiceNumber
@@ -144,6 +138,77 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
       invoiceNumber: formattedInvoiceNumber,
       ledgerEntries,
     });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An error occurred" });
+  }
+};
+
+export const getInvoice = async (req: Request, res: Response) => {
+  try {
+    const { tranxId } = req.params;
+
+    // Fetch the invoice
+    const invoice = await Invoice.findOne({
+      where: { tranxId },
+      include: [
+        {
+          model: Ledger,
+          as: "ledgers", // Ensure this matches your alias
+          attributes: [
+            "id",
+            "tranxId",
+            "productId",
+            "quantity",
+            "unit",
+            "credit",
+            "debit",
+            "balance",
+            "createdAt",
+          ],
+          include: [
+            {
+              model: AccountBook,
+              as: "accountBook",
+              attributes: ["id", "bankName"],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!invoice) {
+      return res.status(404).json({ message: "Invoice not found" });
+    }
+
+    // Parse ledger entries
+    // const ledgerEntries = invoice.dataValues.ledgerEntries.map((ledger: any) => {
+    //   const parsedLedger = {
+    //     ...ledger.toJSON(),
+    //     credit:
+    //       typeof ledger.dataValues.credit === "string"
+    //         ? JSON.parse(ledger.dataValues.credit)
+    //         : ledger.dataValues.credit,
+    //     debit:
+    //       typeof ledger.dataValues.debit === "string"
+    //         ? JSON.parse(ledger.dataValues.debit)
+    //         : ledger.dataValues.debit,
+    //     accountBook: ledger.accountBook,
+    //   };
+
+    //   return parsedLedger;
+    // });
+
+    // // Return the invoice with parsed ledger entries
+    // return res.status(200).json({
+    //   message: "Invoice retrieved successfully!",
+    //   invoice: {
+    //     ...invoice.toJSON(),
+    //     ledgerEntries,
+    //   },
+    // });
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
