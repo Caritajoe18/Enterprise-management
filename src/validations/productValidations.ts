@@ -248,19 +248,10 @@ export const createDeptOrderValidationSchema = Joi.object({
 
 
 export const genStoreValidationSchema = Joi.object({
-  departmentId: Joi.string().messages({
-    "string.base": "department must be a string.",
-  }),
-  name:Joi.string().messages({
+  name:Joi.string().required().messages({
     "string.base": "name must be a string.",
   }),
-  productId: Joi.string().messages({
-    "string.base": "product must be a string.",
-  }),
-  image: Joi.string().messages({
-    "string.base": "Image must be a string.",
-  }),
-  unit: Joi.string().messages({
+  unit: Joi.string().required().messages({
     "string.base": "Unit must be a string.",
   }),
   quantity: Joi.number().min(0).optional().default(0).messages({
@@ -274,19 +265,11 @@ export const genStoreValidationSchema = Joi.object({
   }),
 });
 export const editGenStoreValidationSchema = Joi.object({
-  productId: Joi.string().messages({
-    "string.base": "product must be a string.",
-    "any.required": "name is required.",
-  }),
-  departmentId: Joi.string().messages({
-    "string.base": "department must be a string.",
-  }),
-  image: Joi.string().messages({
-    "string.base": "Image must be a string.",
+  name:Joi.string().messages({
+    "string.base": "name must be a string.",
   }),
   unit: Joi.string().messages({
     "string.base": "Unit must be a string.",
-    "any.required": "Unit is required.",
   }),
   quantity: Joi.number().min(0).optional().default(0).messages({
     "number.base": "Quantity must be a number.",
