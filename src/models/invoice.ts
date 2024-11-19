@@ -12,11 +12,12 @@ export interface InvoiceAttributes {
   prevBalance: number;
   credit: number | null;
   balanceBeforeDebit: number;
-  debit: number | null;
+  ledgerEntries: object;
   currentBalance: number;
   bankName: string | null;
   preparedBy: string | null;
   invoiceNumber: number;
+  status: "pending" | "approved" | "rejected";
 }
 
 export class Invoice extends Model<InvoiceAttributes> {
@@ -98,7 +99,7 @@ Invoice.init(
     },
     prevBalance: {
       type: DataTypes.DECIMAL(15, 2),
-      allowNull: false,
+      allowNull: true,
     },
     credit: {
       type: DataTypes.DECIMAL(15, 2),
@@ -106,15 +107,19 @@ Invoice.init(
     },
     balanceBeforeDebit: {
       type: DataTypes.DECIMAL(15, 2),
-      allowNull: false,
+      allowNull: true,
     },
-    debit: {
-      type: DataTypes.DECIMAL(15, 2),
+    ledgerEntries: {
+      type: DataTypes.JSON, 
       allowNull: true,
     },
     currentBalance: {
       type: DataTypes.DECIMAL(15, 2),
       allowNull: false,
+    },
+    status: {
+      type: DataTypes.ENUM("pending", "approved", "rejected"),
+      defaultValue: "pending",
     },
     bankName: {
       type: DataTypes.STRING,

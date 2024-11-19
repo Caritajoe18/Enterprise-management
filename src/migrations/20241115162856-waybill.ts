@@ -3,7 +3,7 @@ import { QueryInterface, DataTypes } from "sequelize";
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
-    await queryInterface.createTable("Invoices", {
+    await queryInterface.createTable("Waybills", {
       id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
@@ -58,7 +58,7 @@ module.exports = {
       },
       prevBalance: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: true,
+        allowNull: false,
       },
       credit: {
         type: DataTypes.DECIMAL(10, 2),
@@ -66,7 +66,7 @@ module.exports = {
       },
       balanceBeforeDebit: {
         type: DataTypes.DECIMAL(10, 2),
-        allowNull: true,
+        allowNull: false,
       },
       ledgerEntries: {
         type: DataTypes.JSON, 
@@ -106,6 +106,6 @@ module.exports = {
   },
 
   async down(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
-    await queryInterface.dropTable("Invoices");
+    await queryInterface.dropTable("Waybills");
   },
 };

@@ -38,6 +38,14 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
         createdAt: { [Op.gte]: ledger.dataValues.createdAt },
       },
       order: [["createdAt", "ASC"]],
+      attributes: ["productId","quantity","unit","credit", "debit","balance"],
+      include: [
+        {
+          model: AccountBook,
+          as: "accountBook",
+          attributes: ["id", "bankName"],
+        },
+      ],
     });
 
     const previousEntries = await Ledger.findAll({
@@ -51,12 +59,14 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
     let prevBalance = null;
     let credit = null;
     let bankName = null;
+    let balanceBeforeDebit = null
     if (previousEntries.length === 2) {
       const lastEntry = previousEntries[0];
       const secondLastEntry = previousEntries[1];
 
       if (lastEntry.dataValues.credit) {
         credit = lastEntry.dataValues.credit;
+        balanceBeforeDebit = lastEntry.dataValues.balance
         bankName = await AccountBook.findOne({
           where: { id: lastEntry.dataValues.acctBookId },
           attributes: ["bankName"],
@@ -82,7 +92,7 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
         },
         {
           model: Products,
-          as: "porder",
+          as: "porders",
           attributes: ["id", "name"],
         },
         {
@@ -100,6 +110,14 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
 
     const productId = porder?.id;
     const vehicleNo = authToWeighTickets.vehicleId;
+    const latestLedgerEntry = await Ledger.findOne({
+      where: { customerId: ledger.dataValues.customerId },
+      order: [["createdAt", "DESC"]],
+      attributes: ["balance"],
+    });
+    const currentBalance = latestLedgerEntry
+      ? latestLedgerEntry.dataValues.balance
+      : 0;
 
     const invoice = await Invoice.create({
       ...req.body,
@@ -112,8 +130,7 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
       prevBalance,
       credit,
       balanceBeforeDebit: prevBalance,
-      //debit,
-      //currentBalance,
+      currentBalance,
       bankName,
       preparedBy: adminId,
     });
@@ -121,11 +138,11 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
       .toString()
       .padStart(6, "0");
 
-    console.log("Invoice generated successfully!");
     return res.status(201).json({
       message: "Invoice generated successfully!",
+      invoice,
       invoiceNumber: formattedInvoiceNumber,
-      ledgerEntries
+      ledgerEntries,
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
