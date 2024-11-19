@@ -17,7 +17,7 @@ export const getRecords = async (
   try {
     const records = await model.findAll({
       order: [["createdAt", "DESC"]],
-      where:{status: "approved"}
+      //where:{status: "approved"}
     });
 
     if (records.length === 0) {
@@ -84,6 +84,43 @@ export const sendTicketToAdmin = async (
       return res.status(500).json({ error: error.message });
     }
     return res.status(500).json({ error: "An unexpected error occurred." });
+  }
+};
+
+export const getSingleRecord = async (
+  req: Request,
+  res: Response,
+  model: ModelStatic<Model>,
+  entityName: string
+) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ message: "ID parameter is required." });
+    }
+
+    const record = await model.findOne({
+      where: {
+        id,
+        status: "approved",
+      },
+    });
+
+    if (!record) {
+      return res.status(404).json({ message: `${entityName} not found.` });
+    }
+
+    res.status(200).json({
+      message: `Successfully retrieved ${entityName}`,
+      record,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "An unexpected error occurred." });
+    }
   }
 };
 

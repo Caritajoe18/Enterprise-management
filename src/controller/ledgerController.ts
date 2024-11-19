@@ -75,6 +75,7 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
           ...req.body,
           customerId,
           productId,
+          acctBookId:accountBook.dataValues.id,
           unit: "N/A",
           quantity: 0,
           credit: credit ? parsedAmount.toNumber() : 0,
@@ -117,11 +118,12 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
       const supplierDebit = credit ? 0 : parsedAmount.toNumber();
       const supplierCredit = credit ? parsedAmount.toNumber() : 0;
 
-      const supLedgerEntry = await SupplierLedger.create(
+       await SupplierLedger.create(
         {
           ...req.body,
           supplierId,
           productId,
+          acctBookId:accountBook.dataValues.id,
           unit: "N/A",
           quantity: 0,
           credit: supplierDebit,
@@ -131,7 +133,7 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
         },
         { transaction }
       );
-      console.log("sup", supLedgerEntry);
+      //console.log("sup", supLedgerEntry);
     } else if (other) {
       accountBook = await createAccountBookEntry(req.body, "Transfer");
 

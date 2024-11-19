@@ -11,7 +11,7 @@ import Supplier from "../models/suppliers";
 import { LPO } from "../models/lpo";
 import CollectFromGenStore from "../models/collectFromGenStore";
 import AuthToWeigh from "../models/AuthToWeigh";
-import { getRecords } from "../utilities/modules";
+import { getRecords, getSingleRecord } from "../utilities/modules";
 import CustomerOrder from "../models/customerOrder";
 
 export const raiseCashTicket = async (req: AuthRequest, res: Response) => {
@@ -392,8 +392,14 @@ export const sendAuthtoweigh = async (req: Request, res: Response) => {
 export const getCashTicket = (req: Request, res: Response) => {
   getRecords(req, res, CashTicket, "cashTickets");
 };
+export const getACashTicket = (req: Request, res: Response) => {
+  getSingleRecord(req, res, CashTicket, "cashTickets");
+};
 export const getLPO = (req: Request, res: Response) => {
   getRecords(req, res, LPO, "LPOs");
+};
+export const getAnLPO = (req: Request, res: Response) => {
+  getSingleRecord(req, res, LPO, "LPOs");
 };
 export const getStoreAuth = async (req: Request, res: Response) => {
   try {
@@ -432,8 +438,51 @@ export const getStoreAuth = async (req: Request, res: Response) => {
     }
   }
 };
+export const getAStoreAuth = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params; 
+
+    if (!id) {
+      return res
+        .status(400)
+        .json({ message: "ID is required to fetch the record." });
+    }
+    const record = await CollectFromGenStore.findOne({
+      where: { id }, 
+    });
+
+    if (!record) {
+      return res.status(404).json({
+        message: `Authority to collect from General Store with ID ${id} not found.`,
+      });
+    }
+
+    const parsedRecord = {
+      ...record.toJSON(),
+      items:
+        typeof record.dataValues.items === "string"
+          ? JSON.parse(record.dataValues.items)
+          : record.dataValues.items,
+    };
+
+
+    res.status(200).json({
+      message: `Successfully retrieved Authorities to collects from General store`,
+      records: parsedRecord,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "An unexpected error occurred." });
+    }
+  }
+};
 
 export const getAuthToWeigh = (req: Request, res: Response) => {
   getRecords(req, res, AuthToWeigh, "Authorities to weigh");
+};
+export const getAnAuthToWeigh = (req: Request, res: Response) => {
+  getSingleRecord(req, res, AuthToWeigh, "Authorities to weigh");
 };
 

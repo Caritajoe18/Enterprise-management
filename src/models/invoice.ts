@@ -8,7 +8,6 @@ export interface InvoiceAttributes {
   ledgerId: string | null;
   vehicleNo: string | null;
   productId: string | null;
-  acctbookId: string | null;
   quantityOrdered: number;
   prevBalance: number;
   credit: number | null;
@@ -33,10 +32,6 @@ export class Invoice extends Model<InvoiceAttributes> {
     Invoice.belongsTo(models.Product, {
       foreignKey: "productId",
       as: "product",
-    });
-    Invoice.belongsTo(models.AccountBook, {
-      foreignKey: "acctbookId",
-      as: "accountBook",
     });
     Invoice.belongsTo(models.Ledger, {
       foreignKey: "ledgerId",
@@ -92,16 +87,6 @@ Invoice.init(
       allowNull: true,
       references: {
         model: "Products",
-        key: "id",
-      },
-      onUpdate: "CASCADE",
-      onDelete: "SET NULL",
-    },
-    acctbookId: {
-      type: DataTypes.UUID,
-      allowNull: true,
-      references: {
-        model: "AccountBooks",
         key: "id",
       },
       onUpdate: "CASCADE",

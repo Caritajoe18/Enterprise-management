@@ -19,7 +19,7 @@ module.exports = {
         },
       },
       customerId: {
-        type: DataTypes.STRING,
+       type: DataTypes.UUID, 
         allowNull: true,
         references: {
           model: "Customers",
@@ -29,7 +29,7 @@ module.exports = {
         onDelete: "SET NULL",
       },
       ledgerId: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: "Ledgers",
@@ -43,20 +43,10 @@ module.exports = {
         allowNull: true,
       },
       productId: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: "Products",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL",
-      },
-      acctbookId: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        references: {
-          model: "AccountBooks",
           key: "id",
         },
         onUpdate: "CASCADE",
@@ -106,6 +96,7 @@ module.exports = {
         type: DataTypes.INTEGER,
         allowNull: false,
         autoIncrement: true,
+        unique: true, 
       },
       createdAt: {
         allowNull: false,

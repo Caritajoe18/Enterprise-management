@@ -53,6 +53,10 @@ import {
 import { authenticateAdmin } from "../middleware/adminAuth";
 import {
   approveCashTicket,
+  getACashTicket,
+  getAStoreAuth,
+  getAnAuthToWeigh,
+  getAnLPO,
   getAuthToWeigh,
   getCashTicket,
   getLPO,
@@ -147,6 +151,10 @@ router.get("/view-cash-ticket", getCashTicket);
 router.get("/view-lpo", getLPO);
 router.get("/view-store-auth", getStoreAuth);
 router.get("/view-all-auth-weigh", getAuthToWeigh);
+router.get("/view-aprroved-cash-ticket", getACashTicket);
+router.get("/view-approved-lpo", getAnLPO);
+router.get("/view-approved-store-auth", getAStoreAuth);
+router.get("/view-approved-auth-weigh", getAnAuthToWeigh);
 
 //weighinsss
 router.get("/view-auth-weigh/:ticketId", getAuthToWeighDetails);
