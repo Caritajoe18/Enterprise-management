@@ -8,16 +8,16 @@ export interface InvoiceAttributes {
   ledgerId: string | null;
   vehicleNo: string | null;
   productId: string | null;
-  acctbookId: string | null;
   quantityOrdered: number;
   prevBalance: number;
   credit: number | null;
   balanceBeforeDebit: number;
-  debit: number | null;
+  ledgerEntries: object;
   currentBalance: number;
   bankName: string | null;
   preparedBy: string | null;
   invoiceNumber: number;
+  status: "pending" | "approved" | "rejected";
 }
 
 export class Invoice extends Model<InvoiceAttributes> {
@@ -33,10 +33,6 @@ export class Invoice extends Model<InvoiceAttributes> {
     Invoice.belongsTo(models.Product, {
       foreignKey: "productId",
       as: "product",
-    });
-    Invoice.belongsTo(models.AccountBook, {
-      foreignKey: "acctbookId",
-      as: "accountBook",
     });
     Invoice.belongsTo(models.Ledger, {
       foreignKey: "ledgerId",
@@ -97,23 +93,13 @@ Invoice.init(
       onUpdate: "CASCADE",
       onDelete: "SET NULL",
     },
-    acctbookId: {
-      type: DataTypes.UUID,
-      allowNull: true,
-      references: {
-        model: "AccountBooks",
-        key: "id",
-      },
-      onUpdate: "CASCADE",
-      onDelete: "SET NULL",
-    },
     quantityOrdered: {
       type: DataTypes.DECIMAL(10, 3),
       allowNull: false,
     },
     prevBalance: {
       type: DataTypes.DECIMAL(15, 2),
-      allowNull: false,
+      allowNull: true,
     },
     credit: {
       type: DataTypes.DECIMAL(15, 2),
@@ -121,15 +107,19 @@ Invoice.init(
     },
     balanceBeforeDebit: {
       type: DataTypes.DECIMAL(15, 2),
-      allowNull: false,
+      allowNull: true,
     },
-    debit: {
-      type: DataTypes.DECIMAL(15, 2),
+    ledgerEntries: {
+      type: DataTypes.JSON, 
       allowNull: true,
     },
     currentBalance: {
       type: DataTypes.DECIMAL(15, 2),
       allowNull: false,
+    },
+    status: {
+      type: DataTypes.ENUM("pending", "approved", "rejected"),
+      defaultValue: "pending",
     },
     bankName: {
       type: DataTypes.STRING,

@@ -30,6 +30,16 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
       },
+      acctBookId: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: 'AccountBooks', 
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL'
+      },
       unit: {
         type: Sequelize.STRING,
         allowNull: false

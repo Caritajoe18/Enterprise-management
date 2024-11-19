@@ -78,8 +78,10 @@ export const updateStaff = async (req: Request, res: Response) => {
     let { firstname, lastname, phoneNumber, department, roleId, address } =
       req.body;
 
-    firstname = toPascalCase(firstname);
-    lastname = toPascalCase(lastname);
+    firstname = firstname ? toPascalCase(firstname) : firstname;
+
+    lastname = lastname ? toPascalCase(lastname) : lastname;
+
     const validationResult = updateStaffSchema.validate(req.body, option);
     if (validationResult.error) {
       return res
@@ -186,12 +188,12 @@ export const getAllStaff = async (req: AuthRequest, res: Response) => {
     const whereClause = currentUserId ? { id: { [Op.ne]: currentUserId } } : {};
     const staffList = await AdminInstance.findAll({
       where: whereClause,
-      order:[["createdAt", "DESC"]],
+      order: [["createdAt", "DESC"]],
     });
     if (staffList.length === 0) {
-      return res.status(404).json(
-        { message: "No staff found in the database", staffList}
-      );
+      return res
+        .status(404)
+        .json({ message: "No staff found in the database", staffList });
     }
     res
       .status(200)
@@ -205,15 +207,14 @@ export const getAllStaff = async (req: AuthRequest, res: Response) => {
 };
 export const getAdmin = async (req: AuthRequest, res: Response) => {
   try {
-
     const staffList = await AdminInstance.findAll({
-      where: {isAdmin: true},
-      order:[["createdAt", "DESC"]],
+      where: { isAdmin: true },
+      order: [["createdAt", "DESC"]],
     });
     if (staffList.length === 0) {
-      return res.status(204).json(
-        { message: "No admin found in the database", staffList}
-      );
+      return res
+        .status(204)
+        .json({ message: "No admin found in the database", staffList });
     }
     res
       .status(200)
@@ -230,7 +231,7 @@ export const getSuspendedStaff = async (req: Request, res: Response) => {
   try {
     const suspendedStaffList = await AdminInstance.findAll({
       where: { active: false },
-      order:[["createdAt", "DESC"]],
+      order: [["createdAt", "DESC"]],
     });
 
     if (suspendedStaffList.length === 0) {
@@ -252,7 +253,7 @@ export const getSuspendedStaff = async (req: Request, res: Response) => {
 
 export const searchStaff = async (req: Request, res: Response) => {
   try {
-    const {search} = req.query 
+    const { search } = req.query;
 
     const whereClause: {
       [Op.or]?: {
@@ -292,15 +293,12 @@ export const searchStaff = async (req: Request, res: Response) => {
 
 export const orderStaffFirstname = async (req: Request, res: Response) => {
   try {
-    
     const customerList = await AdminInstance.findAll({
-      order: [['firstname', 'ASC']],
+      order: [["firstname", "ASC"]],
     });
 
     if (customerList.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No Staff found" });
+      return res.status(404).json({ message: "No Staff found" });
     }
 
     res
@@ -314,4 +312,3 @@ export const orderStaffFirstname = async (req: Request, res: Response) => {
     }
   }
 };
-

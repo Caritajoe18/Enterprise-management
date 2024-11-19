@@ -90,7 +90,7 @@ export const editDepartment = async (req: Request, res: Response) => {
 export const getAllDepartments = async (req: Request, res: Response) => {
   try {
     const departments = await Departments.findAll({
-      order:[["createdAt", "DESC"]],
+      order: [["createdAt", "DESC"]],
       include: [
         {
           model: Products,
@@ -125,28 +125,27 @@ export const getDepartments = async (req: Request, res: Response) => {
 
 export const getDepartmentsLikePharm = async (req: Request, res: Response) => {
   try {
-    const searchTerm = req.query.name || 'pharm'; 
+    const searchTerm = req.query.name || "pharm";
     const departments = await Departments.findAll({
       where: {
         name: {
-          [Op.like]: `%${searchTerm}%`, 
+          [Op.like]: `%${searchTerm}%`,
         },
       },
     });
 
     if (departments.length === 0) {
-      return res.status(404).json({ message: 'No departments found' });
+      return res.status(404).json({ message: "No departments found" });
     }
-
 
     // const serializedDepartments = departments.map(dept => ({
     //   id: dept.dataValues.id,
     //   name: dept.dataValues.name,
-      
+
     // }));
 
     return res.status(200).json({
-      message: 'Departments retrieved successfully',
+      message: "Departments retrieved successfully",
       department: departments,
     });
   } catch (error: unknown) {
@@ -175,29 +174,32 @@ export const deleteDept = async (req: Request, res: Response) => {
   }
 };
 
-
-export const getDepartmentLedgerByDepartmentId = async (req: Request, res: Response) => {
+export const getDepartmentLedgerByDepartmentId = async (
+  req: Request,
+  res: Response
+) => {
   const { departmentId } = req.params;
 
   try {
-    // Validate that departmentId is provided
-    const dept = await Departments.findByPk(departmentId)
+    const dept = await Departments.findByPk(departmentId);
     if (!dept) {
       return res.status(400).json({ message: "Department is not found" });
     }
 
-    // Find all entries in DepartmentLedger with the specified departmentId
     const departmentLedgerEntries = await DepartmentLedger.findAll({
       where: { departmentId },
-      order: [["createdAt", "DESC"]], // Orders entries by creation date, latest first
+      order: [["createdAt", "DESC"]],
     });
 
-    // If no entries are found, return a 404 response
     if (!departmentLedgerEntries.length) {
-      return res.status(404).json({ message: "No entries found for this department", departmentLedgerEntries });
+      return res
+        .status(404)
+        .json({
+          message: "No entries found for this department",
+          departmentLedgerEntries,
+        });
     }
 
-    // Return the department ledger entries
     return res.status(200).json(departmentLedgerEntries);
   } catch (error: unknown) {
     console.error("Error retrieving department ledger:", error);

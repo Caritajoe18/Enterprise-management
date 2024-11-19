@@ -14,6 +14,8 @@ export interface LedgerAttributes {
   debit:number;
   balance:number;
   weighImage:string;
+  acctBookId:string;
+  createdAt:Date
 
 }
 
@@ -27,6 +29,10 @@ export class Ledger extends Model<LedgerAttributes> {
     Ledger.belongsTo(models.Customer, {
         foreignKey: "customerId",
         as:"product"
+    })
+    Ledger.belongsTo(models.AccountBook, {
+        foreignKey: "acctBookId",
+        as:"accountBook"
     })
   }
 }
@@ -58,6 +64,16 @@ Ledger.init(
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
+      },
+    acctBookId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+          model: 'AccountBooks', 
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL'
       },
       customerId: {
         type: DataTypes.UUID,
@@ -99,6 +115,11 @@ Ledger.init(
         type: DataTypes.DECIMAL(15, 2)
         ,
         allowNull: false
+      },
+      createdAt: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
       },
   },
 

@@ -5,7 +5,8 @@ import db from "../db";
 export interface LedgerAttributes { 
   id: string;
   supplierId: string;
-  productId: string | null;
+  productId: string;
+  acctBookId: string;
   unit:string;
   quantity:number;
   credit:number;
@@ -56,6 +57,16 @@ SupplierLedger.init(
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
+      },
+      acctBookId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+          model: 'AccountBooks', 
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL'
       },
       unit: {
         type: DataTypes.STRING,

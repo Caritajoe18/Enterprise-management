@@ -40,6 +40,7 @@ import {
   raiseSupplierOrder,
 } from "../controller/supplierOrder";
 import { createWeigh, viewAllWeigh, viewWeigh } from "../controller/weighBridge";
+import { generateInvoice } from "../controller/receipts";
 const router = express.Router();
 
 router.post("/reg-customer", authorize(), createCustomer);
@@ -86,12 +87,12 @@ router.post("/raise-supplier-order", authorize(), raiseSupplierOrder);
 router.get("/get-all-supplier-orders", authorize(), getAllSupplierOrders);
 
 //weigh operations
-router.post("/create-weigh/:authToWeighId", authorize(), createWeigh);
+router.post("/create-weigh/:authToWeighId",authorize(), createWeigh);
 router.get("/view-weigh/:weighId", viewWeigh);
 router.get("/view-weighs", authorize(), viewAllWeigh);
 
 //receipts
-router.post("/create-invoice")
+router.post("/create-invoice/:tranxId", authorize(), generateInvoice )
 router.get("/get-invoice")
 router.post("/create-waybill")
 router.get("/get-waybill")
