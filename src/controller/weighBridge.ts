@@ -18,7 +18,7 @@ export const getAuthToWeighDetails = async (req: Request, res: Response) => {
       include: [
         {
           model: CustomerOrder,
-          as: "transaction",
+          as: "transactions",
           attributes: ["quantity"],
           include: [
             {
