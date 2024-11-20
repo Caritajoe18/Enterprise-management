@@ -1,5 +1,5 @@
 import { Model, DataTypes } from "sequelize";
-import db from "../db"; 
+import db from "../db";
 
 interface LPOAttributes {
   id: string;
@@ -13,21 +13,26 @@ interface LPOAttributes {
   expires: Date;
   period: Date;
   status: "pending" | "approved" | "rejected" | "completed";
-  raisedByAdminId:string;
+  raisedByAdminId: string;
   approvedBySuperAdminId: string;
   comments?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-export class LPO extends Model<LPOAttributes>{
-    static associate(models: any) {
-        LPO.belongsTo(models.Supplier, { foreignKey: "supplierId", as: "supplier" });
-        LPO.belongsTo(models.Product, { foreignKey: "rawMaterial", as: "product" });
-    }
+export class LPO extends Model<LPOAttributes> {
+  static associate(models: any) {
+    LPO.belongsTo(models.Supplier, {
+      foreignKey: "supplierId",
+      as: "supplier",
+    });
+    LPO.belongsTo(models.Products, {
+      foreignKey: "rawMaterial",
+      as: "product",
+    });LPO.belongsTo(models.Role, { foreignKey: "raisedByAdminId", as: "role" });
+    
+  }
 }
-  
-
 
 LPO.init(
   {
@@ -90,17 +95,23 @@ LPO.init(
       allowNull: true,
     },
     status: {
-        type: DataTypes.ENUM("pending", "approved", "rejected", "completed"),
-        defaultValue: "pending",
+      type: DataTypes.ENUM("pending", "approved", "rejected", "completed"),
+      defaultValue: "pending",
+    },
+    raisedByAdminId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: "Roles",
+        key: "id",
       },
-      raisedByAdminId: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      approvedBySuperAdminId: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
+    approvedBySuperAdminId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     createdAt: {
       type: DataTypes.DATE,
       allowNull: false,

@@ -26,7 +26,27 @@ export interface RoleAttributes {
         });
         Role.hasMany(models.Admins, {
           foreignKey: "roleId",
-          as: "admins",  // Alias used to reference Admins from Role
+          as: "admins",  
+        });
+        Role.hasMany(models.Invoice, {
+          foreignKey: "preparedBy",
+          as: "invoice",  
+        });
+        Role.hasMany(models.LPO, {
+          foreignKey: "raisedByAdminId",
+          as: "lpo",  
+        });
+        Role.hasMany(models.CollectFromGenStore, {
+          foreignKey: "raisedByAdminId",
+          as: "store",  
+        });
+        Role.hasMany(models.CashTicket, {
+          foreignKey: "raisedByAdminId",
+          as: "cash",  
+        });
+        Role.hasMany(models.AuthToWeigh, {
+          foreignKey: "raisedByAdminId",
+          as: "weigh",  
         });
     }
   }

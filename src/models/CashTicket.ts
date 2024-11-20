@@ -7,6 +7,9 @@ export interface CashTicketAttributes {
   staffName: string;
   amount: number;
   productId: string;
+  departmentId:string;
+  item:string;
+  comments:string;
   creditOrDebit: string;
   status: "pending" | "approved" | "rejected" | "completed";
   raisedByAdminId: string | null;
@@ -21,7 +24,22 @@ class CashTicket extends Model<CashTicketAttributes> {
    * The `models/index` file will call this method automatically.
    */
   static associate(models: any) {
-    // define association here
+    CashTicket.belongsTo(models.Role, {
+      foreignKey: "raisedByAdminId",
+      as: "role", // Alias for the association
+    });
+    CashTicket.belongsTo(models.Customer, {
+      foreignKey: "customerId",
+      as: "customer", // Alias for the association
+    });
+    CashTicket.belongsTo(models.Departments, {
+      foreignKey: "departmentId",
+      as: "department", // Alias for the association
+    });
+    CashTicket.belongsTo(models.Products, {
+      foreignKey: "productId",
+      as: "product", // Alias for the association
+    });
   }
 }
 CashTicket.init(
@@ -47,6 +65,14 @@ CashTicket.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    item: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    comments: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     amount: {
       type: DataTypes.DECIMAL(15, 2),
       allowNull: false,
@@ -61,8 +87,18 @@ CashTicket.init(
       onUpdate: "CASCADE",
       onDelete: "SET NULL",
     },
+    departmentId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: "Departments",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
     creditOrDebit: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM("credit", "debit"),
       allowNull: false,
     },
     status: {
@@ -70,11 +106,17 @@ CashTicket.init(
       defaultValue: "pending",
     },
     raisedByAdminId: {
-      type: DataTypes.STRING,
+      type: DataTypes.UUID,
       allowNull: true,
+      references: {
+        model: "Roles",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
     },
     approvedBySuperAdminId: {
-      type: DataTypes.STRING,
+      type: DataTypes.UUID,
       allowNull: true,
     },
     cashierId: {

@@ -11,11 +11,11 @@ module.exports = {
         primaryKey: true,
       },
       raisedByAdminId: {
-        type: Sequelize.STRING,
+        type: Sequelize.UUID,
         allowNull: true,
       },
       customerId: {
-        type: Sequelize.STRING,
+        type: Sequelize.UUID,
         allowNull: true,
       },
       driver: {

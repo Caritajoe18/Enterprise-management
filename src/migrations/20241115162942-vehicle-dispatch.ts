@@ -81,7 +81,7 @@ module.exports = {
         allowNull: true,
       },
       preparedBy: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: true,
       },
       status: {

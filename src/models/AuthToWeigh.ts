@@ -23,6 +23,10 @@ export class AuthToWeigh extends Model<AuthToWeighAttributes> {
       foreignKey: "customerId",
       as: "customer", // Alias for the association
     });
+    AuthToWeigh.belongsTo(models.Role, {
+      foreignKey: "raisedByAdminId",
+      as: "role", // Alias for the association
+    });
     
   }
 }
@@ -36,14 +40,20 @@ AuthToWeigh.init(
       primaryKey: true,
     },
     raisedByAdminId: {
-      type: DataTypes.STRING,
+      type: DataTypes.UUID,
       allowNull: true,
+      references: {
+        model: "Roles",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
     },
     customerId: {
       type: DataTypes.UUID,
       allowNull: true,
       references: {
-        model: "Customer",
+        model: "Customers",
         key: "id",
       },
       onUpdate: "CASCADE",

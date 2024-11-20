@@ -67,7 +67,7 @@ module.exports = {
         defaultValue: 'pending',
       },
       raisedByAdminId: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: true,
       },
       approvedBySuperAdminId: {

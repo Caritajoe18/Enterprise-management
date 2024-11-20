@@ -12,6 +12,10 @@ import Weigh from "../models/weigh";
 import Invoice from "../models/invoice";
 import { Op } from "sequelize";
 import { generatePdf } from "../utilities/generatePdf";
+import Role from "../models/role";
+import { approveReceipt } from "../utilities/modules";
+import Notify from "../models/notification";
+import { getAdminConnection } from "../utilities/web-push";
 
 export const generateInvoice = async (req: AuthRequest, res: Response) => {
   try {
@@ -168,6 +172,11 @@ export const getApprovedInvoice = async (req: Request, res: Response) => {
           as: "customer",
           attributes: ["firstname", "lastname"],
         },
+        {
+          model: Role,
+          as: "role",
+          attributes: ["name"],
+        },
       ],
     });
 
@@ -212,6 +221,11 @@ export const getAllInvoices = async (req: Request, res: Response) => {
           as: "customer",
           attributes: ["firstname", "lastname"],
         },
+        {
+          model: Role,
+          as: "role",
+          attributes: ["name"],
+        },
       ],
     });
 
@@ -234,6 +248,50 @@ export const getAllInvoices = async (req: Request, res: Response) => {
     return res.status(500).json({ error: "An unknown error occurred" });
   }
 };
+export const sendInvoice = async (req: Request, res: Response) => {
+  const { Id } = req.params;
+  const { adminId } = req.body;
+
+  try {
+    const ticket = await Invoice.findByPk(Id);
+    const admin = await Admins.findByPk(adminId);
+    if (!ticket || !admin) {
+      return res.status(404).json({ message: "Receipt or admin not found" });
+    }
+
+    await Notify.create({
+      ...req.body,
+      adminId,
+      message: `A new Invoice has sent to you.`,
+      type: "ticket_recieved",
+      ticketId: Id,
+    });
+
+    const adminWs = getAdminConnection(adminId);
+    if (adminWs) {
+      adminWs.send(
+        JSON.stringify({
+          message: `A new Invoice has been sent to you.`,
+          ticket,
+        })
+      );
+    }
+
+    return res.status(200).json({
+      message: "Receipt successfully sent to admin.",
+      ticket,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred." });
+  }
+};
+
+export const approveInvoice = (req: AuthRequest, res: Response) => {
+  return approveReceipt(req, res, Invoice, "recieptId");
+};
 
 export const generateInvoicePdf = async (req: Request, res: Response) => {
   try {
@@ -254,6 +312,11 @@ export const generateInvoicePdf = async (req: Request, res: Response) => {
           model: Customer,
           as: "customer",
           attributes: ["firstname", "lastname"],
+        },
+        {
+          model: Role,
+          as: "role",
+          attributes: ["id","name"],
         },
       ],
     });

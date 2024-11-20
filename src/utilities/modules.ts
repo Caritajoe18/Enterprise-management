@@ -9,6 +9,7 @@ import DepartmentLedger from "../models/departmentLedger";
 import Customer from "../models/customers";
 import Products, { Plan } from "../models/products";
 import { AuthRequest } from "../middleware/staffPermissions";
+import Role from "../models/role";
 export const getRecords = async (
   req: Request,
   res: Response,
@@ -122,6 +123,39 @@ export const approveTicket = async (
     res.status(500).json({ error: "An unexpected error occurred." });
   }
 };
+export const approveReceipt = async (
+  req: AuthRequest,
+  res: Response,
+  model: ModelStatic<Model>,
+  receiptIdParam: string
+) => {
+  const admin = req.admin as Admins;
+  const { id } = admin.dataValues;
+  const recieptId = req.params[receiptIdParam];
+
+  try {
+    const ticket = await model.findByPk(recieptId);
+
+    if (!ticket) {
+      return res.status(404).json({ message: "Reciept not found" });
+    }
+
+    ticket.set({
+      status: "approved",
+    });
+
+    await ticket.save();
+
+    return res
+      .status(200)
+      .json({ message: "Receipt approved successfully", ticket });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred." });
+  }
+};
 
 export const getSingleRecord = async (
   req: Request,
@@ -139,8 +173,15 @@ export const getSingleRecord = async (
     const record = await model.findOne({
       where: {
         id,
-        status: "approved",
+        //status: "approved",
       },
+      include: [
+        {
+          model: Role,
+          as: "role",
+          attributes: ["name"],
+        },
+      ]
     });
 
     if (!record) {

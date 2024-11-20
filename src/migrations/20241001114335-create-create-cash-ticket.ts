@@ -24,6 +24,14 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true,
       },
+      item: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      comments: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
       amount: {
         type: Sequelize.DECIMAL(15, 2),
       },
@@ -35,25 +43,35 @@ module.exports = {
           key: "id",
         },
         onUpdate: "CASCADE",
-        onDelete: "CASCADE",
+        onDelete: "SET NULL",
+      },
+      departmentId: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: "Departments",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
       },
       creditOrDebit: {
-        type: DataTypes.ENUM("credit", "debit"),
+        type: Sequelize.ENUM("credit", "debit"),
       },
       status: {
-        type: DataTypes.ENUM("pending", "approved", "rejected", "completed"),
+        type: Sequelize.ENUM("pending", "approved", "rejected", "completed"),
         defaultValue: "pending",
       },
       raisedByAdminId: {
-        type: DataTypes.STRING,
+        type: Sequelize.UUID,
         allowNull: true,
       },
       approvedBySuperAdminId: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: true,
       },
       cashierId: {
-        type: DataTypes.STRING,
+        type: Sequelize.STRING,
         allowNull: true,
       },
       createdAt: {
