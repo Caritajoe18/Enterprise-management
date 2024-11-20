@@ -52,7 +52,10 @@ import {
 } from "../controller/navBarController";
 import { authenticateAdmin } from "../middleware/adminAuth";
 import {
+  approveAuthToWeigh,
   approveCashTicket,
+  approveLPO,
+  approveStoreAuth,
   getACashTicket,
   getAStoreAuth,
   getAnAuthToWeigh,
@@ -146,6 +149,9 @@ router.post("/send-lpo/:Id", sendLPOToAdmin);
 router.post("/send-store-auth/:Id", sendStoreCollectionAdmin);
 router.post("/send-weigh-auth/:Id", sendAuthtoweigh);
 router.patch("/approve-cash-ticket/:Id", authorize(), approveCashTicket);
+router.patch("/approve-lpo/:ticketId", authorize(), approveLPO);
+router.patch("/approve-store-auth/:ticketId", authorize(), approveStoreAuth);
+router.patch("/approve-weigh-auth/:ticketId", authorize(), approveAuthToWeigh);
 router.patch("/reject-cashticket/:ticketId", authorize(), rejectCashTicket);
 router.get("/view-cash-ticket", getCashTicket);
 router.get("/view-lpo", getLPO);

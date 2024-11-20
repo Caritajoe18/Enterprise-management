@@ -8,6 +8,7 @@ import Decimal from "decimal.js";
 import DepartmentLedger from "../models/departmentLedger";
 import Customer from "../models/customers";
 import Products, { Plan } from "../models/products";
+import { AuthRequest } from "../middleware/staffPermissions";
 export const getRecords = async (
   req: Request,
   res: Response,
@@ -84,6 +85,41 @@ export const sendTicketToAdmin = async (
       return res.status(500).json({ error: error.message });
     }
     return res.status(500).json({ error: "An unexpected error occurred." });
+  }
+};
+
+export const approveTicket = async (
+  req: AuthRequest,
+  res: Response,
+  model: ModelStatic<Model>,
+  ticketIdParam: string
+) => {
+  const admin = req.admin as Admins;
+  const { id } = admin.dataValues;
+  const ticketId = req.params[ticketIdParam];
+
+  try {
+    const ticket = await model.findByPk(ticketId);
+
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket not found" });
+    }
+
+    ticket.set({
+      status: "approved",
+      approvedBySuperAdminId: id,
+    });
+
+    await ticket.save();
+
+    return res
+      .status(200)
+      .json({ message: "Ticket approved successfully", ticket });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred." });
   }
 };
 
