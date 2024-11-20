@@ -18,6 +18,7 @@ import DepartmentLedger from './departmentLedger';
 import AuthToWeigh from './AuthToWeigh';
 import AccountBook from './accountBook';
 import Weigh from './weigh';
+import Invoice from './invoice';
 
 const models = {
   Admins,
@@ -38,7 +39,8 @@ const models = {
   DepartmentLedger,
   AuthToWeigh,
   AccountBook,
-  Weigh
+  Weigh,
+  Invoice
   
 };
 

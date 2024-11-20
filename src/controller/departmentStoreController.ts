@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import {
   createDeptOrderValidationSchema,
   deptOrderValidationSchema,
+  deptstoreValidationSchema,
+  editDepteptstoreValidationSchema,
   editGenStoreValidationSchema,
   genStoreValidationSchema,
 } from "../validations/productValidations";
@@ -18,7 +20,7 @@ export const createDeptStore = async (req: AuthRequest, res: Response) => {
     const admin = req.admin as Admins;
     const { roleId: adminId } = admin.dataValues;
     const { productId, departmentId } = req.body;
-    const { error, value } = genStoreValidationSchema.validate(req.body, {
+    const { error, value } = deptstoreValidationSchema.validate(req.body, {
       abortEarly: false,
     });
 
@@ -160,7 +162,7 @@ export const getDeptStoreForPurchase = async (
 export const editDeptStore = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { error, value } = editGenStoreValidationSchema.validate(req.body, {
+    const { error, value } = editDepteptstoreValidationSchema.validate(req.body, {
       abortEarly: false,
     });
 
