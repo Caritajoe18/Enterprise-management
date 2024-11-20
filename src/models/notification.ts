@@ -7,11 +7,7 @@ interface NotificationAttributes {
   message: string;
   read: boolean;
   ticketId: string;
-  type:
-    | "ticket_created"
-    | "ticket_approved"
-    | "ticket_rejected"
-    | "ticket_recieved";
+  type:string;
   createdAt: Date;
 }
 
@@ -33,7 +29,7 @@ Notify.init(
     },
     adminId: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: "Admins",
         key: "id",
@@ -55,13 +51,8 @@ Notify.init(
       defaultValue: false,
     },
     type: {
-      type: DataTypes.ENUM(
-        "ticket_created",
-        "ticket_approved",
-        "ticket_rejected",
-        "ticket_recieved"
-      ),
-      allowNull: false,
+      type: DataTypes.STRING,
+        allowNull: false,
     },
     createdAt: {
       allowNull: false,

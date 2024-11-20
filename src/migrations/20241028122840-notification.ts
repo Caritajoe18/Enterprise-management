@@ -12,7 +12,7 @@ module.exports = {
       },
       adminId: {
         type: DataTypes.UUID,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: "Admins",
           key: "id",
@@ -34,7 +34,7 @@ module.exports = {
         defaultValue: false,
       },
       type: {
-        type: DataTypes.ENUM('ticket_created', 'ticket_approved', 'ticket_rejected', 'ticket_recieved'),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       createdAt: {

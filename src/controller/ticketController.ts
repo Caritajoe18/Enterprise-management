@@ -15,6 +15,7 @@ import {
   approveTicket,
   getRecords,
   getSingleRecord,
+  updateTicketStatus,
 } from "../utilities/modules";
 import CustomerOrder from "../models/customerOrder";
 import Departments from "../models/department";
@@ -22,7 +23,15 @@ import Departments from "../models/department";
 export const raiseCashTicket = async (req: AuthRequest, res: Response) => {
   const admin = req.admin as Admins;
   const { roleId } = admin.dataValues;
-  const { customerId, staffName, amount, productId, creditOrDebit , departmentId, item } = req.body;
+  const {
+    customerId,
+    staffName,
+    amount,
+    productId,
+    creditOrDebit,
+    departmentId,
+    item,
+  } = req.body;
   try {
     const customer = customerId
       ? await Customer.findOne({ where: { id: customerId } })
@@ -68,7 +77,7 @@ export const sendTicketToAdmin = async (req: Request, res: Response) => {
 
   try {
     const ticket = await CashTicket.findOne({
-      where: { id: Id},
+      where: { id: Id },
       include: [
         {
           model: Products,
@@ -85,15 +94,18 @@ export const sendTicketToAdmin = async (req: Request, res: Response) => {
           as: "department",
           attributes: ["name"],
         },
-      ]
+      ],
     });
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket not found" });
+    }
 
     await Notify.create({
       ...req.body,
       adminId,
       message: `A new  cash ticket has sent to you.`,
-      type: "ticket_recieved",
-      ticketId: Id
+      type: "cash",
+      ticketId: Id,
     });
 
     const adminWs = getAdminConnection(adminId);
@@ -134,6 +146,28 @@ export const approveCashTicket = async (req: AuthRequest, res: Response) => {
     ticket.dataValues.approvedBySuperAdminId = id;
 
     await ticket.save();
+    const notification = await Notify.findOne({ where: { ticketId } });
+    if (notification && !notification.dataValues.read) {
+      await notification.update({ read: true });
+    }
+    await Notify.create({
+      ...req.body,
+      adminId: ticket.dataValues.raisedByAdminId,
+      message: `A cash ticket was approved.`,
+      type: "cash",
+      ticketId,
+    });
+
+    // const adminWs = getAdminConnection(adminId);
+    // if (adminWs) {
+    //   adminWs.send(
+    //     JSON.stringify({
+    //       message: `A new ticket for cash has been approved.`,
+    //       ticket,
+    //     })
+    //   );
+    // }
+
     return res
       .status(200)
       .json({ message: "Ticket approved successfully", ticket });
@@ -162,7 +196,8 @@ export const rejectCashTicket = async (req: Request, res: Response) => {
     await Notify.create({
       ...req.body,
       adminId: ticket.dataValues.raisedByAdminId,
-      message: `A ticket was rejected.`,
+      message: `A cash ticket was rejected.`,
+      type: "cash",
       ticketId,
     });
     return res
@@ -307,7 +342,7 @@ export const sendLPOToAdmin = async (req: Request, res: Response) => {
       ...req.body,
       adminId,
       message: `A new LPO has sent to you.`,
-      type: "ticket_recieved",
+      type: "lpo",
       ticketId: Id,
     });
 
@@ -347,7 +382,7 @@ export const sendStoreCollectionAdmin = async (req: Request, res: Response) => {
       ...req.body,
       adminId,
       message: `A new Authority to collect from General Store has sent to you.`,
-      type: "ticket_recieved",
+      type: "store",
       ticketId: Id,
     });
 
@@ -387,7 +422,7 @@ export const sendAuthtoweigh = async (req: Request, res: Response) => {
       ...req.body,
       adminId,
       message: `A new Authority to weigh has been sent to you.`,
-      type: "ticket_recieved",
+      type: "weigh",
       ticketId: Id,
     });
 
@@ -432,13 +467,11 @@ export const getCashTicket = async (req: Request, res: Response) => {
           as: "department",
           attributes: ["name"],
         },
-      ]
+      ],
     });
 
     if (records.length === 0) {
-      return res
-        .status(200)
-        .json({ message: `No Cash Ticket Found`, records });
+      return res.status(200).json({ message: `No Cash Ticket Found`, records });
     }
 
     res.status(200).json({
@@ -544,11 +577,36 @@ export const getAnAuthToWeigh = (req: Request, res: Response) => {
   getSingleRecord(req, res, AuthToWeigh, "Authorities to weigh");
 };
 export const approveLPO = (req: AuthRequest, res: Response) => {
-  return approveTicket(req, res, LPO, "ticketId");
+  return approveTicket(req, res, LPO, "ticketId", "approved", "An lpo was approved.", "lpo" );
 };
 export const approveStoreAuth = (req: AuthRequest, res: Response) => {
-  return approveTicket(req, res, CollectFromGenStore, "ticketId");
+  return approveTicket(req, res, CollectFromGenStore, "ticketId", "approved", "An Authority to collect from store was approved.", "store" );
 };
 export const approveAuthToWeigh = (req: AuthRequest, res: Response) => {
-  return approveTicket(req, res, AuthToWeigh, "ticketId");
+  return approveTicket(req, res, AuthToWeigh, "ticketId", "approved", "An Authority to weigh was approved.", "weigh");
 };
+
+export const rejectLPO = (req: Request, res: Response) =>
+  updateTicketStatus(req, res, {
+    model: LPO,
+    ticketIdParam: "ticketId",
+    status: "rejected",
+    notificationMessage: "An LPO was rejected.",
+    notificationType: "lpo",
+  });
+export const rejectStoreAuth = (req: Request, res: Response) =>
+  updateTicketStatus(req, res, {
+    model: CollectFromGenStore,
+    ticketIdParam: "ticketId",
+    status: "rejected",
+    notificationMessage: "An Authority to collect from store was rejected.",
+    notificationType: "store",
+  });
+export const rejectAuthToWeigh = (req: Request, res: Response) =>
+  updateTicketStatus(req, res, {
+    model: CollectFromGenStore,
+    ticketIdParam: "ticketId",
+    status: "rejected",
+    notificationMessage: "An Authority to collect from store was rejected.",
+    notificationType: "weigh",
+  });

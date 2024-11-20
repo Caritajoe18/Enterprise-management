@@ -93,7 +93,10 @@ export const approveTicket = async (
   req: AuthRequest,
   res: Response,
   model: ModelStatic<Model>,
-  ticketIdParam: string
+  ticketIdParam: string,
+  status: string,
+  notificationMessage: string,
+  notificationType: string
 ) => {
   const admin = req.admin as Admins;
   const { id } = admin.dataValues;
@@ -107,11 +110,23 @@ export const approveTicket = async (
     }
 
     ticket.set({
-      status: "approved",
+      status,
       approvedBySuperAdminId: id,
     });
 
     await ticket.save();
+    const notification = await Notify.findOne({ where: { ticketId } });
+    console.log("Notification found:", notification);
+    if (notification && !notification.dataValues.read) {
+      await notification.update({ read: true });
+    }
+    await Notify.create({
+      ...req.body,
+      adminId: ticket.dataValues.raisedByAdminId,
+      message: notificationMessage,
+      type: notificationType,
+      ticketId,
+    });
 
     return res
       .status(200)
@@ -181,7 +196,7 @@ export const getSingleRecord = async (
           as: "role",
           attributes: ["name"],
         },
-      ]
+      ],
     });
 
     if (!record) {
@@ -383,5 +398,55 @@ export const addQuantityToStore = async (
       return res.status(500).json({ error: error.message });
     }
     return res.status(500).json({ error: "An error occurred" });
+  }
+};
+
+export const updateTicketStatus = async (
+  req: Request,
+  res: Response,
+  options: {
+    model: ModelStatic<Model>;
+    ticketIdParam: string;
+    status: string;
+    notificationMessage: string;
+    notificationType: string;
+  }
+) => {
+  const {
+    ticketIdParam,
+    model,
+    status,
+    notificationMessage,
+    notificationType,
+  } = options;
+  const ticketId = req.params[ticketIdParam];
+
+  try {
+    // Find ticket by ID
+    const ticket = await model.findByPk(ticketId);
+
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket not found" });
+    }
+
+    ticket.dataValues.status = status;
+    await ticket.save();
+
+    await Notify.create({
+      ...req.body,
+      adminId: ticket.dataValues.raisedByAdminId,
+      message: notificationMessage,
+      type: notificationType,
+      ticketId,
+    });
+
+    return res
+      .status(200)
+      .json({ message: `Ticket ${status} successfully`, ticket });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "An unexpected error occurred." });
   }
 };
