@@ -28,6 +28,10 @@ export class Products extends Model<ProductsAttributes> {
       foreignKey: "productId",
       as: "orders",
     });
+    Products.hasMany(models.Invoice, {
+      foreignKey: "productId",
+      as: "invoice",
+    });
     Products.hasOne(models.PharmacyStore, {
       foreignKey: "productId",
       as: "store",

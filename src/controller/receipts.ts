@@ -11,6 +11,7 @@ import AuthToWeigh from "../models/AuthToWeigh";
 import Weigh from "../models/weigh";
 import Invoice from "../models/invoice";
 import { Op } from "sequelize";
+import { generatePdf } from "../utilities/generatePdf";
 
 export const generateInvoice = async (req: AuthRequest, res: Response) => {
   try {
@@ -19,7 +20,6 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
     const { tranxId } = req.params;
     const ledger = await Ledger.findOne({
       where: { tranxId },
-      
     });
     if (!ledger) {
       return res.status(404).json({ message: "Ledger not found" });
@@ -32,7 +32,15 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
         createdAt: { [Op.gte]: ledger.dataValues.createdAt },
       },
       order: [["createdAt", "ASC"]],
-      attributes: ["productId","quantity","unit","credit", "debit","balance"],
+      attributes: [
+        "productId",
+        "quantity",
+        "unit",
+        "credit",
+        "debit",
+        "balance",
+        "createdAt",
+      ],
     });
     const previousEntries = await Ledger.findAll({
       where: {
@@ -53,18 +61,17 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
     let prevBalance = null;
     let credit = null;
     let bankName = null;
-    let balanceBeforeDebit = null
+    let balanceBeforeDebit = null;
     if (previousEntries.length === 2) {
       const lastEntry = previousEntries[0];
       const secondLastEntry = previousEntries[1];
 
       if (lastEntry.dataValues.credit) {
         credit = lastEntry.dataValues.credit;
-        balanceBeforeDebit = lastEntry.dataValues.balance
+        balanceBeforeDebit = lastEntry.dataValues.balance;
         const accountBook = lastEntry.get("accountBook") as AccountBook | null;
-        console.log("acct", accountBook)
-        bankName = accountBook?.dataValues.bankName
-
+        console.log("acct", accountBook);
+        bankName = accountBook?.dataValues.bankName;
 
         prevBalance = secondLastEntry.dataValues.balance;
       } else {
@@ -78,11 +85,6 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
     const order = await CustomerOrder.findByPk(tranxId, {
       attributes: ["id", "price", "quantity"],
       include: [
-        // {
-        //   model: Customer,
-        //   as: "corder",
-        //   attributes: ["id", "firstname", "lastname"],
-        // },
         {
           model: Products,
           as: "porders",
@@ -99,12 +101,12 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
-    const { porder, authToWeighTickets } = order.get() as any;
+    const { porders, authToWeighTickets } = order.get() as any;
 
-    const productId = porder?.id;
-    const vehicleNo = authToWeighTickets.vehicleId;
+    const productId = porders?.id;
+    const vehicleNo = authToWeighTickets.vehicleNo;
     const latestLedgerEntry = await Ledger.findOne({
-      where: { customerId},
+      where: { customerId },
       order: [["createdAt", "DESC"]],
       attributes: ["balance"],
     });
@@ -146,73 +148,146 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getInvoice = async (req: Request, res: Response) => {
+export const getApprovedInvoice = async (req: Request, res: Response) => {
   try {
-    const { tranxId } = req.params;
+    const { invoiceId } = req.params;
 
-    // Fetch the invoice
     const invoice = await Invoice.findOne({
-      where: { tranxId },
+      where: {
+        id: invoiceId,
+        status: "approved",
+      },
       include: [
         {
-          model: Ledger,
-          as: "ledgers", // Ensure this matches your alias
-          attributes: [
-            "id",
-            "tranxId",
-            "productId",
-            "quantity",
-            "unit",
-            "credit",
-            "debit",
-            "balance",
-            "createdAt",
-          ],
-          include: [
-            {
-              model: AccountBook,
-              as: "accountBook",
-              attributes: ["id", "bankName"],
-            },
-          ],
+          model: Products,
+          as: "product",
+          attributes: ["name"],
+        },
+        {
+          model: Customer,
+          as: "customer",
+          attributes: ["firstname", "lastname"],
         },
       ],
     });
 
     if (!invoice) {
-      return res.status(404).json({ message: "Invoice not found" });
+      return res
+        .status(404)
+        .json({ message: "Invoice not found or not approved" });
     }
 
-    // Parse ledger entries
-    // const ledgerEntries = invoice.dataValues.ledgerEntries.map((ledger: any) => {
-    //   const parsedLedger = {
-    //     ...ledger.toJSON(),
-    //     credit:
-    //       typeof ledger.dataValues.credit === "string"
-    //         ? JSON.parse(ledger.dataValues.credit)
-    //         : ledger.dataValues.credit,
-    //     debit:
-    //       typeof ledger.dataValues.debit === "string"
-    //         ? JSON.parse(ledger.dataValues.debit)
-    //         : ledger.dataValues.debit,
-    //     accountBook: ledger.accountBook,
-    //   };
+    const parsedInvoice = {
+      ...invoice.toJSON(),
+      ledgerEntries:
+        typeof invoice.dataValues.ledgerEntries === "string"
+          ? JSON.parse(invoice.dataValues.ledgerEntries)
+          : invoice.dataValues.ledgerEntries,
+    };
 
-    //   return parsedLedger;
-    // });
-
-    // // Return the invoice with parsed ledger entries
-    // return res.status(200).json({
-    //   message: "Invoice retrieved successfully!",
-    //   invoice: {
-    //     ...invoice.toJSON(),
-    //     ledgerEntries,
-    //   },
-    // });
+    return res.status(200).json({
+      message: "Invoice retrieved successfully!",
+      invoice: parsedInvoice,
+    });
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
     }
     res.status(500).json({ error: "An error occurred" });
+  }
+};
+
+export const getAllInvoices = async (req: Request, res: Response) => {
+  try {
+    const invoices = await Invoice.findAll({
+      order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: Products,
+          as: "product",
+          attributes: ["name"],
+        },
+        {
+          model: Customer,
+          as: "customer",
+          attributes: ["firstname", "lastname"],
+        },
+      ],
+    });
+
+    const parsedInvoices = invoices.map((invoice) => ({
+      ...invoice.toJSON(),
+      ledgerEntries:
+        typeof invoice.dataValues.ledgerEntries === "string"
+          ? JSON.parse(invoice.dataValues.ledgerEntries)
+          : invoice.dataValues.ledgerEntries,
+    }));
+
+    return res.status(200).json({
+      message: "Invoices retrieved successfully!",
+      invoices: parsedInvoices,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "An unknown error occurred" });
+  }
+};
+
+export const generateInvoicePdf = async (req: Request, res: Response) => {
+  try {
+    const { invoiceId } = req.params;
+
+    const invoice = await Invoice.findOne({
+      where: {
+        id: invoiceId,
+        //status: "approved",
+      },
+      include: [
+        {
+          model: Products,
+          as: "product",
+          attributes: ["name"],
+        },
+        {
+          model: Customer,
+          as: "customer",
+          attributes: ["firstname", "lastname"],
+        },
+      ],
+    });
+
+
+    if (!invoice) {
+      return res.status(404).json({ message: "Invoice not found or not approved" });
+    }
+ const {customer, product} = invoice.get() as any;
+    const pdfContent = {
+      title: `Invoice #${invoice.dataValues.invoiceNumber}`,
+      fields: [
+        { label: "Customer Name", value: `${customer.firstname} ${customer.lastname}` },
+        { label: "Date", value: `${invoice.dataValues.createdAt?.toISOString().split("T")[0]}`},
+        
+        // { label: "Time Out", value: `${invoice.dataValues.createdAt?.toISOString().split("T")[1]}`},
+
+  //       { label: "Time Out",
+  // value: `${new Date(invoice.dataValues.createdAt).toLocaleTimeString('en-US', {
+  //   hour: '2-digit',
+  //   minute: '2-digit',
+  //   second: '2-digit',
+  //   hour12: true,
+  // })}`,},
+        { label: "balance", value: `${invoice.dataValues.currentBalance }`},
+      ],
+      footer: "Thank you for your business!",
+    };
+    // Use the generatePdf function
+    generatePdf(res, `invoice-${invoiceId}.pdf`, pdfContent);
+  } catch (error) {
+    console.error("Error generating PDF:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while generating the invoice PDF." });
   }
 };

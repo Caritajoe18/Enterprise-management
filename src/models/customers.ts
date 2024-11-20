@@ -24,6 +24,10 @@ export class Customer extends Model<CustomerAttributes> {
       foreignKey: "customerId",
       as: "accountBooks",
     });
+    Customer.hasMany(models.Invoice, {
+      foreignKey: "customerId",
+      as: "customerInvoice",
+    });
   }
 }
 

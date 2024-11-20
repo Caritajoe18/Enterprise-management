@@ -18,6 +18,7 @@ export interface InvoiceAttributes {
   preparedBy: string | null;
   invoiceNumber: number;
   status: "pending" | "approved" | "rejected";
+  createdAt?: Date;
 }
 
 export class Invoice extends Model<InvoiceAttributes> {
@@ -30,7 +31,7 @@ export class Invoice extends Model<InvoiceAttributes> {
       foreignKey: "tranxId",
       as: "transaction",
     });
-    Invoice.belongsTo(models.Product, {
+    Invoice.belongsTo(models.Products, {
       foreignKey: "productId",
       as: "product",
     });
@@ -133,6 +134,11 @@ Invoice.init(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       allowNull: false,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   },
   { sequelize: db, tableName: "Invoices" }
