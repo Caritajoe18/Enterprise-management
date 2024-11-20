@@ -8,6 +8,7 @@ import db from "../db";
 import { AuthRequest } from "../middleware/adminAuth";
 import Ledger from "../models/ledger";
 import Weigh from "../models/weigh";
+import Role from "../models/role";
 
 export const getAuthToWeighDetails = async (req: Request, res: Response) => {
   const { ticketId } = req.params;
@@ -16,6 +17,11 @@ export const getAuthToWeighDetails = async (req: Request, res: Response) => {
     const ticket = await AuthToWeigh.findOne({
       where: { id: ticketId },
       include: [
+        {
+          model: Role,
+          as: "role",
+          attributes: ["name"],
+        },
         {
           model: CustomerOrder,
           as: "transactions",
@@ -26,6 +32,7 @@ export const getAuthToWeighDetails = async (req: Request, res: Response) => {
               as: "corder",
               attributes: ["firstname", "lastname"],
             },
+           
           ],
         },
       ],

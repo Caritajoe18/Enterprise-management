@@ -39,6 +39,7 @@ export class Invoice extends Model<InvoiceAttributes> {
       foreignKey: "ledgerId",
       as: "ledger",
     });
+    Invoice.belongsTo(models.Role, { foreignKey: "preparedBy", as: "role" });
   }
 }
 
@@ -111,7 +112,7 @@ Invoice.init(
       allowNull: true,
     },
     ledgerEntries: {
-      type: DataTypes.JSON, 
+      type: DataTypes.JSON,
       allowNull: true,
     },
     currentBalance: {
@@ -127,8 +128,14 @@ Invoice.init(
       allowNull: true,
     },
     preparedBy: {
-      type: DataTypes.STRING,
+      type: DataTypes.UUID,
       allowNull: true,
+      references: {
+        model: "Roles",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
     },
     invoiceNumber: {
       type: DataTypes.INTEGER,

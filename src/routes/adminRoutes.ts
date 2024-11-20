@@ -148,7 +148,7 @@ router.post("/send-ticket/:Id", sendTicketToAdmin);
 router.post("/send-lpo/:Id", sendLPOToAdmin);
 router.post("/send-store-auth/:Id", sendStoreCollectionAdmin);
 router.post("/send-weigh-auth/:Id", sendAuthtoweigh);
-router.patch("/approve-cash-ticket/:Id", authorize(), approveCashTicket);
+router.patch("/approve-cash-ticket/:ticketId", authorize(), approveCashTicket);
 router.patch("/approve-lpo/:ticketId", authorize(), approveLPO);
 router.patch("/approve-store-auth/:ticketId", authorize(), approveStoreAuth);
 router.patch("/approve-weigh-auth/:ticketId", authorize(), approveAuthToWeigh);
@@ -157,10 +157,10 @@ router.get("/view-cash-ticket", getCashTicket);
 router.get("/view-lpo", getLPO);
 router.get("/view-store-auth", getStoreAuth);
 router.get("/view-all-auth-weigh", getAuthToWeigh);
-router.get("/view-aprroved-cash-ticket", getACashTicket);
-router.get("/view-approved-lpo", getAnLPO);
-router.get("/view-approved-store-auth", getAStoreAuth);
-router.get("/view-approved-auth-weigh", getAnAuthToWeigh);
+router.get("/view-aproved-cash-ticket/:id", getACashTicket);
+router.get("/view-approved-lpo/:id", getAnLPO);
+router.get("/view-approved-store-auth/:id", getAStoreAuth);
+router.get("/view-approved-auth-weigh/:id", getAnAuthToWeigh);
 
 //weighinsss
 router.get("/view-auth-weigh/:ticketId", getAuthToWeighDetails);

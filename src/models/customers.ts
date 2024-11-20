@@ -28,6 +28,10 @@ export class Customer extends Model<CustomerAttributes> {
       foreignKey: "customerId",
       as: "customerInvoice",
     });
+    Customer.hasMany(models.AuthToWeigh, {
+      foreignKey: "customerId",
+      as: "weigh",
+    });
   }
 }
 
