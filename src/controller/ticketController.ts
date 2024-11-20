@@ -11,7 +11,7 @@ import Supplier from "../models/suppliers";
 import { LPO } from "../models/lpo";
 import CollectFromGenStore from "../models/collectFromGenStore";
 import AuthToWeigh from "../models/AuthToWeigh";
-import { getRecords, getSingleRecord } from "../utilities/modules";
+import { approveTicket, getRecords, getSingleRecord } from "../utilities/modules";
 import CustomerOrder from "../models/customerOrder";
 
 export const raiseCashTicket = async (req: AuthRequest, res: Response) => {
@@ -484,5 +484,14 @@ export const getAuthToWeigh = (req: Request, res: Response) => {
 };
 export const getAnAuthToWeigh = (req: Request, res: Response) => {
   getSingleRecord(req, res, AuthToWeigh, "Authorities to weigh");
+};
+export const approveLPO = (req: AuthRequest, res: Response) => {
+  return approveTicket(req, res, LPO, "ticketId");
+};
+export const approveStoreAuth = (req: AuthRequest, res: Response) => {
+  return approveTicket(req, res, CollectFromGenStore, "ticketId");
+};
+export const approveAuthToWeigh = (req: AuthRequest, res: Response) => {
+  return approveTicket(req, res, AuthToWeigh, "ticketId");
 };
 
