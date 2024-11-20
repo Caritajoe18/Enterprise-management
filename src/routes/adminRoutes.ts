@@ -68,7 +68,10 @@ import {
   raiseAuthToWeight,
   raiseCashTicket,
   raiseLPO,
+  rejectAuthToWeigh,
   rejectCashTicket,
+  rejectLPO,
+  rejectStoreAuth,
   sendAuthtoweigh,
   sendLPOToAdmin,
   sendStoreCollectionAdmin,
@@ -76,7 +79,7 @@ import {
 } from "../controller/ticketController";
 import { createCashierEntry, getCashierEntry } from "../controller/cashier";
 import { getAuthToWeighDetails } from "../controller/weighBridge";
-import { getNotifications } from "../controller/notification";
+import { bulkDeleteNotifications, getNotification, getNotifications } from "../controller/notification";
 
 const router = express.Router();
 router.post("/sign-up", signupAdmin);
@@ -153,6 +156,9 @@ router.patch("/approve-lpo/:ticketId", authorize(), approveLPO);
 router.patch("/approve-store-auth/:ticketId", authorize(), approveStoreAuth);
 router.patch("/approve-weigh-auth/:ticketId", authorize(), approveAuthToWeigh);
 router.patch("/reject-cashticket/:ticketId", authorize(), rejectCashTicket);
+router.patch("/reject-lpo/:ticketId", authorize(), rejectLPO);
+router.patch("/reject-store-auth/:ticketId", authorize(), rejectStoreAuth);
+router.patch("/reject-weigh-auth/:ticketId", authorize(), rejectAuthToWeigh);
 router.get("/view-cash-ticket", getCashTicket);
 router.get("/view-lpo", getLPO);
 router.get("/view-store-auth", getStoreAuth);
@@ -167,6 +173,8 @@ router.get("/view-auth-weigh/:ticketId", getAuthToWeighDetails);
 
 //notification
 router.get("/get-notifications", authorize(),getNotifications);
+router.get("/get-notification/:id", getNotification);
+router.delete("/delete-notifications", bulkDeleteNotifications);
 
 
 
