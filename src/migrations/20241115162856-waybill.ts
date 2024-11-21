@@ -18,16 +18,6 @@ module.exports = {
           key: "id",
         },
       },
-      customerId: {
-       type: DataTypes.UUID, 
-        allowNull: true,
-        references: {
-          model: "Customers",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL",
-      },
       ledgerId: {
         type: DataTypes.UUID,
         allowNull: true,
@@ -38,46 +28,30 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
-      vehicleNo: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      productId: {
+      invoiceId: {
         type: DataTypes.UUID,
         allowNull: true,
         references: {
-          model: "Products",
+          model: "Invoices",
           key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
-      quantityOrdered: {
-        type: DataTypes.DECIMAL(10, 3),
-        allowNull: false,
-      },
-      prevBalance: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-      },
-      credit: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: true,
-      },
-      balanceBeforeDebit: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-      },
-      ledgerEntries: {
-        type: DataTypes.JSON, 
-        allowNull: true,
-      },
-      currentBalance: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-      },
-      bankName: {
+      address: {
         type: DataTypes.STRING,
+        allowNull: true,
+      },
+      transportedBy: {
+        type: DataTypes.ENUM("Company","Customer"),
+        allowNull: true,
+      },
+      driversLicense: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      bags: {
+        type: DataTypes.INTEGER,
         allowNull: true,
       },
       preparedBy: {
@@ -87,12 +61,6 @@ module.exports = {
       status: {
         type: Sequelize.ENUM("pending", "approved", "rejected"),
         defaultValue: "pending",
-      },
-      invoiceNumber: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        autoIncrement: true,
-        unique: true, 
       },
       createdAt: {
         allowNull: false,

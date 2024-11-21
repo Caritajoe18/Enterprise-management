@@ -94,7 +94,7 @@ router.get("/view-weighs", authorize(), viewAllWeigh);
 //receipts
 router.post("/create-invoice/:tranxId", authorize(), generateInvoice)
 router.get("/get-invoice/:invoiceId", getApprovedInvoice)
-router.get("/get-all-invoice", getAllInvoices)
+router.get("/get-all-invoice", authorize(), getAllInvoices)
 router.get("/invoice-pdf/:invoiceId", generateInvoicePdf);
 router.post("/create-waybill")
 router.get("/get-waybill")

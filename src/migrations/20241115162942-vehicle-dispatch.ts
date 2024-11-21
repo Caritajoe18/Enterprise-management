@@ -18,65 +18,11 @@ module.exports = {
           key: "id",
         },
       },
-      customerId: {
-       type: DataTypes.UUID, 
-        allowNull: true,
-        references: {
-          model: "Customers",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL",
-      },
-      ledgerId: {
-        type: DataTypes.UUID,
-        allowNull: true,
-        references: {
-          model: "Ledgers",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL",
-      },
-      vehicleNo: {
+      escortName: {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      productId: {
-        type: DataTypes.UUID,
-        allowNull: true,
-        references: {
-          model: "Products",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL",
-      },
-      quantityOrdered: {
-        type: DataTypes.DECIMAL(10, 3),
-        allowNull: false,
-      },
-      prevBalance: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-      },
-      credit: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: true,
-      },
-      balanceBeforeDebit: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-      },
-      ledgerEntries: {
-        type: DataTypes.JSON, 
-        allowNull: true,
-      },
-      currentBalance: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-      },
-      bankName: {
+      destination: {
         type: DataTypes.STRING,
         allowNull: true,
       },
@@ -84,15 +30,13 @@ module.exports = {
         type: DataTypes.UUID,
         allowNull: true,
       },
+      approvedBy: {
+        type: DataTypes.UUID,
+        allowNull: true,
+      },
       status: {
         type: Sequelize.ENUM("pending", "approved", "rejected"),
         defaultValue: "pending",
-      },
-      invoiceNumber: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        autoIncrement: true,
-        unique: true, 
       },
       createdAt: {
         allowNull: false,
