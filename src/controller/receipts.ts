@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import Ledger from "../models/ledger"; // Adjust based on your actual imports
-import { v4 as uuidv4 } from "uuid";
 import { AuthRequest } from "../middleware/adminAuth";
 import Admins from "../models/admin";
 import CustomerOrder from "../models/customerOrder";
@@ -343,9 +342,8 @@ export const generateInvoicePdf = async (req: Request, res: Response) => {
   // })}`,},
         { label: "balance", value: `${invoice.dataValues.currentBalance }`},
       ],
-      footer: "Thank you for your business!",
+      footer: "Thank you for doing Business with us!",
     };
-    // Use the generatePdf function
     generatePdf(res, `invoice-${invoiceId}.pdf`, pdfContent);
   } catch (error) {
     console.error("Error generating PDF:", error);

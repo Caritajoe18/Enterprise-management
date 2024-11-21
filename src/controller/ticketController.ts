@@ -604,7 +604,7 @@ export const rejectStoreAuth = (req: Request, res: Response) =>
   });
 export const rejectAuthToWeigh = (req: Request, res: Response) =>
   updateTicketStatus(req, res, {
-    model: CollectFromGenStore,
+    model: AuthToWeigh,
     ticketIdParam: "ticketId",
     status: "rejected",
     notificationMessage: "An Authority to collect from store was rejected.",
