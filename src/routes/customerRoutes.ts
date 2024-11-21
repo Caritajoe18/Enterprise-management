@@ -40,7 +40,9 @@ import {
   raiseSupplierOrder,
 } from "../controller/supplierOrder";
 import { createWeigh, viewAllWeigh, viewWeigh } from "../controller/weighBridge";
-import { generateInvoice, generateInvoicePdf, getAllInvoices, getApprovedInvoice } from "../controller/receipts";
+import { approveInvoice, generateInvoice, generateInvoicePdf, getAllInvoices, getApprovedInvoice, sendInvoice } from "../controller/receipts";
+import { approveWaybill, generateWaybill, getAWaybill, getAllWaybill, sendWaybill } from "../controller/waybill";
+import { getEntryforReceipt } from "../controller/cashier";
 const router = express.Router();
 
 router.post("/reg-customer", authorize(), createCustomer);
@@ -96,8 +98,14 @@ router.post("/create-invoice/:tranxId", authorize(), generateInvoice)
 router.get("/get-invoice/:invoiceId", getApprovedInvoice)
 router.get("/get-all-invoice", authorize(), getAllInvoices)
 router.get("/invoice-pdf/:invoiceId", generateInvoicePdf);
-router.post("/create-waybill")
-router.get("/get-waybill")
+router.post("/sendInvoice/:Id", sendInvoice);
+router.patch("/approveInvoice/:recieptId",authorize(), approveInvoice);
+router.post("/create-waybill/:tranxId", authorize(), generateWaybill)
+router.get("/get-all-waybill",authorize(),getAllWaybill)
+router.post("/send-Waybill/:Id", sendWaybill);
+router.patch("/approve-waybill/:recieptId",authorize(), approveWaybill);
+router.get("/waybill-pdf/:waybillId", getAWaybill);
+router.get("/create-official/:cashierId",getEntryforReceipt)
 router.post("/create-gatepass")
 router.get("/get-gatepass")
 router.post("/create-vehicle-dispatch")

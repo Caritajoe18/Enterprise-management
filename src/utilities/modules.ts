@@ -117,7 +117,7 @@ export const approveTicket = async (
     await ticket.save();
     const notification = await Notify.findOne({ where: { ticketId } });
     //console.log("Notification found:", notification);
-    if (notification && !notification.dataValues.read) {
+    if (notification) {
       await notification.update({ read: true });
     }
     await Notify.create({
@@ -160,6 +160,18 @@ export const approveReceipt = async (
     });
 
     await ticket.save();
+    const notification = await Notify.findOne({ where: { ticketId: recieptId } });
+    //console.log("Notification found:", notification);
+    if (notification) {
+      await notification.update({ read: true });
+    }
+    // await Notify.create({
+    //   ...req.body,
+    //   adminId: ticket.dataValues.raisedByAdminId,
+    //   message: notificationMessage,
+    //   type: notificationType,
+    //   ticketId,
+    // });
 
     return res
       .status(200)

@@ -9,8 +9,8 @@ interface CustomerOrderAttributes {
   quantity: number;
   price: number;
   discount?: number;
-  comments:string;
-  createdBy:string;
+  comments: string;
+  createdBy: string;
 }
 
 class CustomerOrder extends Model<CustomerOrderAttributes> {
@@ -25,15 +25,16 @@ class CustomerOrder extends Model<CustomerOrderAttributes> {
       foreignKey: "customerId",
       as: "corder",
     });
+    CustomerOrder.hasOne(models.Waybill, { foreignKey: "tranxId", as : "waybill", });
+
     CustomerOrder.hasOne(models.AuthToWeigh, {
-      foreignKey: "tranxId",  
+      foreignKey: "tranxId",
       as: "authToWeighTickets",
     });
     CustomerOrder.hasOne(models.Weigh, {
-      foreignKey: "tranxId",  
+      foreignKey: "tranxId",
       as: "weighBridge",
     });
-    
   }
 }
 
@@ -89,7 +90,6 @@ CustomerOrder.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    
   },
   {
     sequelize: db,

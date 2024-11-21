@@ -22,6 +22,7 @@ import Invoice from "./invoice";
 import CashTicket from "./CashTicket";
 import { LPO } from "./lpo";
 import CollectFromGenStore from "./collectFromGenStore";
+import Waybill from "./waybill";
 
 const models = {
   Admins,
@@ -46,7 +47,8 @@ const models = {
   Invoice,
   CashTicket,
   LPO,
-  CollectFromGenStore
+  CollectFromGenStore,
+  Waybill
 };
 
 Object.values(models).forEach((model) => {

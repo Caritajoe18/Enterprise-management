@@ -107,7 +107,11 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
     const { porders, authToWeighTickets } = order.get() as any;
 
     const productId = porders?.id;
-    const vehicleNo = authToWeighTickets.vehicleNo;
+    const  vehicleNo = authToWeighTickets?.vehicleNo;
+    console.log("authh", authToWeighTickets)
+    console.log("authh2", porders)
+    console.log( vehicleNo, "vehh")
+    console.log( authToWeighTickets?.vehicleNo, "vehh2")
     const latestLedgerEntry = await Ledger.findOne({
       where: { customerId },
       order: [["createdAt", "DESC"]],
@@ -158,7 +162,7 @@ export const getApprovedInvoice = async (req: Request, res: Response) => {
     const invoice = await Invoice.findOne({
       where: {
         id: invoiceId,
-        status: "approved",
+        //status: "approved",
       },
       include: [
         {
@@ -261,8 +265,8 @@ export const sendInvoice = async (req: Request, res: Response) => {
     await Notify.create({
       ...req.body,
       adminId,
-      message: `A new Invoice has sent to you.`,
-      type: "ticket_recieved",
+      message: `A new Invoice has been sent to you.`,
+      type: "invoice",
       ticketId: Id,
     });
 

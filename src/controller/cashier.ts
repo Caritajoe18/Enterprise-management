@@ -90,3 +90,35 @@ export const getCashierEntry = async (req: Request, res: Response) => {
           }
         }
       };
+
+
+export const getEntryforReceipt = async (req: Request, res: Response) => {
+  try {
+    const { cashierId } = req.params;
+
+    // Find a specific cashier entry by ID
+    const cashierEntry = await CashierBook.findOne({
+      where: {
+        id: cashierId,
+      },
+      attributes: ["id", "name", "credit", "createdAt"],
+      
+    });
+
+    if (!cashierEntry) {
+      return res.status(404).json({ message: "Cashier entry not found" });
+    }
+
+    res.status(200).json({
+      message: "Successfully retrieved cashier entry",
+      cashierEntry,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "An unexpected error occurred." });
+    }
+  }
+};
+
