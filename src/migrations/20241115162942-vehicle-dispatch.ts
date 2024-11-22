@@ -18,14 +18,6 @@ module.exports = {
           key: "id",
         },
       },
-      escortName: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      destination: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
       preparedBy: {
         type: DataTypes.UUID,
         allowNull: true,

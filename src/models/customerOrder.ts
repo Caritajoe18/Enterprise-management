@@ -25,7 +25,10 @@ class CustomerOrder extends Model<CustomerOrderAttributes> {
       foreignKey: "customerId",
       as: "corder",
     });
-    CustomerOrder.hasOne(models.Waybill, { foreignKey: "tranxId", as : "waybill", });
+    CustomerOrder.hasOne(models.Waybill, {
+      foreignKey: "tranxId",
+      as: "waybill",
+    });
 
     CustomerOrder.hasOne(models.AuthToWeigh, {
       foreignKey: "tranxId",
