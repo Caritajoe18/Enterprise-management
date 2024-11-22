@@ -18,46 +18,6 @@ module.exports = {
           key: "id",
         },
       },
-      ledgerId: {
-        type: DataTypes.UUID,
-        allowNull: true,
-        references: {
-          model: "Ledgers",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL",
-      },
-      invoiceId: {
-        type: DataTypes.UUID,
-        allowNull: true,
-        references: {
-          model: "Invoices",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL",
-      },
-      customerId: {
-        type: DataTypes.UUID,
-        allowNull: true,
-        references: {
-          model: "Customers",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL",
-      },
-      productId: {
-        type: DataTypes.UUID,
-        allowNull: true,
-        references: {
-          model: "Products",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL",
-      },
       escortName: {
         type: DataTypes.STRING,
         allowNull: true,

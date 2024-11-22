@@ -231,6 +231,9 @@ export const getAllInvoices = async (req: Request, res: Response) => {
         },
       ],
     });
+    if(invoices.length == 0){
+      return res.status(200).json({ message: "No invoice found", invoices });
+    }
 
     const parsedInvoices = invoices.map((invoice) => ({
       ...invoice.toJSON(),

@@ -342,10 +342,11 @@ export const removeQuantityFromStore = async (
   const { Id } = req.params;
 
   try {
-    if (!amount || isNaN(amount) || amount <= 0) {
+    const numericAmount = new Decimal(amount);
+
+    if (numericAmount.isNaN() || numericAmount.lte(0)) {
       return res.status(400).json({ message: "Invalid amount value" });
     }
-
     const storeEntry = await StoreModel.findByPk(Id);
 
     if (!storeEntry) {
@@ -353,20 +354,26 @@ export const removeQuantityFromStore = async (
         .status(404)
         .json({ message: `${StoreModel.name} entry not found` });
     }
+    console.log("Current store entry:", storeEntry);
 
-    if (storeEntry.dataValues.quantity < amount) {
-      return res
-        .status(400)
-        .json({ message: "Insufficient quantity to remove" });
+    const currentQuantity = new Decimal(storeEntry.dataValues.quantity || 0);
+
+    if (numericAmount.gt(currentQuantity)) {
+      return res.status(400).json({
+        message: "Insufficient quantity in the store to remove this amount",
+      });
     }
 
-    storeEntry.dataValues.quantity -= amount;
+    const updatedQuantity = currentQuantity.minus(numericAmount).toFixed(3) ;
+    console.log("Updated quantity:", updatedQuantity);
 
-    await storeEntry.save();
+
+     const updatedEntry = await storeEntry.update({ quantity: updatedQuantity });
+
 
     return res.status(200).json({
       message: "Quantity removed successfully",
-      data: storeEntry,
+      data: updatedEntry,
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -383,9 +390,10 @@ export const addQuantityToStore = async (
 ) => {
   const { amount } = req.body;
   const { Id } = req.params;
+try{
+  const numericAmount = new Decimal(amount);
 
-  try {
-    if (!amount || isNaN(amount) || amount <= 0) {
+    if (numericAmount.isNaN() || numericAmount.lte(0)) {
       return res.status(400).json({ message: "Invalid amount value" });
     }
 
@@ -396,14 +404,16 @@ export const addQuantityToStore = async (
         .status(404)
         .json({ message: `${StoreModel.name} entry not found` });
     }
+    const currentQuantity = new Decimal(storeEntry.dataValues.quantity || 0);
+    const updatedQuantity = currentQuantity.plus(numericAmount).toFixed(3);
 
-    storeEntry.dataValues.quantity += amount;
+    // Update the store entry's quantity
+    const updated = await storeEntry.update({ quantity: updatedQuantity });
 
-    await storeEntry.save();
 
     return res.status(200).json({
       message: "Quantity added successfully",
-      data: storeEntry,
+      updated
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
