@@ -10,7 +10,7 @@ import Invoice from "../models/invoice";
 import Customer from "../models/customers";
 import Waybill from "../models/waybill";
 import { generatePdf } from "../utilities/generatePdf";
-import { approveReceipt } from "../utilities/modules";
+import { approveReceipt, updateTicketStatus } from "../utilities/modules";
 import { getAdminConnection } from "../utilities/web-push";
 import Notify from "../models/notification";
 import Weigh from "../models/weigh";
@@ -76,10 +76,13 @@ export const generateWaybill = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getAllWaybill = async (req: Request, res: Response) => {
+export const getAllWaybill = async (req: AuthRequest, res: Response) => {
   try {
+    const admin = req.admin as Admins;
+  const { roleId: adminId, isAdmin } = admin.dataValues;
     const waybills = await Waybill.findAll({
       order: [["createdAt", "DESC"]],
+      where: isAdmin ? {} : { preparedBy: adminId },
       include: [
         {
           model: CustomerOrder,
@@ -152,6 +155,14 @@ export const sendWaybill = async (req: Request, res: Response) => {
 export const approveWaybill = (req: AuthRequest, res: Response) => {
   return approveReceipt(req, res, Waybill, "recieptId");
 };
+export const rejectWaybill = (req: Request, res: Response) =>
+  updateTicketStatus(req, res, {
+    model: Waybill,
+    ticketIdParam: "waybillId",
+    status: "rejected",
+    notificationMessage: "A waybill was rejected.",
+    notificationType: "wayibll",
+  });
 
 export const getAWaybill = async (req: Request, res: Response) => {
   try {
@@ -264,10 +275,13 @@ export const generateGatePass = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getAllGatepass = async (req: Request, res: Response) => {
+export const getAllGatepass = async (req: AuthRequest, res: Response) => {
+    const admin = req.admin as Admins;
+  const { roleId: adminId, isAdmin } = admin.dataValues;
     try {
       const gatePasses = await GatePass.findAll({
         order: [["createdAt", "DESC"]],
+        where: isAdmin ? {} : { preparedBy: adminId },
         include: [
           {
             model: CustomerOrder,
@@ -402,7 +416,6 @@ export const getAllGatepass = async (req: Request, res: Response) => {
       if (!gatePass) {
         return res.status(404).json({ message: "gate pass not found" });
       }
-console.log(gatePass)
   
       return res.status(200).json({
         message: "Gate pass generated successfully.",
@@ -416,3 +429,12 @@ console.log(gatePass)
         .json({ error: "An error occurred while generating the gate pass." });
     }
   };
+
+  export const rejectGatepass = (req: Request, res: Response) =>
+  updateTicketStatus(req, res, {
+    model: GatePass,
+    ticketIdParam: "gatepassId",
+    status: "rejected",
+    notificationMessage: "A Gate pass was rejected.",
+    notificationType: "gatepass",
+  });

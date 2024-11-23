@@ -108,7 +108,7 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
         order: [["createdAt", "DESC"]],
         transaction,
       });
-      const isCredit = credit ? true : false;
+      const isCredit = debit ? true : false;
 
       const supplierNewBalance = calculateNewBalance(
         latestSupplierEntry,

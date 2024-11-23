@@ -21,7 +21,7 @@ import {
 } from "../utilities/htmls";
 import { Op } from "sequelize";
 
-export const loginurl = `https://polema-webapp.netlify.app/`;
+export const loginurl = `https://polema-V2.netlify.app/`;
 
 export const signupAdmin = async (req: Request, res: Response) => {
   try {
@@ -174,7 +174,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
     return res
       .status(200)
-      .json({ message: "If the email exists, a reset link will be sent." });
+      .json({ message: "A reset password link that will expire in 15 minutes will be sent to this email" });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });

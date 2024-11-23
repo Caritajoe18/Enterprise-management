@@ -40,8 +40,8 @@ import {
   raiseSupplierOrder,
 } from "../controller/supplierOrder";
 import { createWeigh, viewAllWeigh, viewWeigh } from "../controller/weighBridge";
-import { approveInvoice, generateInvoice, generateInvoicePdf, getAllInvoices, getApprovedInvoice, sendInvoice } from "../controller/receipts";
-import { approveGatepass, approveWaybill, generateGatePass, generateWaybill, getAWaybill, getAllGatepass, getAllWaybill, sendGatePass, sendWaybill } from "../controller/waybill";
+import { approveInvoice, generateInvoice, generateInvoicePdf, generateVehicle, getAllInvoices, getApprovedInvoice, rejectInvoice, sendInvoice } from "../controller/receipts";
+import { approveGatepass, approveWaybill, generateGatePass, generateWaybill, getAWaybill, getAllGatepass, getAllWaybill, rejectGatepass, rejectWaybill, sendGatePass, sendWaybill } from "../controller/waybill";
 import { getEntryforReceipt } from "../controller/cashier";
 const router = express.Router();
 
@@ -100,11 +100,13 @@ router.get("/get-all-invoice", authorize(), getAllInvoices)
 router.get("/invoice-pdf/:invoiceId", generateInvoicePdf);
 router.post("/sendInvoice/:Id", sendInvoice);
 router.patch("/approveInvoice/:recieptId",authorize(), approveInvoice);
+router.patch("/rejectInvoice/:invoiceId",authorize(), rejectInvoice);
 //waybill
 router.post("/create-waybill/:tranxId", authorize(), generateWaybill)
 router.get("/get-all-waybill",authorize(),getAllWaybill)
 router.post("/send-Waybill/:Id", sendWaybill);
 router.patch("/approve-waybill/:recieptId",authorize(), approveWaybill);
+router.patch("/reject-waybill/:waybillId",authorize(), rejectWaybill);
 router.get("/waybill-pdf/:waybillId", getAWaybill);
 //official receipt
 router.get("/create-official/:cashierId",getEntryforReceipt)
@@ -113,9 +115,10 @@ router.post("/create-gatepass/:tranxId",authorize(), generateGatePass)
 router.get("/get-all-gatepass",authorize(), getAllGatepass)
 router.post("/send-gate-pass/:Id", sendGatePass)
 router.patch("/approve-gatepass/:recieptId",authorize(), approveGatepass);
+router.patch("/reject-gatepass/:gatepassId",authorize(), rejectGatepass);
 router.get("/view-gatepass/:id", getAllGatepass);
 //vehicle dispatch
-router.post("/create-vehicle-dispatch")
+router.post("/create-vehicle-dispatch/:tranxId",authorize(), generateVehicle)
 router.get("/get-vehicle-dispatch")
 
 

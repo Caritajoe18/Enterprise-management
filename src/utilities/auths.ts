@@ -67,9 +67,9 @@ export const generateOtp = ()=> {
 };
 
 export const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 3, 
-  message: "Too many requests from this IP, please try again after 15 minutes."
+  windowMs: 10 * 60 * 1000, // 15 minutes
+  max: 10, 
+  message: "Too many requests from this IP, please try again after 10 minutes."
 });
 export const tokenExpiry = Date.now() + 900000;
 

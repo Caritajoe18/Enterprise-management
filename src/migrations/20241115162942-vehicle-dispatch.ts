@@ -26,6 +26,14 @@ module.exports = {
         type: DataTypes.UUID,
         allowNull: true,
       },
+      escortName: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      destination: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
       status: {
         type: Sequelize.ENUM("pending", "approved", "rejected"),
         defaultValue: "pending",
