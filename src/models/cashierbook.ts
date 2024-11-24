@@ -15,7 +15,10 @@ export interface CashierAttributes {
 
 export class CashierBook extends Model<CashierAttributes> {
   static associate(models: any) {
-    // define association here
+    CashierBook.belongsTo(models.Departments, {
+      foreignKey: "departmentId",
+      as: "department",
+    });
   }
 }
 CashierBook.init(

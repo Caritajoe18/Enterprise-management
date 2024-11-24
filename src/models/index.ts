@@ -24,6 +24,7 @@ import { LPO } from "./lpo";
 import CollectFromGenStore from "./collectFromGenStore";
 import Waybill from "./waybill";
 import GatePass from "./gatePass";
+import CashierBook from "./cashierbook";
 
 const models = {
   Admins,
@@ -50,7 +51,8 @@ const models = {
   LPO,
   CollectFromGenStore,
   Waybill,
-  GatePass
+  GatePass,
+  CashierBook
 };
 
 Object.values(models).forEach((model) => {

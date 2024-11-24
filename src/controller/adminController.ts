@@ -211,7 +211,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     });
     console.log("userrr", user);
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: `User not found ${user} and decoded${decodedToken}` });
     }
     const tokenIsValid = await bcryptDecode(
       token as string,
