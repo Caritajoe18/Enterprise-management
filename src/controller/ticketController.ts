@@ -13,12 +13,18 @@ import CollectFromGenStore from "../models/collectFromGenStore";
 import AuthToWeigh from "../models/AuthToWeigh";
 import {
   approveTicket,
+  calculateNewBalance,
   getRecords,
   getSingleRecord,
   updateTicketStatus,
 } from "../utilities/modules";
 import CustomerOrder from "../models/customerOrder";
 import Departments from "../models/department";
+import db from "../db";
+import { Transaction } from "sequelize";
+import Decimal from "decimal.js";
+import Ledger from "../models/ledger";
+import DepartmentLedger from "../models/departmentLedger";
 
 export const raiseCashTicket = async (req: AuthRequest, res: Response) => {
   const admin = req.admin as Admins;
@@ -216,29 +222,109 @@ export const recieveCashTicket = async (req: AuthRequest, res: Response) => {
   const { id } = admin.dataValues;
   const { ticketId } = req.params;
 
+  const transaction: Transaction = await db.transaction();
   try {
-    const ticket = await CashTicket.findByPk(ticketId);
-
+    const ticket = await CashTicket.findByPk(ticketId, {
+      include: [
+        {
+          association: "customer",
+          attributes: ["firstname", "lastname"],
+          required: false,
+        },
+      ],
+      transaction,
+    });
     if (!ticket) {
+      await transaction.rollback();
       return res.status(404).json({ message: "Ticket not found" });
+    }
+    const { customerId, departmentId, staffName, creditOrDebit, amount } =
+      ticket.dataValues;
+    const isCredit = creditOrDebit === "credit";
+    const isLedgerCredit = creditOrDebit === "debit";
+
+    const customer = ticket.get("customer") as any;
+
+    const customerName = customer
+      ? `${customer.firstname} ${customer.lastname}`
+      : "N/A";
+
+    const lastEntry = await CashierBook.findOne({
+      order: [["createdAt", "DESC"]],
+      transaction,
+    });
+    const newCashierBalance = calculateNewBalance(
+      lastEntry,
+      new Decimal(amount),
+      isCredit
+    );
+
+    await CashierBook.create(
+      {
+        ...req.body,
+        approvedByAdminId: ticket.dataValues.approvedBySuperAdminId,
+        name: staffName || customerName,
+        credit: isCredit ? amount : 0,
+        debit: isCredit ? 0 : amount,
+        balance: newCashierBalance.toNumber(),
+      },
+      { transaction }
+    );
+    if (customerId) {
+      const lastLedgerEntry = await Ledger.findOne({
+        where: { customerId },
+        order: [["createdAt", "DESC"]],
+        transaction,
+      });
+
+      const newLedgerBalance = calculateNewBalance(
+        lastLedgerEntry,
+        new Decimal(amount),
+        isLedgerCredit
+      );
+      await Ledger.create(
+        {
+          ...req.body,
+          customerId,
+          credit: isCredit ? amount : 0,
+          debit: isCredit ? 0 : amount,
+          balance: newLedgerBalance.toNumber(),
+        },
+        { transaction }
+      );
+    } else if (departmentId) {
+      const lastDepartmentEntry = await DepartmentLedger.findOne({
+        where: { departmentId },
+        order: [["createdAt", "DESC"]],
+        transaction,
+      });
+
+      const newDepartmentBalance = calculateNewBalance(
+        lastDepartmentEntry,
+        new Decimal(amount),
+        isLedgerCredit
+      );
+      await DepartmentLedger.create(
+        {
+          ...req.body,
+          departmentId,
+          credit: isCredit ? amount : 0,
+          debit: isCredit ? 0 : amount,
+          balance: newDepartmentBalance.toNumber(),
+        },
+        { transaction }
+      );
     }
 
     ticket.dataValues.status = "completed";
 
-    await ticket.save();
-
-    await CashierBook.create({
-      ...req.body,
-      approvedByAdminId: ticket.dataValues.approvedBySuperAdminId,
-      name: ticket.dataValues.customerId,
-      // credit: parsedAmount.toNumber(),
-      // debit: 0,
-      // balance: newBalance.toNumber(),
-    });
+    await ticket.save({ transaction });
+    await transaction.commit();
     return res
       .status(200)
       .json({ message: "Ticket approved successfully", ticket });
   } catch (error: unknown) {
+    await transaction.rollback();
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
     }
@@ -577,13 +663,37 @@ export const getAnAuthToWeigh = (req: Request, res: Response) => {
   getSingleRecord(req, res, AuthToWeigh, "Authorities to weigh");
 };
 export const approveLPO = (req: AuthRequest, res: Response) => {
-  return approveTicket(req, res, LPO, "ticketId", "approved", "An lpo was approved.", "lpo" );
+  return approveTicket(
+    req,
+    res,
+    LPO,
+    "ticketId",
+    "approved",
+    "An lpo was approved.",
+    "lpo"
+  );
 };
 export const approveStoreAuth = (req: AuthRequest, res: Response) => {
-  return approveTicket(req, res, CollectFromGenStore, "ticketId", "approved", "An Authority to collect from store was approved.", "store" );
+  return approveTicket(
+    req,
+    res,
+    CollectFromGenStore,
+    "ticketId",
+    "approved",
+    "An Authority to collect from store was approved.",
+    "store"
+  );
 };
 export const approveAuthToWeigh = (req: AuthRequest, res: Response) => {
-  return approveTicket(req, res, AuthToWeigh, "ticketId", "approved", "An Authority to weigh was approved.", "weigh");
+  return approveTicket(
+    req,
+    res,
+    AuthToWeigh,
+    "ticketId",
+    "approved",
+    "An Authority to weigh was approved.",
+    "weigh"
+  );
 };
 
 export const rejectLPO = (req: Request, res: Response) =>

@@ -12,9 +12,10 @@ import Invoice from "../models/invoice";
 import { Op } from "sequelize";
 import { generatePdf } from "../utilities/generatePdf";
 import Role from "../models/role";
-import { approveReceipt } from "../utilities/modules";
+import { approveReceipt, updateTicketStatus } from "../utilities/modules";
 import Notify from "../models/notification";
 import { getAdminConnection } from "../utilities/web-push";
+import VehicleDispatch from "../models/vehicle";
 
 export const generateInvoice = async (req: AuthRequest, res: Response) => {
   try {
@@ -209,10 +210,13 @@ export const getApprovedInvoice = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllInvoices = async (req: Request, res: Response) => {
+export const getAllInvoices = async (req: AuthRequest, res: Response) => {
   try {
+    const admin = req.admin as Admins;
+  const { roleId: adminId, isAdmin } = admin.dataValues;
     const invoices = await Invoice.findAll({
       order: [["createdAt", "DESC"]],
+      where: isAdmin ? {} : { preparedBy: adminId },
       include: [
         {
           model: Products,
@@ -359,3 +363,43 @@ export const generateInvoicePdf = async (req: Request, res: Response) => {
       .json({ error: "An error occurred while generating the invoice PDF." });
   }
 };
+
+export const rejectInvoice = (req: Request, res: Response) =>
+  updateTicketStatus(req, res, {
+    model: Invoice,
+    ticketIdParam: "invoiceId",
+    status: "rejected",
+    notificationMessage: "An invoice was rejected.",
+    notificationType: "invoice",
+  });
+
+  export const generateVehicle = async (req: AuthRequest, res: Response) => {
+    try {
+      const admin = req.admin as Admins;
+      const { roleId: adminId } = admin.dataValues;
+      const { tranxId } = req.params;
+  
+      const { escortName, destination } = req.body;
+      const ledger = await Ledger.findOne({ where: { tranxId } });
+      if (!ledger) {
+        return res.status(404).json({ message: "Ledger not found" });
+      }
+  
+      
+      const vehicle = await VehicleDispatch.create({
+        ...req.body,
+        tranxId,
+        preparedBy: adminId,
+      });
+  
+      return res.status(201).json({
+        message: "Vehicle Dispatch generated successfully!",
+        vehicle,
+      });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return res.status(500).json({ error: error.message });
+      }
+      res.status(500).json({ error: "An error occurred" });
+    }
+  };
