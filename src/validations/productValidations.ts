@@ -165,7 +165,7 @@ export const storeEditValidationSchema = Joi.object({
   unit: Joi.string().messages({
     "string.base": "Unit must be a string.",
   }),
-  quantity: Joi.number().min(0).optional().default(0).messages({
+  quantity: Joi.number().min(0).optional().messages({
     "number.base": "Quantity must be a number.",
     "number.min": "Quantity cannot be negative.",
   }),

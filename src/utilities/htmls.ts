@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+const resetPasswordURL = process.env.RESET_PASSWORD_URL;
 export const generateVerificationEmailHTML = (
   fullname: string,
   item: number | string
@@ -100,7 +103,7 @@ export const generateTokenEmailHTML = (
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Email Verification</title>
+        <title>Polema:Reset Password</title>
         <style>
           body {
             font-family: Arial, sans-serif;
@@ -165,14 +168,14 @@ export const generateTokenEmailHTML = (
       <body>
         <div class="container">
           <div class="header">
-            <h1>Email Verification</h1>
+            <h1>Reset Password</h1>
           </div>
           <div class="content">
             <p>Hi ${fullname},</p>
             <p>Thank you for registering with us. Please click the button below to reset your password:</p>
             <p>
             <button style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
-            <a href="http://localhost:5000/admin/reset-password?token=${item}" style="color: white; text-decoration: none;">Verify Email</a>
+            <a href="${resetPasswordURL}?token=${item}" style="color: white; text-decoration: none;">Reset</a>
           </button>
 
 </p>

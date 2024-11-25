@@ -2,11 +2,9 @@ import express from "express";
 import {
   forgotPassword,
   loginAdmin,
-  loginMial,
   resetPassword,
   signupAdmin,
 } from "../controller/adminController";
-//import { authenticateAdmin } from '../middleware/adminAuth';
 import {
   createProducts,
   deleteProduct,
@@ -68,6 +66,7 @@ import {
   raiseAuthToWeight,
   raiseCashTicket,
   raiseLPO,
+  recieveCashTicket,
   rejectAuthToWeigh,
   rejectCashTicket,
   rejectLPO,
@@ -79,7 +78,11 @@ import {
 } from "../controller/ticketController";
 import { createCashierEntry, getCashierEntry } from "../controller/cashier";
 import { getAuthToWeighDetails } from "../controller/weighBridge";
-import { bulkDeleteNotifications, getNotification, getNotifications } from "../controller/notification";
+import {
+  bulkDeleteNotifications,
+  getNotification,
+  getNotifications,
+} from "../controller/notification";
 
 const router = express.Router();
 router.post("/sign-up", signupAdmin);
@@ -120,7 +123,6 @@ router.delete(
 );
 
 router.post("/reg-staff", authorize(), signupStaff);
-router.post("/login-mail", loginMial);
 router.post("/forgot", limiter, forgotPassword);
 
 router.patch("/reset-password", limiter, resetPassword);
@@ -140,6 +142,7 @@ router.get("/cashier-ledger", authorize(), getCashierEntry);
 
 //tickets
 router.post("/cash-ticket", authorize(), raiseCashTicket);
+router.post("/recieve-cash-ticket", authorize(), recieveCashTicket);
 router.post("/raise-lpo", authorize(), raiseLPO);
 router.post(
   "/raise-store-collection",
@@ -172,13 +175,8 @@ router.get("/view-approved-auth-weigh/:id", getAnAuthToWeigh);
 router.get("/view-auth-weigh/:ticketId", getAuthToWeighDetails);
 
 //notification
-router.get("/get-notifications", authorize(),getNotifications);
+router.get("/get-notifications", authorize(), getNotifications);
 router.get("/get-notification/:id", getNotification);
 router.delete("/delete-notifications", bulkDeleteNotifications);
-
-
-
-
-
 
 export default router;

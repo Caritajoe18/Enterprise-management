@@ -292,7 +292,7 @@ export const editRole = async (req: Request, res: Response) => {
     await role.update({ name: updatedName });
 
     // Handle permissions
-    const currentPermissionIds = role.permissions?.map((p) => p.dataValues.id);
+    const currentPermissionIds = role.permissions?.map((p) => p.dataValues.id) || [];
     const permissionsToAdd = permissionsId.filter(
       (id: string) => !currentPermissionIds?.includes(id)
     );
