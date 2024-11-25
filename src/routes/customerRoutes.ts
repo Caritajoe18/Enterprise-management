@@ -20,6 +20,7 @@ import {
 } from "../controller/supplierController";
 import {
   createAccountAndLedger,
+  generateLedgerSummary,
   getAccountBook,
   getCustomerLedger,
   getCustomerLedgerByProduct,
@@ -84,6 +85,9 @@ router.post("/raise-customer-order", authorize(), raiseCustomerOrder);
 router.get("/get-product-order/:productId", authorize(), getOrdersByProduct);
 router.get("/get-customer-order/:customerId", authorize(), getOrdersByCustomer);
 router.get("/get-all-orders", authorize(), getAllOrders);
+router.get("/get-summary/:tranxId", generateLedgerSummary);
+
+
 //supplier order
 router.post("/raise-supplier-order", authorize(), raiseSupplierOrder);
 router.get("/get-all-supplier-orders", authorize(), getAllSupplierOrders);
