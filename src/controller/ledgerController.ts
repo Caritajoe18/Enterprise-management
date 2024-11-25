@@ -453,11 +453,13 @@ export const generateLedgerSummary = async (req: Request, res: Response) => {
       ],
     });
 
+    console.log("prex",previousEntries)
+
     let prevBalance = null;
     let credit = null;
     let bankName = null;
     let balanceBeforeDebit = null;
-    if (previousEntries.length === 2) {
+    if (previousEntries.length >= 2) {
       const lastEntry = previousEntries[0];
       const secondLastEntry = previousEntries[1];
 
@@ -473,10 +475,20 @@ export const generateLedgerSummary = async (req: Request, res: Response) => {
         credit = null;
         prevBalance = lastEntry.dataValues.balance;
       }
-    } else if (previousEntries.length === 1) {
-      prevBalance = previousEntries[0].dataValues.balance;
+    } else if (previousEntries.length == 1) {
+      //prevBalance = previousEntries[0].dataValues.balance;
+      const singleEntry = previousEntries[0]
+      if (singleEntry.dataValues.credit) {
+        credit = singleEntry.dataValues.credit;
+        const accountBook = singleEntry.get("accountBook") as AccountBook | null;
+        bankName = accountBook?.dataValues.bankName || null; 
+      } else {
+        credit = null; 
+        bankName = null; 
+      }
+    
+      prevBalance = singleEntry.dataValues.balance;
     }
-
     const order = await CustomerOrder.findByPk(tranxId, {
       attributes: ["id", "price", "quantity"],
       include: [
