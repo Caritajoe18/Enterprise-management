@@ -24,6 +24,7 @@ export const authorize = () => {
         return res
           .status(401)
           .json({ message: "Unauthorized: Invalid token format" });
+          
       }
 
       const decoded = await verifyToken(token);

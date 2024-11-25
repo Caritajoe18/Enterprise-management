@@ -71,8 +71,7 @@ export const limiter = rateLimit({
   max: 10, 
   message: "Too many requests from this IP, please try again after 10 minutes."
 });
-export const tokenExpiry = Date.now() + 900000;
-
+export const tokenExpiry = Math.floor(Date.now() / 1000) + 900; 
 export const toPascalCase = (str: string) => {
   return str
     .toLowerCase()

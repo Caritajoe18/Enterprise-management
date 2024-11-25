@@ -20,8 +20,11 @@ import {
   generateVerificationEmailHTML,
 } from "../utilities/htmls";
 import { Op } from "sequelize";
+import { JwtPayload } from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 
-export const loginurl = `https://polema-V2.netlify.app/`;
+export const loginurl = process.env.LOGIN_URL || 'https://polema.bookbank.com.ng'; 
 
 export const signupAdmin = async (req: Request, res: Response) => {
   try {
@@ -32,7 +35,8 @@ export const signupAdmin = async (req: Request, res: Response) => {
         .json({ error: validationResult.error.details[0].message });
     }
 
-    let { email, password, roleId, firstname,lastname, isAdmin, department } = req.body;
+    let { email, password, roleId, firstname, lastname, isAdmin, department } =
+      req.body;
 
     firstname = toPascalCase(firstname);
     lastname = toPascalCase(lastname);
@@ -43,10 +47,8 @@ export const signupAdmin = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Email already exists" });
     }
 
-    
     const passwordHashed = await bcryptEncode({ value: password });
 
-    
     const admin = await AdminInstance.create({
       ...req.body,
       password: passwordHashed,
@@ -80,37 +82,37 @@ export const signupAdmin = async (req: Request, res: Response) => {
   }
 };
 
-export const loginMial = async (req: Request, res: Response) => {
-  try {
-    const { email } = req.body;
-    const user = await AdminInstance.findOne({ where: { email } });
+// export const loginMial = async (req: Request, res: Response) => {
+//   try {
+//     const { email } = req.body;
+//     const user = await AdminInstance.findOne({ where: { email } });
 
-    if (!user) {
-      return res.status(404).json({
-        error: "user not found please sign up",
-      });
-    }
-    if (user.dataValues.isVerified) {
-      return res.status(400).json({ error: "User already verified" });
-    }
-    const fullname = user.dataValues.firstname;
+//     if (!user) {
+//       return res.status(404).json({
+//         error: "user not found please sign up",
+//       });
+//     }
+//     if (user.dataValues.isVerified) {
+//       return res.status(400).json({ error: "User already verified" });
+//     }
+//     const fullname = user.dataValues.firstname;
 
-    await sendVerificationMail(
-      email,
-      loginurl,
-      fullname,
-      generateVerificationEmailHTML
-    );
-    return res.status(201).json({
-      message: "A new login has been sent to your mail",
-    });
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      res.status(500).json({ error: error.message });
-    }
-    res.status(500).json({ error: "An unexpected error occurred." });
-  }
-};
+//     await sendVerificationMail(
+//       email,
+//       loginurl,
+//       fullname,
+//       generateVerificationEmailHTML
+//     );
+//     return res.status(201).json({
+//       message: "A new login has been sent to your mail",
+//     });
+//   } catch (error: unknown) {
+//     if (error instanceof Error) {
+//       res.status(500).json({ error: error.message });
+//     }
+//     res.status(500).json({ error: "An unexpected error occurred." });
+//   }
+// };
 
 export const loginAdmin = async (req: Request, res: Response) => {
   try {
@@ -172,9 +174,10 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
     await sendVerificationMail(email, token, firstname, generateTokenEmailHTML);
 
-    return res
-      .status(200)
-      .json({ message: "A reset password link that will expire in 15 minutes will be sent to this email" });
+    return res.status(200).json({
+      message:
+        "A reset password link that will expire in 15 minutes will be sent to this email",
+    });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
@@ -184,8 +187,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
 };
 
 export const resetPassword = async (req: Request, res: Response) => {
-  console.log(req.body);
-  const  {token}  = req.query ;
+  const { token } = req.query;
   const { password } = req.body;
 
   try {
@@ -197,44 +199,61 @@ export const resetPassword = async (req: Request, res: Response) => {
     }
 
     const decodedToken = await verifyToken(token as string);
+
     if (!decodedToken) {
       return res.status(401).json({
         error: "Invalid or expired token",
       });
     }
+    if (!decodedToken || typeof decodedToken === "string") {
+      return res.status(401).json({ error: "Invalid or expired token" });
+    }
 
-    //const { id } = decodedToken as unknown as { [key: string]: string };
-    const { id } = decodedToken as { id: string };
+    const userId = decodedToken as JwtPayload;
 
     const user = await AdminInstance.findOne({
-      where: { id, resetPasswordTokenExpiry: { [Op.gt]: Date.now() } },
+      where: {
+        id: userId.id,
+      },
     });
-    console.log("userrr", user);
     if (!user) {
-      return res.status(404).json({ error: `User not found ${user} and decoded${decodedToken}` });
+      return res.status(404).json({ error: `User not found` });
     }
+    const resetPasswordToken = user.dataValues.resetPasswordToken;
+    const resetPasswordTokenExpiry = user.dataValues.resetPasswordTokenExpiry;
+
+    if (!resetPasswordToken || !resetPasswordTokenExpiry) {
+      return res
+        .status(400)
+        .json({ error: "No reset password token found or token expired." });
+    }
+
     const tokenIsValid = await bcryptDecode(
       token as string,
-      user.dataValues.resetPasswordToken as unknown as string
+      resetPasswordToken as unknown as string
     );
     if (!tokenIsValid) {
       return res.status(401).json({ error: "Invalid token" });
     }
-    
-       const passwordHashed = await bcryptEncode({ value: password });
-    
-      const updated = await user.update({
-        password: passwordHashed,
-       resetPasswordTokenExpiry: null,
-       resetPasswordToken: null,
+    if (resetPasswordTokenExpiry < Math.floor(Date.now() / 1000)) {
+      return res.status(401).json({ error: "Token has expired" });
+    }
+
+    const passwordHashed = await bcryptEncode({ value: password });
+
+    const updated = await user.update({
+      password: passwordHashed,
+      resetPasswordTokenExpiry: null,
+      resetPasswordToken: null,
     });
 
-      return res
-        .status(200)
-        .json({ message: "Password reset successful", updated });
-    }catch (error: unknown) {
-      if (error instanceof Error) {
-        return res.status(500).json({ error: error.message });
-      }
-      return res.status(500).json({ error: "An error occurred" });
-  }}
+    return res
+      .status(200)
+      .json({ message: "Password reset successful", updated });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "An error occurred" });
+  }
+};

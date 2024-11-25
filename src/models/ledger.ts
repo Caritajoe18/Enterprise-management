@@ -24,11 +24,11 @@ export class Ledger extends Model<LedgerAttributes> {
     
     Ledger.belongsTo(models.Products, {
       foreignKey: "productId",
-      as: "customer", 
+      as: "product", 
     });
     Ledger.belongsTo(models.Customer, {
         foreignKey: "customerId",
-        as:"product"
+        as:"customer"
     })
     Ledger.belongsTo(models.AccountBook, {
         foreignKey: "acctBookId",

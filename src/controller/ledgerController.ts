@@ -17,6 +17,10 @@ import {
   createDepartmentLedgerEntry,
 } from "../utilities/modules";
 import Supplier from "../models/suppliers";
+import { AuthRequest } from "../middleware/staffPermissions";
+import Admins from "../models/admin";
+import CustomerOrder from "../models/customerOrder";
+import AuthToWeigh from "../models/AuthToWeigh";
 
 export const createAccountAndLedger = async (req: Request, res: Response) => {
   const validationResult = createLedgerSchema.validate(req.body, option);
@@ -388,5 +392,143 @@ export const getSupplierLedger = async (req: Request, res: Response) => {
       return res.status(500).json({ message: error.message });
     }
     return res.status(500).json({ message: "An unexpected error occurred." });
+  }
+};
+
+export const generateLedgerSummary = async (req: Request, res: Response) => {
+  try {
+    const { tranxId } = req.params;
+    const ledger = await Ledger.findOne({
+      where: { tranxId },
+    });
+    if (!ledger) {
+      return res.status(404).json({ message: "Ledger not found" });
+    }
+    const customerId = ledger.dataValues.customerId;
+
+    const ledgerEntries = await Ledger.findAll({
+      where: {
+        customerId,
+        createdAt: { [Op.gte]: ledger.dataValues.createdAt },
+      },
+      order: [["createdAt", "ASC"]],
+      attributes: [
+        "productId",
+        "quantity",
+        "unit",
+        "credit",
+        "creditType",
+        "debit",
+        "balance",
+        "createdAt",
+      ],
+      include: [
+        {
+          model: Products,
+          as: "product",
+          attributes: ["name"],
+        },
+        {
+          model: Customer,
+          as: "customer",
+          attributes: ["firstname", "lastname"],
+        }
+      ],
+    });
+    const previousEntries = await Ledger.findAll({
+      where: {
+        customerId,
+        id: { [Op.lt]: ledger.dataValues.id },
+      },
+      order: [["id", "DESC"]],
+      limit: 2,
+      include: [
+        {
+          model: AccountBook,
+          as: "accountBook",
+          attributes: ["id", "bankName"],
+        },
+      ],
+    });
+
+    let prevBalance = null;
+    let credit = null;
+    let bankName = null;
+    let balanceBeforeDebit = null;
+    if (previousEntries.length === 2) {
+      const lastEntry = previousEntries[0];
+      const secondLastEntry = previousEntries[1];
+
+      if (lastEntry.dataValues.credit) {
+        credit = lastEntry.dataValues.credit;
+        balanceBeforeDebit = lastEntry.dataValues.balance;
+        const accountBook = lastEntry.get("accountBook") as AccountBook | null;
+        console.log("acct", accountBook);
+        bankName = accountBook?.dataValues.bankName;
+
+        prevBalance = secondLastEntry.dataValues.balance;
+      } else {
+        credit = null;
+        prevBalance = lastEntry.dataValues.balance;
+      }
+    } else if (previousEntries.length === 1) {
+      prevBalance = previousEntries[0].dataValues.balance;
+    }
+
+    const order = await CustomerOrder.findByPk(tranxId, {
+      attributes: ["id", "price", "quantity"],
+      include: [
+        {
+          model: Products,
+          as: "porders",
+          attributes: ["id", "name"],
+        },
+        {
+          model: AuthToWeigh,
+          as: "authToWeighTickets",
+          attributes: ["id", "vehicleNo"],
+        },
+      ],
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    const { porders, authToWeighTickets } = order.get() as any;
+
+    const productId = porders?.id;
+    const  vehicleNo = authToWeighTickets?.vehicleNo;
+    const latestLedgerEntry = await Ledger.findOne({
+      where: { customerId },
+      order: [["createdAt", "DESC"]],
+      attributes: ["balance"],
+    });
+    const currentBalance = latestLedgerEntry
+      ? latestLedgerEntry.dataValues.balance
+      : 0;
+
+    
+    
+
+    return res.status(201).json({
+      message: "Ledger Summary  generated successfully!",
+      ledgerSummary: {
+        tranxId,
+        customerId,
+        productId,
+        vehicleNo,
+        prevBalance,
+        credit,
+        balanceBeforeDebit: prevBalance,
+        currentBalance,
+        bankName,
+        ledgerEntries,
+      },
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An error occurred" });
   }
 };

@@ -109,10 +109,6 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
 
     const productId = porders?.id;
     const  vehicleNo = authToWeighTickets?.vehicleNo;
-    console.log("authh", authToWeighTickets)
-    console.log("authh2", porders)
-    console.log( vehicleNo, "vehh")
-    console.log( authToWeighTickets?.vehicleNo, "vehh2")
     const latestLedgerEntry = await Ledger.findOne({
       where: { customerId },
       order: [["createdAt", "DESC"]],
@@ -307,10 +303,11 @@ export const generateInvoicePdf = async (req: Request, res: Response) => {
   try {
     const { invoiceId } = req.params;
 
+    // Fetch the invoice along with associated product, customer, and role
     const invoice = await Invoice.findOne({
       where: {
         id: invoiceId,
-        //status: "approved",
+        // status: "approved",
       },
       include: [
         {
@@ -326,43 +323,76 @@ export const generateInvoicePdf = async (req: Request, res: Response) => {
         {
           model: Role,
           as: "role",
-          attributes: ["id","name"],
+          attributes: ["name"],
         },
       ],
     });
 
-
     if (!invoice) {
-      return res.status(404).json({ message: "Invoice not found or not approved" });
+      return res
+        .status(404)
+        .json({ message: "Invoice not found or not approved" });
     }
- const {customer, product} = invoice.get() as any;
-    const pdfContent = {
-      title: `Invoice #${invoice.dataValues.invoiceNumber}`,
-      fields: [
-        { label: "Customer Name", value: `${customer.firstname} ${customer.lastname}` },
-        { label: "Date", value: `${invoice.dataValues.createdAt?.toISOString().split("T")[0]}`},
-        
-        // { label: "Time Out", value: `${invoice.dataValues.createdAt?.toISOString().split("T")[1]}`},
 
-  //       { label: "Time Out",
-  // value: `${new Date(invoice.dataValues.createdAt).toLocaleTimeString('en-US', {
-  //   hour: '2-digit',
-  //   minute: '2-digit',
-  //   second: '2-digit',
-  //   hour12: true,
-  // })}`,},
-        { label: "balance", value: `${invoice.dataValues.currentBalance }`},
-      ],
-      footer: "Thank you for doing Business with us!",
+    
+    const ledgerEntries =
+      typeof invoice.dataValues.ledgerEntries === "string"
+        ? JSON.parse(invoice.dataValues.ledgerEntries)
+        : invoice.dataValues.ledgerEntries;
+
+        const enrichedLedgerEntries = await Promise.all(
+          ledgerEntries.map(async (entry: any) => {
+            let productName = null; // Set default as null
+            let customerName = null; // Set default as null
+        
+            // Fetch product name if productId is valid
+            if (entry.productId) {
+              const product = await Products.findOne({
+                where: { id: entry.productId },
+                attributes: ["name"],
+              });
+              if (product) {
+                productName = product.dataValues.name;
+              }
+            }
+        
+            // Fetch customer name if customerId is valid
+            if (entry.customerId) {
+              const customer = await Customer.findOne({
+                where: { id: entry.customerId },
+                attributes: ["firstname", "lastname"],
+              });
+              if (customer) {
+                customerName = `${customer.dataValues.firstname} ${customer.dataValues.lastname}`;
+              }
+            }
+
+        return {
+          ...entry,
+          productName,
+          customerName,
+        };
+      })
+    );
+
+    // Prepare the final invoice object
+    const parsedInvoice = {
+      ...invoice.toJSON(),
+      ledgerEntries: enrichedLedgerEntries,
     };
-    generatePdf(res, `invoice-${invoiceId}.pdf`, pdfContent);
-  } catch (error) {
-    console.error("Error generating PDF:", error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while generating the invoice PDF." });
+
+    return res.status(200).json({
+      message: "Invoice retrieved successfully!",
+      invoice: parsedInvoice,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "An error occurred" });
   }
 };
+
 
 export const rejectInvoice = (req: Request, res: Response) =>
   updateTicketStatus(req, res, {
