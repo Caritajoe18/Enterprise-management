@@ -21,6 +21,7 @@ import { AuthRequest } from "../middleware/staffPermissions";
 import Admins from "../models/admin";
 import CustomerOrder from "../models/customerOrder";
 import AuthToWeigh from "../models/AuthToWeigh";
+import Weigh from "../models/weigh";
 
 export const createAccountAndLedger = async (req: Request, res: Response) => {
   const validationResult = createLedgerSchema.validate(req.body, option);
@@ -79,7 +80,7 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
           ...req.body,
           customerId,
           productId,
-          acctBookId:accountBook.dataValues.id,
+          acctBookId: accountBook.dataValues.id,
           unit: "N/A",
           quantity: 0,
           credit: credit ? parsedAmount.toNumber() : 0,
@@ -122,12 +123,12 @@ export const createAccountAndLedger = async (req: Request, res: Response) => {
       const supplierDebit = credit ? 0 : parsedAmount.toNumber();
       const supplierCredit = credit ? parsedAmount.toNumber() : 0;
 
-       await SupplierLedger.create(
+      await SupplierLedger.create(
         {
           ...req.body,
           supplierId,
           productId,
-          acctBookId:accountBook.dataValues.id,
+          acctBookId: accountBook.dataValues.id,
           unit: "N/A",
           quantity: 0,
           credit: supplierDebit,
@@ -417,6 +418,7 @@ export const generateLedgerSummary = async (req: Request, res: Response) => {
         "quantity",
         "unit",
         "credit",
+        "weighImage",
         "creditType",
         "debit",
         "balance",
@@ -432,7 +434,7 @@ export const generateLedgerSummary = async (req: Request, res: Response) => {
           model: Customer,
           as: "customer",
           attributes: ["firstname", "lastname"],
-        }
+        },
       ],
     });
     const previousEntries = await Ledger.findAll({
@@ -486,7 +488,12 @@ export const generateLedgerSummary = async (req: Request, res: Response) => {
         {
           model: AuthToWeigh,
           as: "authToWeighTickets",
-          attributes: ["id", "vehicleNo"],
+          attributes: ["id", "vehicleNo", "driver"],
+        },
+        {
+          model: Weigh,
+          as: "weighBridge",
+          attributes: ["tar", "gross", "net"],
         },
       ],
     });
@@ -497,7 +504,7 @@ export const generateLedgerSummary = async (req: Request, res: Response) => {
     const { porders, authToWeighTickets } = order.get() as any;
 
     const productId = porders?.id;
-    const  vehicleNo = authToWeighTickets?.vehicleNo;
+    const vehicleNo = authToWeighTickets?.vehicleNo;
     const latestLedgerEntry = await Ledger.findOne({
       where: { customerId },
       order: [["createdAt", "DESC"]],
@@ -507,10 +514,7 @@ export const generateLedgerSummary = async (req: Request, res: Response) => {
       ? latestLedgerEntry.dataValues.balance
       : 0;
 
-    
-    
-
-    return res.status(201).json({
+    return res.status(200).json({
       message: "Ledger Summary  generated successfully!",
       ledgerSummary: {
         tranxId,
@@ -524,6 +528,7 @@ export const generateLedgerSummary = async (req: Request, res: Response) => {
         bankName,
         ledgerEntries,
       },
+      order,
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
