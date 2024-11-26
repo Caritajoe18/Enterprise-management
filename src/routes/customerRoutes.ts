@@ -154,7 +154,7 @@ router.patch("/approve-gatepass/:recieptId", authorize(), approveGatepass);
 router.patch("/reject-gatepass/:gatepassId", authorize(), rejectGatepass);
 router.get("/view-gatepass/:id", getAGatePass);
 //vehicle dispatch
-router.post("/create-vehicle-dispatch/:tranxId", authorize(), generateVehicle);
+router.post("/create-vehicle-dispatch", authorize(), generateVehicle);
 router.get("/get-all-vehicle-dispatch", authorize(), getAllVehicle);
 router.post("/send-vehicle/:Id", sendVehicle);
 router.patch("/approve-vehicle/:recieptId", authorize(), approveVehicle);

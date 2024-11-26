@@ -405,17 +405,11 @@ export const generateVehicle = async (req: AuthRequest, res: Response) => {
   try {
     const admin = req.admin as Admins;
     const { roleId: adminId } = admin.dataValues;
-    const { tranxId } = req.params;
 
     const { escortName, destination } = req.body;
-    const ledger = await Ledger.findOne({ where: { tranxId } });
-    if (!ledger) {
-      return res.status(404).json({ message: "Ledger not found" });
-    }
 
     const vehicle = await VehicleDispatch.create({
       ...req.body,
-      tranxId,
       preparedBy: adminId,
     });
 
@@ -438,20 +432,6 @@ export const getAllVehicle = async (req: AuthRequest, res: Response) => {
     const vehicles = await VehicleDispatch.findAll({
       order: [["createdAt", "DESC"]],
       where: isAdmin ? {} : { preparedBy: adminId },
-      include: [
-        {
-          model: CustomerOrder,
-          as: "customerOrder",
-          attributes: ["id"],
-          include: [
-            {
-              model: AuthToWeigh,
-              as: "authToWeighTickets",
-              attributes: ["driver", "vehicleNo"],
-            },
-          ],
-        },
-      ],
     });
     if (vehicles.length == 0) {
       return res.status(200).json({ message: "No vehicles found", vehicles });
@@ -529,20 +509,6 @@ export const getAVehicle = async (req: Request, res: Response) => {
       where: {
         id: vehicleId,
       },
-      include: [
-        {
-          model: CustomerOrder,
-          as: "customerOrder",
-          attributes: ["id"],
-          include: [
-            {
-              model: AuthToWeigh,
-              as: "authToWeighTickets",
-              attributes: ["driver", "vehicleNo"],
-            },
-          ],
-        },
-      ],
     });
 
     if (!vehicle) {

@@ -10,14 +10,15 @@ module.exports = {
         allowNull: false,
         primaryKey: true,
       },
-      tranxId: {
-        type: Sequelize.UUID,
+      driversName: {
+        type: DataTypes.STRING,
         allowNull: true,
-        references: {
-          model: "CustomerOrders",
-          key: "id",
-        },
       },
+      vehicleNo: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+
       preparedBy: {
         type: DataTypes.UUID,
         allowNull: true,
