@@ -26,6 +26,7 @@ import Waybill from "./waybill";
 import GatePass from "./gatePass";
 import CashierBook from "./cashierbook";
 import VehicleDispatch from "./vehicle";
+import OfficialReceipt from "./officialReceipt";
 
 const models = {
   Admins,
@@ -54,7 +55,8 @@ const models = {
   Waybill,
   GatePass,
   CashierBook,
-  VehicleDispatch
+  VehicleDispatch,
+  OfficialReceipt
 };
 
 Object.values(models).forEach((model) => {

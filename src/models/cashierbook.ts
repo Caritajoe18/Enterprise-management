@@ -19,6 +19,10 @@ export class CashierBook extends Model<CashierAttributes> {
       foreignKey: "departmentId",
       as: "department",
     });
+    CashierBook.hasOne(models.OfficialReceipt, {
+      foreignKey: "cashierId",
+      as: "cashier",  
+    });
   }
 }
 CashierBook.init(
