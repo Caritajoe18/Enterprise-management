@@ -117,7 +117,7 @@ export const approveTicket = async (
     await ticket.save();
     const notification = await Notify.findOne({ where: { ticketId } });
     //console.log("Notification found:", notification);
-    if (notification) {
+    if (notification && !notification.dataValues.read) {
       await notification.update({ read: true });
     }
     await Notify.create({

@@ -12,6 +12,7 @@ import { LPO } from "../models/lpo";
 import CollectFromGenStore from "../models/collectFromGenStore";
 import AuthToWeigh from "../models/AuthToWeigh";
 import {
+  approveReceipt,
   approveTicket,
   calculateNewBalance,
   getRecords,
@@ -674,15 +675,7 @@ export const approveLPO = (req: AuthRequest, res: Response) => {
   );
 };
 export const approveStoreAuth = (req: AuthRequest, res: Response) => {
-  return approveTicket(
-    req,
-    res,
-    CollectFromGenStore,
-    "ticketId",
-    "approved",
-    "An Authority to collect from store was approved.",
-    "store"
-  );
+  return approveReceipt(req, res, CollectFromGenStore, "ticketId");
 };
 export const approveAuthToWeigh = (req: AuthRequest, res: Response) => {
   return approveTicket(
