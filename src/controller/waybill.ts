@@ -116,7 +116,7 @@ export const sendWaybill = async (req: Request, res: Response) => {
   const { adminId } = req.body;
 
   try {
-    const ticket = await Invoice.findByPk(Id);
+    const ticket = await Waybill.findByPk(Id);
     const admin = await Admins.findByPk(adminId);
     if (!ticket || !admin) {
       return res.status(404).json({ message: "Receipt or admin not found" });
