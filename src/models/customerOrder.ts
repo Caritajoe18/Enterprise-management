@@ -38,6 +38,10 @@ class CustomerOrder extends Model<CustomerOrderAttributes> {
       foreignKey: "tranxId",
       as: "weighBridge",
     });
+    CustomerOrder.hasOne(models.VehicleDispatch, {
+      foreignKey: "tranxId",
+      as: "vehicle",
+    });
   }
 }
 

@@ -41,8 +41,8 @@ import {
   raiseSupplierOrder,
 } from "../controller/supplierOrder";
 import { createWeigh, viewAllWeigh, viewWeigh } from "../controller/weighBridge";
-import { approveInvoice, generateInvoice, generateInvoicePdf, generateVehicle, getAllInvoices, getApprovedInvoice, rejectInvoice, sendInvoice } from "../controller/receipts";
-import { approveGatepass, approveWaybill, generateGatePass, generateWaybill, getAWaybill, getAllGatepass, getAllWaybill, rejectGatepass, rejectWaybill, sendGatePass, sendWaybill } from "../controller/waybill";
+import { approveInvoice, approveVehicle, generateInvoice, generateInvoicePdf, generateVehicle, getAVehicle, getAllInvoices, getAllVehicle, getApprovedInvoice, rejectInvoice, rejectVehicle, sendInvoice, sendVehicle } from "../controller/receipts";
+import { approveGatepass, approveWaybill, generateGatePass, generateWaybill, getAGatePass, getAWaybill, getAllGatepass, getAllWaybill, rejectGatepass, rejectWaybill, sendGatePass, sendWaybill } from "../controller/waybill";
 import { getEntryforReceipt } from "../controller/cashier";
 const router = express.Router();
 
@@ -120,10 +120,14 @@ router.get("/get-all-gatepass",authorize(), getAllGatepass)
 router.post("/send-gate-pass/:Id", sendGatePass)
 router.patch("/approve-gatepass/:recieptId",authorize(), approveGatepass);
 router.patch("/reject-gatepass/:gatepassId",authorize(), rejectGatepass);
-router.get("/view-gatepass/:id", getAllGatepass);
+router.get("/view-gatepass/:id", getAGatePass);
 //vehicle dispatch
-router.post("/create-vehicle-dispatch/:tranxId",authorize(), generateVehicle)
-router.get("/get-vehicle-dispatch")
+router.post("/create-vehicle-dispatch/:tranxId",authorize(), generateVehicle);
+router.get("/get-all-vehicle-dispatch", authorize(), getAllVehicle);
+router.post("/send-vehicle/:Id", sendVehicle);
+router.patch("/approve-vehicle/:recieptId",authorize(), approveVehicle);
+router.patch("/reject-vehicle/:vehicleId",authorize(), rejectVehicle);
+router.get("/view-vehicle/:vehicleId", getAVehicle);
 
 
 export default router;

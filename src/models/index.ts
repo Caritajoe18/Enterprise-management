@@ -25,6 +25,7 @@ import CollectFromGenStore from "./collectFromGenStore";
 import Waybill from "./waybill";
 import GatePass from "./gatePass";
 import CashierBook from "./cashierbook";
+import VehicleDispatch from "./vehicle";
 
 const models = {
   Admins,
@@ -52,7 +53,8 @@ const models = {
   CollectFromGenStore,
   Waybill,
   GatePass,
-  CashierBook
+  CashierBook,
+  VehicleDispatch
 };
 
 Object.values(models).forEach((model) => {

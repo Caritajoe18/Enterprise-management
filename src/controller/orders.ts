@@ -77,7 +77,9 @@ export const raiseCustomerOrder = async (req: AuthRequest, res: Response) => {
     // Apply discount if provided and if a price plan is available
     if (discount && pricePlan) {
       const matchingPlan = pricePlan.find((plan: Plan) => {
-        // plan.amount === discount
+        // json objects are usually stored stringified in c Panel mysql database, so I
+        //am changing the priceplan amout to number first.
+
         const planAmount = Number(plan.amount);
         return !isNaN(planAmount) && planAmount === discount;
       });
@@ -190,7 +192,6 @@ export const getOrdersByProduct = async (req: AuthRequest, res: Response) => {
         },
       ],
       order: [["createdAt", "DESC"]],
-      //logging: console.log, //
     });
 
     if (orders.length === 0) {
