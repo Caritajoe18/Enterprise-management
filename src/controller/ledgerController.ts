@@ -440,9 +440,9 @@ export const generateLedgerSummary = async (req: Request, res: Response) => {
     const previousEntries = await Ledger.findAll({
       where: {
         customerId,
-        id: { [Op.lt]: ledger.dataValues.id },
+        createdAt: { [Op.lt]: ledger.dataValues.createdAt }, 
       },
-      order: [["id", "DESC"]],
+      order: [["createdAt", "DESC"]],
       limit: 2,
       include: [
         {
@@ -452,8 +452,6 @@ export const generateLedgerSummary = async (req: Request, res: Response) => {
         },
       ],
     });
-
-    console.log("prex",previousEntries)
 
     let prevBalance = null;
     let credit = null;

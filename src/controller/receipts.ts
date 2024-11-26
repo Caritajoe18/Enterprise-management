@@ -49,9 +49,9 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
     const previousEntries = await Ledger.findAll({
       where: {
         customerId,
-        id: { [Op.lt]: ledger.dataValues.id },
+        createdAt: { [Op.lt]: ledger.dataValues.createdAt }, 
       },
-      order: [["id", "DESC"]],
+      order: [["createdAt", "DESC"]],
       limit: 2,
       include: [
         {
