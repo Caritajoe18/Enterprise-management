@@ -20,7 +20,7 @@ module.exports = {
       },
       cashierId: {
         type: DataTypes.UUID,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: "CashierBooks",  
           key: "id",

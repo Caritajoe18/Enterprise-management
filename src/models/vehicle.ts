@@ -3,8 +3,9 @@ import db from "../db";
 
 export interface VehicleDispatchAttributes {
   id: string;
-  tranxId?: string;
+  driversName?: string;
   escortName: string;
+  vehicleNo: string;
   destination: string;
   preparedBy?: string;
   approvedBy?: string;
@@ -15,11 +16,7 @@ export interface VehicleDispatchAttributes {
 
 export class VehicleDispatch extends Model<VehicleDispatchAttributes> {
   static associate(models: any) {
-    // Associations with other models
-    VehicleDispatch.belongsTo(models.CustomerOrder, {
-      foreignKey: "tranxId",
-      as: "customerOrder",
-    });
+    // Associations with other model
   }
 }
 
@@ -31,15 +28,13 @@ VehicleDispatch.init(
       primaryKey: true,
       allowNull: false,
     },
-    tranxId: {
-      type: DataTypes.UUID,
+    driversName: {
+      type: DataTypes.STRING,
       allowNull: true,
-      references: {
-        model: "CustomerOrders",
-        key: "id",
-      },
-      onUpdate: "CASCADE",
-      onDelete: "SET NULL",
+    },
+    vehicleNo: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     preparedBy: {
       type: DataTypes.UUID,
