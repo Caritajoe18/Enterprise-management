@@ -3,9 +3,9 @@ import db from "../db";
 
 export interface VehicleDispatchAttributes {
   id: string;
-  tranxId?:string;
-  escortName:string;
-  destination:string;
+  tranxId?: string;
+  escortName: string;
+  destination: string;
   preparedBy?: string;
   approvedBy?: string;
   status: "pending" | "approved" | "rejected";
@@ -46,13 +46,13 @@ VehicleDispatch.init(
       allowNull: true,
     },
     escortName: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      destination: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    destination: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     approvedBy: {
       type: DataTypes.UUID,
       allowNull: true,

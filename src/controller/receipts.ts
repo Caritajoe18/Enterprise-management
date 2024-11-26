@@ -49,7 +49,7 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
     const previousEntries = await Ledger.findAll({
       where: {
         customerId,
-        createdAt: { [Op.lt]: ledger.dataValues.createdAt }, 
+        createdAt: { [Op.lt]: ledger.dataValues.createdAt },
       },
       order: [["createdAt", "DESC"]],
       limit: 2,
@@ -108,7 +108,7 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
     const { porders, authToWeighTickets } = order.get() as any;
 
     const productId = porders?.id;
-    const  vehicleNo = authToWeighTickets?.vehicleNo;
+    const vehicleNo = authToWeighTickets?.vehicleNo;
     const latestLedgerEntry = await Ledger.findOne({
       where: { customerId },
       order: [["createdAt", "DESC"]],
@@ -209,7 +209,7 @@ export const getApprovedInvoice = async (req: Request, res: Response) => {
 export const getAllInvoices = async (req: AuthRequest, res: Response) => {
   try {
     const admin = req.admin as Admins;
-  const { roleId: adminId, isAdmin } = admin.dataValues;
+    const { roleId: adminId, isAdmin } = admin.dataValues;
     const invoices = await Invoice.findAll({
       order: [["createdAt", "DESC"]],
       where: isAdmin ? {} : { preparedBy: adminId },
@@ -231,7 +231,7 @@ export const getAllInvoices = async (req: AuthRequest, res: Response) => {
         },
       ],
     });
-    if(invoices.length == 0){
+    if (invoices.length == 0) {
       return res.status(200).json({ message: "No invoice found", invoices });
     }
 
@@ -334,38 +334,37 @@ export const generateInvoicePdf = async (req: Request, res: Response) => {
         .json({ message: "Invoice not found or not approved" });
     }
 
-    
     const ledgerEntries =
       typeof invoice.dataValues.ledgerEntries === "string"
         ? JSON.parse(invoice.dataValues.ledgerEntries)
         : invoice.dataValues.ledgerEntries;
 
-        const enrichedLedgerEntries = await Promise.all(
-          ledgerEntries.map(async (entry: any) => {
-            let productName = null; // Set default as null
-            let customerName = null; // Set default as null
-        
-            // Fetch product name if productId is valid
-            if (entry.productId) {
-              const product = await Products.findOne({
-                where: { id: entry.productId },
-                attributes: ["name"],
-              });
-              if (product) {
-                productName = product.dataValues.name;
-              }
-            }
-        
-            // Fetch customer name if customerId is valid
-            if (entry.customerId) {
-              const customer = await Customer.findOne({
-                where: { id: entry.customerId },
-                attributes: ["firstname", "lastname"],
-              });
-              if (customer) {
-                customerName = `${customer.dataValues.firstname} ${customer.dataValues.lastname}`;
-              }
-            }
+    const enrichedLedgerEntries = await Promise.all(
+      ledgerEntries.map(async (entry: any) => {
+        let productName = null; // Set default as null
+        let customerName = null; // Set default as null
+
+        // Fetch product name if productId is valid
+        if (entry.productId) {
+          const product = await Products.findOne({
+            where: { id: entry.productId },
+            attributes: ["name"],
+          });
+          if (product) {
+            productName = product.dataValues.name;
+          }
+        }
+
+        // Fetch customer name if customerId is valid
+        if (entry.customerId) {
+          const customer = await Customer.findOne({
+            where: { id: entry.customerId },
+            attributes: ["firstname", "lastname"],
+          });
+          if (customer) {
+            customerName = `${customer.dataValues.firstname} ${customer.dataValues.lastname}`;
+          }
+        }
 
         return {
           ...entry,
@@ -393,7 +392,6 @@ export const generateInvoicePdf = async (req: Request, res: Response) => {
   }
 };
 
-
 export const rejectInvoice = (req: Request, res: Response) =>
   updateTicketStatus(req, res, {
     model: Invoice,
@@ -403,201 +401,163 @@ export const rejectInvoice = (req: Request, res: Response) =>
     notificationType: "invoice",
   });
 
-  export const generateVehicle = async (req: AuthRequest, res: Response) => {
-    try {
-      const admin = req.admin as Admins;
-      const { roleId: adminId } = admin.dataValues;
-      const { tranxId } = req.params;
-  
-      const { escortName, destination } = req.body;
-      const ledger = await Ledger.findOne({ where: { tranxId } });
-      if (!ledger) {
-        return res.status(404).json({ message: "Ledger not found" });
-      }
-  
-      
-      const vehicle = await VehicleDispatch.create({
-        ...req.body,
-        tranxId,
-        preparedBy: adminId,
-      });
-  
-      return res.status(201).json({
-        message: "Vehicle Dispatch generated successfully!",
-        vehicle,
-      });
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        return res.status(500).json({ error: error.message });
-      }
-      res.status(500).json({ error: "An error occurred" });
+export const generateVehicle = async (req: AuthRequest, res: Response) => {
+  try {
+    const admin = req.admin as Admins;
+    const { roleId: adminId } = admin.dataValues;
+    const { tranxId } = req.params;
+
+    const { escortName, destination } = req.body;
+    const ledger = await Ledger.findOne({ where: { tranxId } });
+    if (!ledger) {
+      return res.status(404).json({ message: "Ledger not found" });
     }
-  };
 
+    const vehicle = await VehicleDispatch.create({
+      ...req.body,
+      tranxId,
+      preparedBy: adminId,
+    });
 
-  // export const getAllWaybill = async (req: AuthRequest, res: Response) => {
-  //   try {
-  //     const admin = req.admin as Admins;
-  //     const { roleId: adminId, isAdmin } = admin.dataValues;
-  //     const waybills = await Waybill.findAll({
-  //       order: [["createdAt", "DESC"]],
-  //       where: isAdmin ? {} : { preparedBy: adminId },
-  //       include: [
-  //         {
-  //           model: CustomerOrder,
-  //           as: "transaction",
-  //           attributes: ["id"],
-  //         },
-  //         {
-  //           model: Invoice,
-  //           as: "invoice",
-  //           attributes: ["vehicleNo"],
-  //         },
-  //       ],
-  //     });
-  //     if (waybills.length == 0) {
-  //       return res.status(200).json({ message: "No waybill found", waybills });
-  //     }
-  
-  //     return res.status(200).json({
-  //       message: "Way bills retrieved successfully!",
-  //       waybills,
-  //     });
-  //   } catch (error: unknown) {
-  //     if (error instanceof Error) {
-  //       return res.status(500).json({ error: error.message });
-  //     }
-  //     return res.status(500).json({ error: "An unknown error occurred" });
-  //   }
-  // };
-  // export const sendWaybill = async (req: Request, res: Response) => {
-  //   const { Id } = req.params;
-  //   const { adminId } = req.body;
-  
-  //   try {
-  //     const ticket = await Waybill.findByPk(Id);
-  //     const admin = await Admins.findByPk(adminId);
-  //     if (!ticket || !admin) {
-  //       return res.status(404).json({ message: "Receipt or admin not found" });
-  //     }
-  
-  //     await Notify.create({
-  //       ...req.body,
-  //       adminId,
-  //       message: `A new waybill has been sent to you.`,
-  //       type: "waybill",
-  //       ticketId: Id,
-  //     });
-  
-  //     const adminWs = getAdminConnection(adminId);
-  //     if (adminWs) {
-  //       adminWs.send(
-  //         JSON.stringify({
-  //           message: `A new waybill has been sent to you.`,
-  //           ticket,
-  //         })
-  //       );
-  //     }
-  
-  //     return res.status(200).json({
-  //       message: "Receipt successfully sent to admin.",
-  //       ticket,
-  //     });
-  //   } catch (error: unknown) {
-  //     if (error instanceof Error) {
-  //       return res.status(500).json({ error: error.message });
-  //     }
-  //     res.status(500).json({ error: "An unexpected error occurred." });
-  //   }
-  // };
-  
-  // export const approveWaybill = (req: AuthRequest, res: Response) => {
-  //   return approveReceipt(req, res, Waybill, "recieptId");
-  // };
-  // export const rejectWaybill = (req: Request, res: Response) =>
-  //   updateTicketStatus(req, res, {
-  //     model: Waybill,
-  //     ticketIdParam: "waybillId",
-  //     status: "rejected",
-  //     notificationMessage: "A waybill was rejected.",
-  //     notificationType: "wayibll",
-  //   });
-  
-  // export const getAWaybill = async (req: Request, res: Response) => {
-  //   try {
-  //     const { waybillId } = req.params;
-  
-  //     const waybill = await Waybill.findOne({
-  //       where: {
-  //         id: waybillId,
-  //       },
-  //       include: [
-  //         {
-  //           model: CustomerOrder,
-  //           as: "transaction",
-  //           attributes: ["id"],
-  //           include: [
-  //             {
-  //               model: Weigh,
-  //               as: "weighBridge",
-  //               attributes: ["tar", "gross", "net"],
-  //             },
-  //             {
-  //               model: Products,
-  //               as: "porders",
-  //               attributes: ["name"],
-  //             },
-  //             {
-  //               model: Customer,
-  //               as: "corder",
-  //               attributes: ["firstname", "lastname"],
-  //             },
-  //           ],
-  //         },
-  //         {
-  //           model: Invoice,
-  //           as: "invoice",
-  //           attributes: ["vehicleNo", "ledgerEntries", "invoiceNumber"],
-  //           include: [
-  //             {
-  //               model: Products,
-  //               as: "product",
-  //               attributes: ["name"],
-  //             },
-  //           ],
-  //         },
-  //         {
-  //           model: Role,
-  //           as: "preparedByRole",
-  //           attributes: ["name"],
-  //         },
-  //       ],
-  //     });
-  
-  //     if (!waybill) {
-  //       return res.status(404).json({ message: "Waybill not found" });
-  //     }
-  
-  //     const parsedWaybill = {
-  //       ...waybill.toJSON(),
-  //       invoice: {
-  //         ...(waybill as any).invoice?.toJSON(),
-  //         ledgerEntries:
-  //           typeof (waybill as any).invoice?.dataValues.ledgerEntries === "string"
-  //             ? JSON.parse((waybill as any).invoice?.dataValues.ledgerEntries)
-  //             : (waybill as any).invoice?.dataValues.ledgerEntries,
-  //       },
-  //     };
-  
-  //     return res.status(200).json({
-  //       message: "Waybill generated successfully.",
-  //       //waybill,
-  //       parse: parsedWaybill,
-  //     });
-  //   } catch (error) {
-  //     console.error("Error generating PDF:", error);
-  //     res
-  //       .status(500)
-  //       .json({ error: "An error occurred while generating the waybill PDF." });
-  //   }
-  // };
+    return res.status(201).json({
+      message: "Vehicle Dispatch generated successfully!",
+      vehicle,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An error occurred" });
+  }
+};
+
+export const getAllVehicle = async (req: AuthRequest, res: Response) => {
+  try {
+    const admin = req.admin as Admins;
+    const { roleId: adminId, isAdmin } = admin.dataValues;
+    const vehicles = await VehicleDispatch.findAll({
+      order: [["createdAt", "DESC"]],
+      where: isAdmin ? {} : { preparedBy: adminId },
+      include: [
+        {
+          model: CustomerOrder,
+          as: "customerOrder",
+          attributes: ["id"],
+          include: [
+            {
+              model: AuthToWeigh,
+              as: "authToWeighTickets",
+              attributes: ["driver", "vehicleNo"],
+            },
+          ],
+        },
+      ],
+    });
+    if (vehicles.length == 0) {
+      return res.status(200).json({ message: "No vehicles found", vehicles });
+    }
+
+    return res.status(200).json({
+      message: "Vehicle dispatch retrieved successfully!",
+      vehicles,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "An unknown error occurred" });
+  }
+};
+export const sendVehicle = async (req: Request, res: Response) => {
+  const { Id } = req.params;
+  const { adminId } = req.body;
+
+  try {
+    const ticket = await VehicleDispatch.findByPk(Id);
+    const admin = await Admins.findByPk(adminId);
+    if (!ticket || !admin) {
+      return res.status(404).json({ message: "Receipt or admin not found" });
+    }
+
+    await Notify.create({
+      ...req.body,
+      adminId,
+      message: `A new vehicle dispatch receipt has been sent to you.`,
+      type: "vehicle",
+      ticketId: Id,
+    });
+
+    const adminWs = getAdminConnection(adminId);
+    if (adminWs) {
+      adminWs.send(
+        JSON.stringify({
+          message: `A new vehicle dispatch has been sent to you.`,
+          ticket,
+        })
+      );
+    }
+
+    return res.status(200).json({
+      message: "Receipt successfully sent to admin.",
+      ticket,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred." });
+  }
+};
+
+export const approveVehicle = (req: AuthRequest, res: Response) => {
+  return approveReceipt(req, res, VehicleDispatch, "recieptId");
+};
+export const rejectVehicle = (req: Request, res: Response) =>
+  updateTicketStatus(req, res, {
+    model: VehicleDispatch,
+    ticketIdParam: "vehicleId",
+    status: "rejected",
+    notificationMessage: "A vehicle dispatch was rejected.",
+    notificationType: "vehicle",
+  });
+
+export const getAVehicle = async (req: Request, res: Response) => {
+  try {
+    const { vehicleId } = req.params;
+
+    const vehicle = await VehicleDispatch.findOne({
+      where: {
+        id: vehicleId,
+      },
+      include: [
+        {
+          model: CustomerOrder,
+          as: "customerOrder",
+          attributes: ["id"],
+          include: [
+            {
+              model: AuthToWeigh,
+              as: "authToWeighTickets",
+              attributes: ["driver", "vehicleNo"],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!vehicle) {
+      return res.status(404).json({ message: "vehicle not found" });
+    }
+
+    return res.status(200).json({
+      message: "Vehicle Dispatch retrieved successfully.",
+
+      vehicle,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred." });
+  }
+};
