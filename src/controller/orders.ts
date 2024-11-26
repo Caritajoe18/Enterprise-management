@@ -76,9 +76,11 @@ export const raiseCustomerOrder = async (req: AuthRequest, res: Response) => {
 
     // Apply discount if provided and if a price plan is available
     if (discount && pricePlan) {
-      const matchingPlan = pricePlan.find(
-        (plan: Plan) => plan.amount === discount
-      );
+      const matchingPlan = pricePlan.find((plan: Plan) => {
+        // plan.amount === discount
+        const planAmount = Number(plan.amount);
+        return !isNaN(planAmount) && planAmount === discount;
+      });
       if (!matchingPlan) {
         throw new Error(
           `Discount of ${discount} does not match any available price plan. Available plans: ${pricePlan

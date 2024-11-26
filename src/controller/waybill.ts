@@ -79,7 +79,7 @@ export const generateWaybill = async (req: AuthRequest, res: Response) => {
 export const getAllWaybill = async (req: AuthRequest, res: Response) => {
   try {
     const admin = req.admin as Admins;
-  const { roleId: adminId, isAdmin } = admin.dataValues;
+    const { roleId: adminId, isAdmin } = admin.dataValues;
     const waybills = await Waybill.findAll({
       order: [["createdAt", "DESC"]],
       where: isAdmin ? {} : { preparedBy: adminId },
@@ -96,9 +96,9 @@ export const getAllWaybill = async (req: AuthRequest, res: Response) => {
         },
       ],
     });
-    if(waybills.length == 0){
-        return res.status(200).json({ message: "No waybill found", waybills});
-      }
+    if (waybills.length == 0) {
+      return res.status(200).json({ message: "No waybill found", waybills });
+    }
 
     return res.status(200).json({
       message: "Way bills retrieved successfully!",
@@ -193,7 +193,6 @@ export const getAWaybill = async (req: Request, res: Response) => {
               as: "corder",
               attributes: ["firstname", "lastname"],
             },
-    
           ],
         },
         {
@@ -256,7 +255,6 @@ export const generateGatePass = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: "Ledger not found" });
     }
 
-    
     const gatepass = await GatePass.create({
       ...req.body,
       tranxId,
@@ -276,161 +274,162 @@ export const generateGatePass = async (req: AuthRequest, res: Response) => {
 };
 
 export const getAllGatepass = async (req: AuthRequest, res: Response) => {
-    const admin = req.admin as Admins;
+  const admin = req.admin as Admins;
   const { roleId: adminId, isAdmin } = admin.dataValues;
-    try {
-      const gatePasses = await GatePass.findAll({
-        order: [["createdAt", "DESC"]],
-        where: isAdmin ? {} : { preparedBy: adminId },
-        include: [
-          {
-            model: CustomerOrder,
-            as: "transaction",
-            attributes: ["id"],
-            include:[
-                {
-                    model: AuthToWeigh,
-                    as:"authToWeighTickets",
-                    attributes:["driver", "vehicleNo"]
-                },
-                {
-                    model: Customer,
-                    as:"corder",
-                    attributes:["firstname", "lastname"]
-                },
-                {
-                  model: Products,
-                  as :  "porders",
-                  attributes: ["name"]
-                }
-            ]
-          },
-        ],
-      });
-      if(gatePasses.length == 0){
-        return res.status(200).json({ message: "No gate pass found", gatePasses });
-      }
-  
-      return res.status(200).json({
-        message: "Gate Pass retrieved successfully!",
-        gatePasses,
-      });
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        return res.status(500).json({ error: error.message });
-      }
-      return res.status(500).json({ error: "An unknown error occurred" });
-    }
-  };
-
-  export const sendGatePass = async (req: Request, res: Response) => {
-    const { Id } = req.params;
-    const { adminId } = req.body;
-  
-    try {
-      const ticket = await GatePass.findByPk(Id);
-      const admin = await Admins.findByPk(adminId);
-      if (!ticket || !admin) {
-        return res.status(404).json({ message: "Receipt or admin not found" });
-      }
-  
-      await Notify.create({
-        ...req.body,
-        adminId,
-        message: `A new gatepass has been sent to you.`,
-        type: "gatepass",
-        ticketId: Id,
-      });
-  
-      const adminWs = getAdminConnection(adminId);
-      if (adminWs) {
-        adminWs.send(
-          JSON.stringify({
-            message: `A new gatepass has been sent to you.`,
-            ticket,
-          })
-        );
-      }
-  
-      return res.status(200).json({
-        message: "Receipt successfully sent to admin.",
-        ticket,
-      });
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        return res.status(500).json({ error: error.message });
-      }
-      res.status(500).json({ error: "An unexpected error occurred." });
-    }
-  };
-
-  export const approveGatepass = (req: AuthRequest, res: Response) => {
-    return approveReceipt(req, res, GatePass, "recieptId");
-  };
-  export const getAGatePass = async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-  
-      const gatePass= await GatePass.findOne({
-        where: {
-          id
-        },
-        include: [
+  try {
+    const gatePasses = await GatePass.findAll({
+      order: [["createdAt", "DESC"]],
+      where: isAdmin ? {} : { preparedBy: adminId },
+      include: [
+        {
+          model: CustomerOrder,
+          as: "transaction",
+          attributes: ["id"],
+          include: [
             {
-              model: CustomerOrder,
-              as: "transaction",
-              attributes: ["id"],
-              include:[
-                  {
-                      model: AuthToWeigh,
-                      as:"authToWeighTickets",
-                      attributes:["driver", "vehicleNo"]
-                  },
-                  {
-                      model: Customer,
-                      as:"corder",
-                      attributes:["firstname", "lastname"]
-                  },
-                  {
-                    model: Products,
-                    as :  "porders",
-                    attributes: ["name"]
-                  },
-                  {
-                    model: Waybill,
-                    as: "waybill",
-                    attributes: ["id"],
-                    include:[
-                      {
-                          model: Invoice,
-                          as: "invoice",
-                          attributes: ["invoiceNumber"],
-                        },
-                    ]
-                  },
-              ]
+              model: AuthToWeigh,
+              as: "authToWeighTickets",
+              attributes: ["driver", "vehicleNo"],
+            },
+            {
+              model: Customer,
+              as: "corder",
+              attributes: ["firstname", "lastname"],
+            },
+            {
+              model: Products,
+              as: "porders",
+              attributes: ["name"],
             },
           ],
-      });
-  
-      if (!gatePass) {
-        return res.status(404).json({ message: "gate pass not found" });
-      }
-  
-      return res.status(200).json({
-        message: "Gate pass generated successfully.",
-        gatePass
-        
-      });
-    } catch (error) {
-      console.error("Error generating gate pass", error);
-      res
-        .status(500)
-        .json({ error: "An error occurred while generating the gate pass." });
+        },
+      ],
+    });
+    if (gatePasses.length == 0) {
+      return res
+        .status(200)
+        .json({ message: "No gate pass found", gatePasses });
     }
-  };
 
-  export const rejectGatepass = (req: Request, res: Response) =>
+    return res.status(200).json({
+      message: "Gate Pass retrieved successfully!",
+      gatePasses,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "An unknown error occurred" });
+  }
+};
+
+export const sendGatePass = async (req: Request, res: Response) => {
+  const { Id } = req.params;
+  const { adminId } = req.body;
+
+  try {
+    const ticket = await GatePass.findByPk(Id);
+    const admin = await Admins.findByPk(adminId);
+    if (!ticket || !admin) {
+      return res.status(404).json({ message: "Receipt or admin not found" });
+    }
+
+    await Notify.create({
+      ...req.body,
+      adminId,
+      message: `A new gatepass has been sent to you.`,
+      type: "gatepass",
+      ticketId: Id,
+    });
+
+    const adminWs = getAdminConnection(adminId);
+    if (adminWs) {
+      adminWs.send(
+        JSON.stringify({
+          message: `A new gatepass has been sent to you.`,
+          ticket,
+        })
+      );
+    }
+
+    return res.status(200).json({
+      message: "Receipt successfully sent to admin.",
+      ticket,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred." });
+  }
+};
+
+export const approveGatepass = (req: AuthRequest, res: Response) => {
+  return approveReceipt(req, res, GatePass, "recieptId");
+};
+export const getAGatePass = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const gatePass = await GatePass.findOne({
+      where: {
+        id,
+      },
+      include: [
+        {
+          model: CustomerOrder,
+          as: "transaction",
+          attributes: ["id"],
+          include: [
+            {
+              model: AuthToWeigh,
+              as: "authToWeighTickets",
+              attributes: ["driver", "vehicleNo"],
+            },
+            {
+              model: Customer,
+              as: "corder",
+              attributes: ["firstname", "lastname"],
+            },
+            {
+              model: Products,
+              as: "porders",
+              attributes: ["name"],
+            },
+            {
+              model: Waybill,
+              as: "waybill",
+              attributes: ["id"],
+              include: [
+                {
+                  model: Invoice,
+                  as: "invoice",
+                  attributes: ["invoiceNumber"],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!gatePass) {
+      return res.status(404).json({ message: "gate pass not found" });
+    }
+
+    return res.status(200).json({
+      message: "Gate pass generated successfully.",
+      gatePass,
+    });
+  } catch (error) {
+    console.error("Error generating gate pass", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while generating the gate pass." });
+  }
+};
+
+export const rejectGatepass = (req: Request, res: Response) =>
   updateTicketStatus(req, res, {
     model: GatePass,
     ticketIdParam: "gatepassId",

@@ -433,3 +433,171 @@ export const rejectInvoice = (req: Request, res: Response) =>
       res.status(500).json({ error: "An error occurred" });
     }
   };
+
+
+  // export const getAllWaybill = async (req: AuthRequest, res: Response) => {
+  //   try {
+  //     const admin = req.admin as Admins;
+  //     const { roleId: adminId, isAdmin } = admin.dataValues;
+  //     const waybills = await Waybill.findAll({
+  //       order: [["createdAt", "DESC"]],
+  //       where: isAdmin ? {} : { preparedBy: adminId },
+  //       include: [
+  //         {
+  //           model: CustomerOrder,
+  //           as: "transaction",
+  //           attributes: ["id"],
+  //         },
+  //         {
+  //           model: Invoice,
+  //           as: "invoice",
+  //           attributes: ["vehicleNo"],
+  //         },
+  //       ],
+  //     });
+  //     if (waybills.length == 0) {
+  //       return res.status(200).json({ message: "No waybill found", waybills });
+  //     }
+  
+  //     return res.status(200).json({
+  //       message: "Way bills retrieved successfully!",
+  //       waybills,
+  //     });
+  //   } catch (error: unknown) {
+  //     if (error instanceof Error) {
+  //       return res.status(500).json({ error: error.message });
+  //     }
+  //     return res.status(500).json({ error: "An unknown error occurred" });
+  //   }
+  // };
+  // export const sendWaybill = async (req: Request, res: Response) => {
+  //   const { Id } = req.params;
+  //   const { adminId } = req.body;
+  
+  //   try {
+  //     const ticket = await Waybill.findByPk(Id);
+  //     const admin = await Admins.findByPk(adminId);
+  //     if (!ticket || !admin) {
+  //       return res.status(404).json({ message: "Receipt or admin not found" });
+  //     }
+  
+  //     await Notify.create({
+  //       ...req.body,
+  //       adminId,
+  //       message: `A new waybill has been sent to you.`,
+  //       type: "waybill",
+  //       ticketId: Id,
+  //     });
+  
+  //     const adminWs = getAdminConnection(adminId);
+  //     if (adminWs) {
+  //       adminWs.send(
+  //         JSON.stringify({
+  //           message: `A new waybill has been sent to you.`,
+  //           ticket,
+  //         })
+  //       );
+  //     }
+  
+  //     return res.status(200).json({
+  //       message: "Receipt successfully sent to admin.",
+  //       ticket,
+  //     });
+  //   } catch (error: unknown) {
+  //     if (error instanceof Error) {
+  //       return res.status(500).json({ error: error.message });
+  //     }
+  //     res.status(500).json({ error: "An unexpected error occurred." });
+  //   }
+  // };
+  
+  // export const approveWaybill = (req: AuthRequest, res: Response) => {
+  //   return approveReceipt(req, res, Waybill, "recieptId");
+  // };
+  // export const rejectWaybill = (req: Request, res: Response) =>
+  //   updateTicketStatus(req, res, {
+  //     model: Waybill,
+  //     ticketIdParam: "waybillId",
+  //     status: "rejected",
+  //     notificationMessage: "A waybill was rejected.",
+  //     notificationType: "wayibll",
+  //   });
+  
+  // export const getAWaybill = async (req: Request, res: Response) => {
+  //   try {
+  //     const { waybillId } = req.params;
+  
+  //     const waybill = await Waybill.findOne({
+  //       where: {
+  //         id: waybillId,
+  //       },
+  //       include: [
+  //         {
+  //           model: CustomerOrder,
+  //           as: "transaction",
+  //           attributes: ["id"],
+  //           include: [
+  //             {
+  //               model: Weigh,
+  //               as: "weighBridge",
+  //               attributes: ["tar", "gross", "net"],
+  //             },
+  //             {
+  //               model: Products,
+  //               as: "porders",
+  //               attributes: ["name"],
+  //             },
+  //             {
+  //               model: Customer,
+  //               as: "corder",
+  //               attributes: ["firstname", "lastname"],
+  //             },
+  //           ],
+  //         },
+  //         {
+  //           model: Invoice,
+  //           as: "invoice",
+  //           attributes: ["vehicleNo", "ledgerEntries", "invoiceNumber"],
+  //           include: [
+  //             {
+  //               model: Products,
+  //               as: "product",
+  //               attributes: ["name"],
+  //             },
+  //           ],
+  //         },
+  //         {
+  //           model: Role,
+  //           as: "preparedByRole",
+  //           attributes: ["name"],
+  //         },
+  //       ],
+  //     });
+  
+  //     if (!waybill) {
+  //       return res.status(404).json({ message: "Waybill not found" });
+  //     }
+  
+  //     const parsedWaybill = {
+  //       ...waybill.toJSON(),
+  //       invoice: {
+  //         ...(waybill as any).invoice?.toJSON(),
+  //         ledgerEntries:
+  //           typeof (waybill as any).invoice?.dataValues.ledgerEntries === "string"
+  //             ? JSON.parse((waybill as any).invoice?.dataValues.ledgerEntries)
+  //             : (waybill as any).invoice?.dataValues.ledgerEntries,
+  //       },
+  //     };
+  
+  //     return res.status(200).json({
+  //       message: "Waybill generated successfully.",
+  //       //waybill,
+  //       parse: parsedWaybill,
+  //     });
+  //   } catch (error) {
+  //     console.error("Error generating PDF:", error);
+  //     res
+  //       .status(500)
+  //       .json({ error: "An error occurred while generating the waybill PDF." });
+  //   }
+  // };
