@@ -110,7 +110,7 @@ export const sendTicketToAdmin = async (req: Request, res: Response) => {
     await Notify.create({
       ...req.body,
       adminId,
-      message: `A new  cash ticket has sent to you.`,
+      message: `A new  cash ticket has been sent to you.`,
       type: "cash",
       ticketId: Id,
     });
@@ -199,6 +199,10 @@ export const rejectCashTicket = async (req: Request, res: Response) => {
     ticket.dataValues.status = "rejected";
 
     await ticket.save();
+    const notification = await Notify.findOne({ where: { ticketId } });
+    if (notification && !notification.dataValues.read) {
+      await notification.update({ read: true });
+    }
 
     await Notify.create({
       ...req.body,
