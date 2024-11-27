@@ -737,6 +737,7 @@ export const approveStoreAuth = async (req: AuthRequest, res: Response) => {
         where: {
           name: { [Op.iLike]: "%general store%" }, // Case-insensitive match
         },
+        
       },
     });
 
@@ -758,7 +759,7 @@ export const approveStoreAuth = async (req: AuthRequest, res: Response) => {
 
     return res
       .status(200)
-      .json({ message: "Authority to collect from Store approved successfully", ticket });
+      .json({ message: "Authority to collect from Store approved successfully" });
   } catch (error: unknown) {
     await transaction.rollback();
     if (error instanceof Error) {
