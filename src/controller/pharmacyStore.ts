@@ -15,10 +15,7 @@ export const uploadImage = async (req: Request, res: Response) => {
     if (!req.file) {
       return res.status(500).json({ error: "no file uploaded" });
     }
-    const isPDF = req.file.mimetype === 'application/pdf';
-    const resourceType = isPDF ? 'raw' : 'image';
-
-    const imageUpload = await cloudinary.uploader.upload(req.file.path, {resource_type: resourceType,});
+    const imageUpload = await cloudinary.uploader.upload(req.file.path);
     res.status(200).json({ imageUrl: imageUpload.secure_url });
   } catch (error) {
     res.status(500).json({ error: "image upload failed" });
