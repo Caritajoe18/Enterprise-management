@@ -115,7 +115,35 @@ export const getReceipt = async (req: Request, res: Response) => {
     }
 
     res.status(200).json({
-      message: "Successfully retrieved cashier entry",
+      message: "Successfully retrieved  Receipts",
+      receipt,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "An unexpected error occurred." });
+    }
+  }
+};
+export const getAllReceipt = async (req: Request, res: Response) => {
+  try {
+    const receipt = await OfficialReceipt.findAll({
+      include: [
+        {
+          model: CashierBook,
+          as: "cashier",
+          attributes: ["name", "credit"],
+        },
+      ],
+    });
+
+    if (receipt.length == 0) {
+      return res.status(200).json({ message: "No Receipts yet", receipt });
+    }
+
+    res.status(200).json({
+      message: "Successfully retrieved Official Receipts",
       receipt,
     });
   } catch (error: unknown) {
@@ -168,7 +196,6 @@ export const getEntryforReceipt = async (req: Request, res: Response) => {
         id: cashierId,
       },
       attributes: ["id", "name", "credit", "createdAt"],
-      
     });
 
     if (!cashierEntry) {
