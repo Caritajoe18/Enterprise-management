@@ -40,6 +40,14 @@ class CustomerOrder extends Model<CustomerOrderAttributes> {
       foreignKey: "tranxId",
       as: "weighBridge",
     });
+    CustomerOrder.hasOne(models.Invoice, {
+      foreignKey: "tranxId",
+      as: "invoice",
+    });
+    CustomerOrder.hasOne(models.Ledger, {
+      foreignKey: "tranxId",
+      as: "ledger",
+    });
   }
 }
 

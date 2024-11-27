@@ -38,6 +38,10 @@ export class Ledger extends Model<LedgerAttributes> {
         foreignKey: "acctBookId",
         as:"accountBook"
     })
+    Ledger.belongsTo(models.CustomerOrder, {
+        foreignKey: "tranxId",
+        as:"order"
+    })
   }
 }
 
