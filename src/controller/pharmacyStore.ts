@@ -18,7 +18,7 @@ export const uploadImage = async (req: Request, res: Response) => {
     const imageUpload = await cloudinary.uploader.upload(req.file.path);
     res.status(200).json({ imageUrl: imageUpload.secure_url });
   } catch (error) {
-    res.status(500).json({ error: "image upload failed" });
+    res.status(500).json({ error: "Image upload failed or invalid image type. Must be jpeg or png" });
   }
 };
 

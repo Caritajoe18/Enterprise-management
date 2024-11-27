@@ -74,7 +74,7 @@ import {
   sendGatePass,
   sendWaybill,
 } from "../controller/waybill";
-import { createOfficialReceipt, getEntryforReceipt, getReceipt } from "../controller/cashier";
+import { createOfficialReceipt, getAllReceipt, getEntryforReceipt, getReceipt } from "../controller/cashier";
 const router = express.Router();
 
 router.post("/reg-customer", authorize(), createCustomer);
@@ -146,6 +146,7 @@ router.get("/waybill-pdf/:waybillId", getAWaybill);
 router.get("/create-official", getEntryforReceipt );
 router.post("/create-official-receipt/:cashierId", createOfficialReceipt);
 router.get("/get-official/:receiptId", getReceipt);
+router.get("/get-all-official", getAllReceipt);
 //gatepass
 router.post("/create-gatepass/:tranxId", authorize(), generateGatePass);
 router.get("/get-all-gatepass", authorize(), getAllGatepass);
