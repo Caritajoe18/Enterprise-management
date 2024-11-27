@@ -78,6 +78,22 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true,
       },
+      invoiceImg: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      gatepassImage: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      cashImage: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      wayBillImage: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

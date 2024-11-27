@@ -25,7 +25,7 @@ router.post("/upload", upload.single("file"), uploadImage);
 router.post("/create-pharmstore", createStore);
 router.get("/view-pharmstore", authorize(), getPharmStores);
 router.get("/view-pharmstore-prod", authorize(), getStoreForSale);
-router.get("/view-pharmstore-raw", authorize(), getStoreForPurchase);
+router.get("/view-pharmstore-raw", getStoreForPurchase);
 router.patch("/edit-pharmstore/:id",authorize(), editStore);
 router.post("/raise-pharm-order",authorize(), createOrder);
 router.get("/view-pharm-order",authorize(), viewOrder);

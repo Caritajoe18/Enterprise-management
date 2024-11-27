@@ -79,20 +79,20 @@ const router = express.Router();
 
 router.post("/reg-customer", authorize(), createCustomer);
 router.get("/get-customers", authorize(), getAllCustomers);
-router.get("/get-customer/:id", authorize(), getCustomer);
+router.get("/get-customer/:id", getCustomer);
 router.patch("/edit-customer/:id", authorize(), updateCustomer);
 router.delete("/delete-customer/:id", authorize(), deleteCustomer);
-router.get("/search-customer", authorize(), searchCustomer);
+router.get("/search-customer", searchCustomer);
 
 //suppliers
 router.post("/reg-supplier", authorize(), createSupplier);
 router.get("/get-suppliers", authorize(), getAllSuppliers);
-router.get("/get-supplier/:id", authorize(), getSupplier);
-router.patch("/edit-supplier/:id", authorize(), updateSupplier);
+router.get("/get-supplier/:id", getSupplier);
+router.patch("/edit-supplier/:id", updateSupplier);
 router.delete("/delete-supplier/:id", authorize(), deleteSupplier);
-router.get("/search-supplier", authorize(), searchSupplier);
-router.get("/order-suppliers", authorize(), orderSupplierFirstname);
-router.get("/order-customers", authorize(), orderCustomersFirstname);
+router.get("/search-supplier", searchSupplier);
+router.get("/order-suppliers", orderSupplierFirstname);
+router.get("/order-customers",  orderCustomersFirstname);
 
 //ledger, accountbook, placeorder
 router.post("/create-account", authorize(), createAccountAndLedger);

@@ -14,6 +14,10 @@ export interface LedgerAttributes {
   debit:number;
   balance:number;
   weighImage:string;
+  invoiceImage:string;
+  cashImage:string;
+  gatepassImage:string;
+  wayBillImage:string;
   acctBookId:string;
   createdAt:Date
 
@@ -115,6 +119,22 @@ Ledger.init(
         type: DataTypes.DECIMAL(15, 2)
         ,
         allowNull: false
+      },
+      invoiceImage: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      gatepassImage: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      cashImage: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      wayBillImage: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
       createdAt: {
         type: DataTypes.DATE,
