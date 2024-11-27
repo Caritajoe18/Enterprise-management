@@ -41,6 +41,12 @@ module.exports = {
       price: {
         type: Sequelize.DECIMAL(15, 2),
       },
+      basePrice: {
+        type: Sequelize.DECIMAL(15, 2),
+      },
+      rate: {
+        type: Sequelize.DECIMAL(15, 2),
+      },
       discount: {
         type: Sequelize.DECIMAL(15, 2),
       },

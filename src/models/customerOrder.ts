@@ -9,6 +9,8 @@ interface CustomerOrderAttributes {
   quantity: number;
   price: number;
   discount?: number;
+  basePrice?: number;
+  rate  ?: number;
   comments: string;
   createdBy: string;
 }
@@ -80,6 +82,12 @@ CustomerOrder.init(
     price: {
       type: DataTypes.DECIMAL(15, 2),
       allowNull: false,
+    },
+    basePrice: {
+      type: DataTypes.DECIMAL(15, 2),
+    },
+    rate: {
+      type: DataTypes.DECIMAL(15, 2),
     },
     discount: {
       type: DataTypes.DECIMAL(15, 2),

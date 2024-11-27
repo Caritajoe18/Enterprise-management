@@ -127,9 +127,9 @@ router.post("/forgot", limiter, forgotPassword);
 
 router.patch("/reset-password", limiter, resetPassword);
 router.patch("/update-staff/:id", authorize(), updateStaff);
-router.patch("/suspend-staff/:id", authorize(), suspendStaff);
-router.patch("/restore-staff/:id", authorize(), restoreStaff);
-router.delete("/delete-staff/:id", authorize(), deleteStaff);
+router.patch("/suspend-staff/:id", suspendStaff);
+router.patch("/restore-staff/:id", restoreStaff);
+router.delete("/delete-staff/:id", deleteStaff);
 router.get("/all-staff", authorize(), getAllStaff);
 router.get("/all-admin", getAdmin);
 router.get("/search-staff", searchStaff);
