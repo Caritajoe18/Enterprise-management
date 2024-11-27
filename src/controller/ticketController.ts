@@ -675,7 +675,14 @@ export const approveLPO = (req: AuthRequest, res: Response) => {
   );
 };
 export const approveStoreAuth = (req: AuthRequest, res: Response) => {
-  return approveReceipt(req, res, CollectFromGenStore, "ticketId");
+  return approveReceipt(
+    req,
+    res,
+    CollectFromGenStore,
+    "ticketId",
+    "A new authority to collect from Store has been approved",
+    "store"
+  );
 };
 export const approveAuthToWeigh = (req: AuthRequest, res: Response) => {
   return approveTicket(

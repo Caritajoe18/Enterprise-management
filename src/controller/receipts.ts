@@ -296,7 +296,7 @@ export const sendInvoice = async (req: Request, res: Response) => {
 };
 
 export const approveInvoice = (req: AuthRequest, res: Response) => {
-  return approveReceipt(req, res, Invoice, "recieptId");
+  return approveReceipt(req, res, Invoice, "recieptId", "A new Invoice has been approved", "invoice");
 };
 
 export const generateInvoicePdf = async (req: Request, res: Response) => {
@@ -490,7 +490,7 @@ export const sendVehicle = async (req: Request, res: Response) => {
 };
 
 export const approveVehicle = (req: AuthRequest, res: Response) => {
-  return approveReceipt(req, res, VehicleDispatch, "recieptId");
+  return approveReceipt(req, res, VehicleDispatch, "recieptId","A new Vehicle Dispatch note has been approved", "vehicle");
 };
 export const rejectVehicle = (req: Request, res: Response) =>
   updateTicketStatus(req, res, {

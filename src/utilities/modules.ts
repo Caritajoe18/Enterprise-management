@@ -142,7 +142,9 @@ export const approveReceipt = async (
   req: AuthRequest,
   res: Response,
   model: ModelStatic<Model>,
-  receiptIdParam: string
+  receiptIdParam: string,
+  notificationMessage: string,
+  notificationType: string
 ) => {
   const admin = req.admin as Admins;
   const { id } = admin.dataValues;
@@ -160,18 +162,20 @@ export const approveReceipt = async (
     });
 
     await ticket.save();
-    const notification = await Notify.findOne({ where: { ticketId: recieptId } });
+    const notification = await Notify.findOne({
+      where: { ticketId: recieptId },
+    });
     //console.log("Notification found:", notification);
     if (notification) {
       await notification.update({ read: true });
     }
-    // await Notify.create({
-    //   ...req.body,
-    //   adminId: ticket.dataValues.raisedByAdminId,
-    //   message: notificationMessage,
-    //   type: notificationType,
-    //   ticketId,
-    // });
+    await Notify.create({
+      ...req.body,
+      adminId: ticket.dataValues.raisedByAdminId,
+      message: notificationMessage,
+      type: notificationType,
+      ticketId: recieptId,
+    });
 
     return res
       .status(200)
@@ -364,12 +368,10 @@ export const removeQuantityFromStore = async (
       });
     }
 
-    const updatedQuantity = currentQuantity.minus(numericAmount).toFixed(3) ;
+    const updatedQuantity = currentQuantity.minus(numericAmount).toFixed(3);
     console.log("Updated quantity:", updatedQuantity);
 
-
-     const updatedEntry = await storeEntry.update({ quantity: updatedQuantity });
-
+    const updatedEntry = await storeEntry.update({ quantity: updatedQuantity });
 
     return res.status(200).json({
       message: "Quantity removed successfully",
@@ -390,8 +392,8 @@ export const addQuantityToStore = async (
 ) => {
   const { amount } = req.body;
   const { Id } = req.params;
-try{
-  const numericAmount = new Decimal(amount);
+  try {
+    const numericAmount = new Decimal(amount);
 
     if (numericAmount.isNaN() || numericAmount.lte(0)) {
       return res.status(400).json({ message: "Invalid amount value" });
@@ -410,10 +412,9 @@ try{
     // Update the store entry's quantity
     const updated = await storeEntry.update({ quantity: updatedQuantity });
 
-
     return res.status(200).json({
       message: "Quantity added successfully",
-      updated
+      updated,
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
