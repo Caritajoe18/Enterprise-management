@@ -180,7 +180,7 @@ export const approveCashTicket = async (req: AuthRequest, res: Response) => {
       await Notify.create({
         ...req.body,
         adminId: cashier.dataValues.id,
-        message: `An cash ticket has been sent to you.`,
+        message: `An approved cash ticket has been sent to you.`,
         type: "cash",
         ticketId,
       });
@@ -198,7 +198,7 @@ export const approveCashTicket = async (req: AuthRequest, res: Response) => {
 
     return res
       .status(200)
-      .json({ message: "Ticket approved successfully", ticket });
+      .json({ message: `Ticket approved successfully and sent to ${cashier?.dataValues.id}`});
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
@@ -737,7 +737,7 @@ export const approveStoreAuth = async (req: AuthRequest, res: Response) => {
         where: {
           name: { [Op.iLike]: "%general store%" }, // Case-insensitive match
         },
-        
+
       },
     });
 
