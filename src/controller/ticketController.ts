@@ -169,6 +169,7 @@ export const approveCashTicket = async (req: AuthRequest, res: Response) => {
     const cashier = await Admins.findOne({
       include: {
         model: Role,
+        as: 'role',
         where: {
           name: { [Op.iLike]: "Cashier" }, // Case-insensitive comparison
         },
@@ -734,6 +735,7 @@ export const approveStoreAuth = async (req: AuthRequest, res: Response) => {
     const generalStoreAdmin = await Admins.findOne({
       include: {
         model: Role,
+        as: 'role',
         where: {
           name: { [Op.iLike]: "%general store%" }, // Case-insensitive match
         },
@@ -806,6 +808,7 @@ export const approveAuthToWeigh = async (req: AuthRequest, res: Response) => {
     const weighAdmin = await Admins.findOne({
       include: {
         model: Role,
+        as: 'role',
         where: {
           name: { [Op.iLike]: "%weigh%" }, // Case-insensitive match for "weigh"
         },
