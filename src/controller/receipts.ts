@@ -170,7 +170,7 @@ export const getApprovedInvoice = async (req: Request, res: Response) => {
         {
           model: Customer,
           as: "customer",
-          attributes: ["firstname", "lastname"],
+          attributes: ["firstname", "lastname", "address"],
         },
         {
           model: Role,
@@ -318,7 +318,7 @@ export const generateInvoicePdf = async (req: Request, res: Response) => {
         {
           model: Customer,
           as: "customer",
-          attributes: ["firstname", "lastname"],
+          attributes: ["firstname", "lastname", "address"],
         },
         {
           model: Role,
