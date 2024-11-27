@@ -13,14 +13,9 @@ export interface PermissionAttributes {
   slug: string;
 }
 
-// export default (sequelize, DataTypes) => {
+
 class Permission extends Model<PermissionAttributes> {
   public navParent?: NavParent;
-  /**
-   * Helper method for defining associations.
-   * This method is not a part of Sequelize lifecycle.
-   * The `models/index` file will call this method automatically.
-   */
   static associate(models: any) {
     Permission.belongsTo(models.NavParent, {
       foreignKey: "navParentId",

@@ -9,8 +9,8 @@ import {
 } from "../validations/adminValidation";
 import { toPascalCase } from "../utilities/auths";
 import NavParent from "../models/navparent";
-import { Op } from "sequelize";
-
+import { Transaction } from "sequelize";
+import db from "../db";
 export const addRole = async (req: Request, res: Response) => {
   try {
     const validationResult = createRoleSchema.validate(req.body, option);
@@ -292,7 +292,8 @@ export const editRole = async (req: Request, res: Response) => {
     await role.update({ name: updatedName });
 
     // Handle permissions
-    const currentPermissionIds = role.permissions?.map((p) => p.dataValues.id) || [];
+    const currentPermissionIds =
+      role.permissions?.map((p) => p.dataValues.id) || [];
     const permissionsToAdd = permissionsId.filter(
       (id: string) => !currentPermissionIds?.includes(id)
     );
@@ -344,77 +345,65 @@ export const editRole = async (req: Request, res: Response) => {
   }
 };
 
-
 export const editRolePermissions = async (req: Request, res: Response) => {
-  try {
   const { roleId } = req.params;
   const { name, permissionsId } = req.body;
-
-    // Validate request
+  const transaction: Transaction = await db.transaction();
+  try {
     const validationResult = updateRoleSchema.validate(req.body);
     if (validationResult.error) {
       return res
         .status(400)
         .json({ error: validationResult.error.details[0].message });
     }
-
-
-    // Find the role
-    const role = await Role.findByPk(roleId);
+    // Validate the role
+    const role = await Role.findByPk(roleId, { transaction });
     if (!role) {
-      return res.status(404).json({ message: "Role not found" });
+      return res.status(404).json({ error: "Role not found." });
     }
-    let updatedName = name ? toPascalCase(name) : role.dataValues.name;
+    const updatedName = name ? toPascalCase(name) : role.dataValues.name;
     if (updatedName !== role.dataValues.name) {
-      const existingRole = await Role.findOne({ where: { name: updatedName } });
+      const existingRole = await Role.findOne({ where: { name: updatedName }, transaction, });
       if (existingRole) {
         return res.status(400).json({ message: "Role name already exists" });
       }
     }
-    await role.update({ name: updatedName });
+    await role.update({ name: updatedName },{ transaction });
 
-    // Get the current permissions for the role
-    const currentRolePermissions = await RolePermission.findAll({
+    // Validate the permissions
+    const validPermissions = await Permission.findAll({
+      where: { id: permissionsId },
+      transaction,
+    });
+
+    if (validPermissions.length !== permissionsId.length) {
+      return res
+        .status(400)
+        .json({ error: "One or more permissions are invalid or do not exist." });
+    }
+
+    // Clear existing permissions for the role
+    await RolePermission.destroy({
       where: { roleId },
+      transaction,
     });
-    const currentPermissionIds = currentRolePermissions.map((rp) => rp.dataValues.permissionId);
 
-    // Determine permissions to remove and add
-    const permissionsToRemove = currentPermissionIds.filter(id => !permissionsId.includes(id));
-    const permissionsToAdd = permissionsId.filter((id: any) => !currentPermissionIds.includes(id));
+    // Add the new permissions
+    const rolePermissions = permissionsId.map((permissionId: string) => ({
+      roleId,
+      permissionId,
+    }));
 
-    // Remove permissions not included in the new permissionsId array
-    if (permissionsToRemove.length > 0) {
-      await RolePermission.destroy({
-        where: {
-          roleId,
-          permissionId: permissionsToRemove,
-        },
-      });
-    }
+    await RolePermission.bulkCreate(rolePermissions, { transaction });
 
-    // Add new permissions
-    if (permissionsToAdd.length > 0) {
-      const newPermissions = permissionsToAdd.map((permissionId: any) => ({
-        roleId,
-        permissionId,
-      }));
-      await RolePermission.bulkCreate(newPermissions);
-    }
+    await transaction.commit();
 
-    return res.status(200).json({
-      message: "Role permissions updated successfully",
-      addedPermissions: permissionsToAdd,
-      removedPermissions: permissionsToRemove,
-    });
+    return { message: "Role permissions updated successfully." };
   } catch (error: unknown) {
-    console.error("Error updating role permissions:", error);
+    await transaction.rollback();
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
     }
-    res.status(500).json({ error: "An unexpected error occurred." });
+    return res.status(500).json({ error: "An error occurred" });
   }
 };
-
-
-
