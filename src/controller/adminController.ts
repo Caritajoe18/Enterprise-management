@@ -24,7 +24,8 @@ import { JwtPayload } from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
 
-export const loginurl = process.env.LOGIN_URL || 'https://polema.bookbank.com.ng'; 
+export const loginurl =
+  process.env.LOGIN_URL || "https://polema.bookbank.com.ng";
 
 export const signupAdmin = async (req: Request, res: Response) => {
   try {
@@ -82,38 +83,6 @@ export const signupAdmin = async (req: Request, res: Response) => {
   }
 };
 
-// export const loginMial = async (req: Request, res: Response) => {
-//   try {
-//     const { email } = req.body;
-//     const user = await AdminInstance.findOne({ where: { email } });
-
-//     if (!user) {
-//       return res.status(404).json({
-//         error: "user not found please sign up",
-//       });
-//     }
-//     if (user.dataValues.isVerified) {
-//       return res.status(400).json({ error: "User already verified" });
-//     }
-//     const fullname = user.dataValues.firstname;
-
-//     await sendVerificationMail(
-//       email,
-//       loginurl,
-//       fullname,
-//       generateVerificationEmailHTML
-//     );
-//     return res.status(201).json({
-//       message: "A new login has been sent to your mail",
-//     });
-//   } catch (error: unknown) {
-//     if (error instanceof Error) {
-//       res.status(500).json({ error: error.message });
-//     }
-//     res.status(500).json({ error: "An unexpected error occurred." });
-//   }
-// };
-
 export const loginAdmin = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
@@ -127,7 +96,6 @@ export const loginAdmin = async (req: Request, res: Response) => {
     if (!admin) {
       return res.status(401).json({ error: "invalid Email" });
     }
-    //console.log("adminnnnnn", admin);
     if (!admin.dataValues.active) {
       return res.status(403).json({ error: "unauthorized access" });
     }
@@ -144,7 +112,6 @@ export const loginAdmin = async (req: Request, res: Response) => {
     const { id, roleId, isAdmin } = admin.dataValues;
     const token = await generateToken(id, roleId, isAdmin);
 
-    console.log(token);
     return res
       .status(200)
       .json({ messages: "login successfull", admin, token });
@@ -249,7 +216,7 @@ export const resetPassword = async (req: Request, res: Response) => {
 
     return res
       .status(200)
-      .json({ message: "Password reset successful", updated });
+      .json({ message: "Password reset successful" });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });

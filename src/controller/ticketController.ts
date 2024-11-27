@@ -22,10 +22,11 @@ import {
 import CustomerOrder from "../models/customerOrder";
 import Departments from "../models/department";
 import db from "../db";
-import { Transaction } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import Decimal from "decimal.js";
 import Ledger from "../models/ledger";
 import DepartmentLedger from "../models/departmentLedger";
+import Role from "../models/role";
 
 export const raiseCashTicket = async (req: AuthRequest, res: Response) => {
   const admin = req.admin as Admins;
@@ -165,6 +166,26 @@ export const approveCashTicket = async (req: AuthRequest, res: Response) => {
       ticketId,
     });
 
+    const cashier = await Admins.findOne({
+      include: {
+        model: Role,
+        where: {
+          name: { [Op.iLike]: "Cashier" }, // Case-insensitive comparison
+        },
+      },
+    });
+
+    if (cashier) {
+      // Send a notification to the cashier
+      await Notify.create({
+        ...req.body,
+        adminId: cashier.dataValues.id,
+        message: `An cash ticket has been sent to you.`,
+        type: "cash",
+        ticketId,
+      });
+    }
+
     // const adminWs = getAdminConnection(adminId);
     // if (adminWs) {
     //   adminWs.send(
@@ -243,7 +264,7 @@ export const recieveCashTicket = async (req: AuthRequest, res: Response) => {
       await transaction.rollback();
       return res.status(404).json({ message: "Ticket not found" });
     }
-    const { customerId, departmentId, staffName, creditOrDebit, amount } =
+    const { customerId, departmentId, staffName, creditOrDebit, amount, comments } =
       ticket.dataValues;
     const isCredit = creditOrDebit === "credit";
     const isLedgerCredit = creditOrDebit === "debit";
@@ -269,6 +290,7 @@ export const recieveCashTicket = async (req: AuthRequest, res: Response) => {
         ...req.body,
         approvedByAdminId: ticket.dataValues.approvedBySuperAdminId,
         name: staffName || customerName,
+        comment: comments,
         credit: isCredit ? amount : 0,
         debit: isCredit ? 0 : amount,
         balance: newCashierBalance.toNumber(),
@@ -678,26 +700,138 @@ export const approveLPO = (req: AuthRequest, res: Response) => {
     "lpo"
   );
 };
-export const approveStoreAuth = (req: AuthRequest, res: Response) => {
-  return approveReceipt(
-    req,
-    res,
-    CollectFromGenStore,
-    "ticketId",
-    "A new authority to collect from Store has been approved",
-    "store"
-  );
+export const approveStoreAuth = async (req: AuthRequest, res: Response) => {
+  const admin = req.admin as Admins;
+  const { id } = admin.dataValues;
+  const { ticketId } = req.params;
+
+  const transaction = await db.transaction();
+  try {
+    // Find the ticket
+    const ticket = await CollectFromGenStore.findByPk(ticketId);
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket not found" });
+    }
+
+    // Update ticket status and save
+    ticket.dataValues.status = "approved";
+    ticket.dataValues.approvedBySuperAdminId = id;
+    await ticket.save({ transaction });
+
+    // Create notification for the admin who raised the ticket
+    await Notify.create(
+      { ...req.body,
+        adminId: ticket.dataValues.raisedByAdminId,
+        message: "A new authority to collect from Store has been approved",
+        type: "store",
+        ticketId,
+        
+      },
+      { transaction }
+    );
+
+    // Find admins with roles containing "general store" (case-insensitive)
+    const generalStoreAdmin = await Admins.findOne({
+      include: {
+        model: Role,
+        where: {
+          name: { [Op.iLike]: "%general store%" }, // Case-insensitive match
+        },
+      },
+    });
+
+    if (generalStoreAdmin) {
+      await Notify.create(
+        {...req.body,
+          adminId: generalStoreAdmin.dataValues.id,
+          message: "A new authority to collect from Store has been approved.",
+          type: "store",
+          ticketId,
+          
+        },
+        { transaction }
+      );
+    }
+
+    // Commit transaction
+    await transaction.commit();
+
+    return res
+      .status(200)
+      .json({ message: "Authority to collect from Store approved successfully", ticket });
+  } catch (error: unknown) {
+    await transaction.rollback();
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "An unexpected error occurred." });
+  }
 };
-export const approveAuthToWeigh = (req: AuthRequest, res: Response) => {
-  return approveTicket(
-    req,
-    res,
-    AuthToWeigh,
-    "ticketId",
-    "approved",
-    "An Authority to weigh was approved.",
-    "weigh"
-  );
+
+
+export const approveAuthToWeigh = async (req: AuthRequest, res: Response) => {
+  const admin = req.admin as Admins;
+  const { id } = admin.dataValues;
+  const { ticketId } = req.params;
+
+  try {
+    // Find the ticket
+    const ticket = await AuthToWeigh.findByPk(ticketId);
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket not found" });
+    }
+
+    // Update ticket status and save
+    ticket.dataValues.status = "approved";
+    ticket.dataValues.approvedBySuperAdminId = id;
+    await ticket.save();
+
+    // Update existing notification if unread
+    const notification = await Notify.findOne({ where: { ticketId } });
+    if (notification && !notification.dataValues.read) {
+      await notification.update({ read: true });
+    }
+
+    // Create a new notification for the admin who raised the ticket
+    await Notify.create({
+      ...req.body,
+      adminId: ticket.dataValues.raisedByAdminId,
+      message: `An Authority to weigh was approved.`,
+      type: "weigh",
+      ticketId,
+    });
+
+    // Find admins with roles containing "weigh" (case-insensitive)
+    const weighAdmin = await Admins.findOne({
+      include: {
+        model: Role,
+        where: {
+          name: { [Op.iLike]: "%weigh%" }, // Case-insensitive match for "weigh"
+        },
+      },
+    });
+
+    
+    if (weighAdmin ){
+      await Notify.create({
+        ...req.body,
+        adminId:  weighAdmin.dataValues.id,
+        message: `An Authority to weigh has been approved.`,
+        type: "weigh",
+        ticketId
+      });
+    }
+
+    // Return success response
+    return res
+      .status(200)
+      .json({ message: "Authority to weigh approved successfully", ticket });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "An unexpected error occurred." });
+  }
 };
 
 export const rejectLPO = (req: Request, res: Response) =>
