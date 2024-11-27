@@ -153,7 +153,7 @@ export const sendWaybill = async (req: Request, res: Response) => {
 };
 
 export const approveWaybill = (req: AuthRequest, res: Response) => {
-  return approveReceipt(req, res, Waybill, "recieptId");
+  return approveReceipt(req, res, Waybill, "recieptId", "A new waybill has been approved", "waybill");
 };
 export const rejectWaybill = (req: Request, res: Response) =>
   updateTicketStatus(req, res, {
@@ -365,7 +365,7 @@ export const sendGatePass = async (req: Request, res: Response) => {
 };
 
 export const approveGatepass = (req: AuthRequest, res: Response) => {
-  return approveReceipt(req, res, GatePass, "recieptId");
+  return approveReceipt(req, res, GatePass, "recieptId", "A new gatepass has been approved", "gatepass");
 };
 export const getAGatePass = async (req: Request, res: Response) => {
   try {
