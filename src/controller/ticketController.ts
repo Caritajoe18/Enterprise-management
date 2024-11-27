@@ -171,7 +171,7 @@ export const approveCashTicket = async (req: AuthRequest, res: Response) => {
         model: Role,
         as: 'role',
         where: {
-          name: { [Op.iLike]: "Cashier" }, // Case-insensitive comparison
+          name: { [Op.like]: "%Cashier%" }, // Case-insensitive comparison
         },
       },
     });
@@ -737,7 +737,7 @@ export const approveStoreAuth = async (req: AuthRequest, res: Response) => {
         model: Role,
         as: 'role',
         where: {
-          name: { [Op.iLike]: "%general store%" }, // Case-insensitive match
+          name: { [Op.like]: "%general store%" }, // Case-insensitive match
         },
 
       },
@@ -810,7 +810,7 @@ export const approveAuthToWeigh = async (req: AuthRequest, res: Response) => {
         model: Role,
         as: 'role',
         where: {
-          name: { [Op.iLike]: "%weigh%" }, // Case-insensitive match for "weigh"
+          name: { [Op.like]: "%weigh%" }, // Case-insensitive match for "weigh"
         },
       },
     });
