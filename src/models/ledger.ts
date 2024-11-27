@@ -14,7 +14,7 @@ export interface LedgerAttributes {
   debit:number;
   balance:number;
   weighImage:string;
-  invoiceImage:string;
+  invoiceImg:string;
   cashImage:string;
   gatepassImage:string;
   wayBillImage:string;
@@ -120,7 +120,7 @@ Ledger.init(
         ,
         allowNull: false
       },
-      invoiceImage: {
+      invoiceImg: {
         type: DataTypes.STRING,
         allowNull: true,
       },

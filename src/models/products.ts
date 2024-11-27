@@ -81,7 +81,7 @@ Products.init(
         model: "Departments",
         key: "id",
       },
-      onDelete: "SET NULL",
+      onDelete: "CASCADE",
     },
   },
 
