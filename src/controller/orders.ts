@@ -73,6 +73,8 @@ export const raiseCustomerOrder = async (req: AuthRequest, res: Response) => {
     }
 
     let priceToUse = new Decimal(productPrice.amount);
+    let rate = priceToUse.toNumber();
+    let basePrice = priceToUse.mul(new Decimal(quantity));
 
     // Apply discount if provided and if a price plan is available
     if (discount && pricePlan) {
@@ -95,6 +97,7 @@ export const raiseCustomerOrder = async (req: AuthRequest, res: Response) => {
         throw new Error("Discount cannot exceed product price.");
       }
       priceToUse = discountedPrice;
+      rate = priceToUse.toNumber(); 
     } else if (discount && !pricePlan) {
       throw new Error(
         "Discounts are not applicable for this product as no price plan is available."
@@ -115,6 +118,8 @@ export const raiseCustomerOrder = async (req: AuthRequest, res: Response) => {
         unit,
         quantity,
         price: totalPrice.toNumber(),
+        rate,
+        basePrice: basePrice.toNumber(),
       },
       { transaction }
     );
