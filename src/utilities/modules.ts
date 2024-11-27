@@ -78,8 +78,7 @@ export const sendTicketToAdmin = async (
     }
 
     return res.status(200).json({
-      message: "Ticket successfully sent to admin.",
-      ticket,
+      message: "Ticket successfully sent to admin."
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -130,7 +129,7 @@ export const approveTicket = async (
 
     return res
       .status(200)
-      .json({ message: "Ticket approved successfully", ticket });
+      .json({ message: "Ticket approved successfully" });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
@@ -179,7 +178,7 @@ export const approveReceipt = async (
 
     return res
       .status(200)
-      .json({ message: "Receipt approved successfully", ticket });
+      .json({ message: "Receipt approved successfully"});
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
@@ -470,7 +469,7 @@ export const updateTicketStatus = async (
 
     return res
       .status(200)
-      .json({ message: `Ticket ${status} successfully`, ticket });
+      .json({ message: `Ticket ${status} successfully` });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
