@@ -45,6 +45,13 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
         "balance",
         "createdAt",
       ],
+      include: [
+        {
+          model: CustomerOrder,
+          as: "order",
+          attributes: ["rate", "basePrice"],
+        },
+      ],
     });
     const previousEntries = await Ledger.findAll({
       where: {
@@ -296,7 +303,14 @@ export const sendInvoice = async (req: Request, res: Response) => {
 };
 
 export const approveInvoice = (req: AuthRequest, res: Response) => {
-  return approveReceipt(req, res, Invoice, "recieptId", "A new Invoice has been approved", "invoice");
+  return approveReceipt(
+    req,
+    res,
+    Invoice,
+    "recieptId",
+    "A new Invoice has been approved",
+    "invoice"
+  );
 };
 
 export const generateInvoicePdf = async (req: Request, res: Response) => {
@@ -490,7 +504,14 @@ export const sendVehicle = async (req: Request, res: Response) => {
 };
 
 export const approveVehicle = (req: AuthRequest, res: Response) => {
-  return approveReceipt(req, res, VehicleDispatch, "recieptId","A new Vehicle Dispatch note has been approved", "vehicle");
+  return approveReceipt(
+    req,
+    res,
+    VehicleDispatch,
+    "recieptId",
+    "A new Vehicle Dispatch note has been approved",
+    "vehicle"
+  );
 };
 export const rejectVehicle = (req: Request, res: Response) =>
   updateTicketStatus(req, res, {
