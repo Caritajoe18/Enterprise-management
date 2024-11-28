@@ -606,9 +606,56 @@ export const getACashTicket = (req: Request, res: Response) => {
 export const getLPO = (req: Request, res: Response) => {
   getRecords(req, res, LPO, "LPOs");
 };
-export const getAnLPO = (req: Request, res: Response) => {
-  getSingleRecord(req, res, LPO, "LPOs");
+export const getAnLPO = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ message: "ID parameter is required." });
+    }
+
+    // Fetch the LPO record
+    const record = await LPO.findOne({
+      where: {
+        id,
+        // status: "approved", 
+      },
+      include: [
+        {
+          model: Role,
+          as: "role",
+          attributes: ["name"],
+        },
+        {
+          model: Products,
+          as: "product",
+          attributes: ["name"],
+        },
+        {
+          model: Supplier,
+          as: "supplier",
+          attributes: ["firstname","lastname"],
+        },
+      ],
+    });
+
+    if (!record) {
+      return res.status(404).json({ message: "LPO not found." });
+    }
+
+    return res.status(200).json({
+      message: "Successfully retrieved LPO",
+      record,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    } else {
+      return res.status(500).json({ error: "An unexpected error occurred." });
+    }
+  }
 };
+
 export const getStoreAuth = async (req: Request, res: Response) => {
   try {
     const records = await CollectFromGenStore.findAll({
