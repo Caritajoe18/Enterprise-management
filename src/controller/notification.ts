@@ -6,26 +6,26 @@ import Admins from "../models/admin";
 
 export const getNotifications = async (req: AuthRequest, res: Response) => {
   const admin = req.admin as Admins;
-  const { id: adminId } = admin.dataValues;
+  const { id: adminId, roleId } = admin.dataValues;
   try {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - 28);
 
     await Notify.destroy({
       where: {
-        adminId,
+        [Op.or]: [{ adminId }, { adminId: roleId }],
         read: true,
         createdAt: { [Op.lt]: cutoffDate },
       },
     });
 
     const readNotifications = await Notify.findAll({
-      where: { adminId, read: true },
+      where: { [Op.or]: [{ adminId }, { adminId: roleId }], read: true },
       order: [["updatedAt", "DESC"]],
     });
 
     const unreadNotifications = await Notify.findAll({
-      where: { adminId, read: false },
+      where: { [Op.or]: [{ adminId }, { adminId: roleId }], read: false },
       order: [["createdAt", "DESC"]],
     });
 

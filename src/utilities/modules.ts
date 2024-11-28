@@ -78,7 +78,7 @@ export const sendTicketToAdmin = async (
     }
 
     return res.status(200).json({
-      message: "Ticket successfully sent to admin."
+      message: "Ticket successfully sent to admin.",
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -127,9 +127,7 @@ export const approveTicket = async (
       ticketId,
     });
 
-    return res
-      .status(200)
-      .json({ message: "Ticket approved successfully" });
+    return res.status(200).json({ message: "Ticket approved successfully" });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
@@ -170,15 +168,13 @@ export const approveReceipt = async (
     }
     await Notify.create({
       ...req.body,
-      adminId: ticket.dataValues.raisedByAdminId,
+      adminId: ticket.dataValues.raisedByAdminId || ticket.dataValues.preparedBy,
       message: notificationMessage,
       type: notificationType,
       ticketId: recieptId,
     });
 
-    return res
-      .status(200)
-      .json({ message: "Receipt approved successfully"});
+    return res.status(200).json({ message: "Receipt approved successfully" });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
@@ -454,22 +450,21 @@ export const updateTicketStatus = async (
     ticket.dataValues.status = status;
     await ticket.save();
     const notification = await Notify.findOne({ where: { ticketId } });
-    console.log("Notification found:", notification);
+    
     if (notification && !notification.dataValues.read) {
       await notification.update({ read: true });
     }
 
     await Notify.create({
       ...req.body,
-      adminId: ticket.dataValues.raisedByAdminId,
+      adminId:
+        ticket.dataValues.raisedByAdminId || ticket.dataValues.preparedBy,
       message: notificationMessage,
       type: notificationType,
       ticketId,
     });
 
-    return res
-      .status(200)
-      .json({ message: `Ticket ${status} successfully` });
+    return res.status(200).json({ message: `Ticket ${status} successfully` });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
