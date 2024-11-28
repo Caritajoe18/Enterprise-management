@@ -168,7 +168,10 @@ export const approveReceipt = async (
     }
     await Notify.create({
       ...req.body,
-      adminId: ticket.dataValues.raisedByAdminId || ticket.dataValues.preparedBy,
+      adminId:
+        ticket.dataValues.raisedByAdminId ??
+        ticket.dataValues.preparedBy ??
+        null,
       message: notificationMessage,
       type: notificationType,
       ticketId: recieptId,
@@ -450,7 +453,7 @@ export const updateTicketStatus = async (
     ticket.dataValues.status = status;
     await ticket.save();
     const notification = await Notify.findOne({ where: { ticketId } });
-    
+
     if (notification && !notification.dataValues.read) {
       await notification.update({ read: true });
     }
@@ -458,7 +461,9 @@ export const updateTicketStatus = async (
     await Notify.create({
       ...req.body,
       adminId:
-        ticket.dataValues.raisedByAdminId || ticket.dataValues.preparedBy,
+        ticket.dataValues.raisedByAdminId ??
+        ticket.dataValues.preparedBy ??
+        null,
       message: notificationMessage,
       type: notificationType,
       ticketId,
