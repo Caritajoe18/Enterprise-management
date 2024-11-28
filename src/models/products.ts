@@ -44,6 +44,10 @@ export class Products extends Model<ProductsAttributes> {
       foreignKey: "productId",
       as: "supplierLedgers",
     });
+    Products.hasMany(models.LPO, {
+      foreignKey: "rawMaterial",
+      as: "lpo",
+    });
   }
 }
 

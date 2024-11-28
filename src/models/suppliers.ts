@@ -14,7 +14,10 @@ export interface SupplierAttributes {
 }
 export class Supplier extends Model<SupplierAttributes> {
   static associate(models: any) {
-    
+    Supplier.hasMany(models.LPO, {
+      foreignKey: "supplierId",
+      as: "lpo",
+    });
     
   }
 }
