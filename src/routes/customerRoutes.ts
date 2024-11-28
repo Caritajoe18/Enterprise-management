@@ -143,7 +143,7 @@ router.patch("/approve-waybill/:recieptId", authorize(), approveWaybill);
 router.patch("/reject-waybill/:waybillId", authorize(), rejectWaybill);
 router.get("/waybill-pdf/:waybillId", getAWaybill);
 //official receipt
-router.get("/create-official", getEntryforReceipt );
+router.get("/create-official/:cashierId", getEntryforReceipt );
 router.post("/create-official-receipt/:cashierId", createOfficialReceipt);
 router.get("/get-official/:receiptId", getReceipt);
 router.get("/get-all-official", getAllReceipt);
