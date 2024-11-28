@@ -199,7 +199,7 @@ export const approveCashTicket = async (req: AuthRequest, res: Response) => {
 
     return res
       .status(200)
-      .json({ message: `Ticket approved successfully and sent to ${cashier?.dataValues.id}`});
+      .json({ message: `Ticket approved successfully and sent to the cashier`});
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
