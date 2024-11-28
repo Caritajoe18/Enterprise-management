@@ -29,17 +29,12 @@ export const addRole = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Role already exists" });
     }
 
-    const role = await Role.create({ ...req.body, name });
-
-    //console.log("role", role);
-
     if (permissionsId && permissionsId.length > 0) {
       const permissionsInstances = await Permission.findAll({
         where: {
           id: permissionsId,
         },
       });
-      //console.log(permissionsInstances, "permissions instances");
       const foundPermissionIds = permissionsInstances.map(
         (permission) => permission.dataValues.id
       );
@@ -54,17 +49,18 @@ export const addRole = async (req: Request, res: Response) => {
           missingPermissions,
         });
       }
+      const role = await Role.create({ ...req.body, name });
       const rolePermissionData = permissionsInstances.map(
         (permissionInstance) => ({
           roleId: role.dataValues.id,
           permissionId: permissionInstance.dataValues.id,
         })
       );
-      //console.log(rolePermissionData, "role permission data");
 
       await RolePermission.bulkCreate(rolePermissionData, { returning: true });
+      return res.status(201).json({ role });
     }
-
+    const role = await Role.create({ ...req.body, name });
     return res.status(201).json({ role });
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -81,7 +77,6 @@ export const getAllRoles = async (req: Request, res: Response) => {
       order: [["createdAt", "DESC"]],
     });
 
-    console.log("roles:", roles);
     if (!roles.length) {
       return res.status(404).json({ message: "No roles found" });
     }
@@ -186,14 +181,11 @@ export const getARoleWithPermission = async (req: Request, res: Response) => {
     permissionsWithNavParents = JSON.parse(
       JSON.stringify(permissionsWithNavParents)
     );
-    //console.log("prem:", permissionsWithNavParents);
     // Map NavParents and their associated permissions
     const navParentsMap = new Map<string, any>();
     permissionsWithNavParents.forEach((permission: any) => {
       const navParent = permission.navParent as any;
-      // console.log("prem2:", navParent);
-      // console.log("prem3:", navParent.id);
-
+      
       if (navParent) {
         if (!navParentsMap.has(navParent.id)) {
           navParentsMap.set(navParent.id, {
@@ -209,13 +201,11 @@ export const getARoleWithPermission = async (req: Request, res: Response) => {
           slug: permission.slug,
         });
       }
-      //console.log("prem4:", navParent);
-      // console.log("prem5:",permissions)
     });
 
     // Convert map to an array for response
     const navParentsArray = Array.from(navParentsMap.values());
-    //console.log("role:", role);
+
     // Create response object
     const responseObject = {
       role: {
@@ -358,17 +348,33 @@ export const editRolePermissions = async (req: Request, res: Response) => {
     }
     // Validate the role
     const role = await Role.findByPk(roleId, { transaction });
+
     if (!role) {
+      await transaction.rollback();
+
       return res.status(404).json({ error: "Role not found." });
     }
     const updatedName = name ? toPascalCase(name) : role.dataValues.name;
+
     if (updatedName !== role.dataValues.name) {
-      const existingRole = await Role.findOne({ where: { name: updatedName }, transaction, });
+      const existingRole = await Role.findOne({
+        where: { name: updatedName },
+        transaction,
+      });
       if (existingRole) {
+        await transaction.rollback();
         return res.status(400).json({ message: "Role name already exists" });
       }
     }
-    await role.update({ name: updatedName },{ transaction });
+
+    await role.update({ name: updatedName }, { transaction });
+    console.log("name updated");
+    if (!Array.isArray(permissionsId) || permissionsId.length === 0) {
+      await transaction.rollback();
+      return res
+        .status(400)
+        .json({ error: "Invalid or empty permissionsId array." });
+    }
 
     // Validate the permissions
     const validPermissions = await Permission.findAll({
@@ -377,9 +383,10 @@ export const editRolePermissions = async (req: Request, res: Response) => {
     });
 
     if (validPermissions.length !== permissionsId.length) {
-      return res
-        .status(400)
-        .json({ error: "One or more permissions are invalid or do not exist." });
+      await transaction.rollback();
+      return res.status(400).json({
+        error: "Invalid or duplicate permissions.",
+      });
     }
 
     // Clear existing permissions for the role
@@ -398,7 +405,9 @@ export const editRolePermissions = async (req: Request, res: Response) => {
 
     await transaction.commit();
 
-    return { message: "Role permissions updated successfully." };
+    return res
+      .status(200)
+      .json({ message: "Role permissions updated successfully." });
   } catch (error: unknown) {
     await transaction.rollback();
     if (error instanceof Error) {

@@ -106,11 +106,11 @@ router.delete("/delete-product/:id", authorize(), deleteProduct);
 
 //staff
 router.post("/create-role", authorize(), addRole);
-router.get("/get-roles", authorize(), getAllRoles);
-router.get("/get-rolePerm", authorize(), getRoles);
-router.get("/get-a-role/:roleId", authorize(), getARoleWithPermission);
-router.put("/edit-role/:roleId", authorize(), editRole);
-router.put("/editing-role/:roleId", authorize(), editRolePermissions); // on review
+router.get("/get-roles", authorize(), getAllRoles); //with nav parents without permissins
+router.get("/get-rolePerm", getRoles); //roles with their Ids only, no prmissions no nav
+router.get("/get-a-role/:roleId", getARoleWithPermission);
+router.put("/edit-role/:roleId", authorize(), editRolePermissions);
+router.put("/editing-role/:roleId", authorize(), editRole); // reviewed
 router.patch(
   "/add-permission/:roleId/permissions",
   authorize(),

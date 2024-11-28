@@ -34,7 +34,7 @@ OfficialReceipt.init(
       },
     being: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     cashierId: {
       type: DataTypes.UUID,
