@@ -4,7 +4,7 @@ dotenv.config();
 
 // Create a transporter object
 const MAIL_SETTINGS = {
-  host: "host57.registrar-servers.com",
+  host: process.env.MAIL_TRAP_HOST,
   port: 465,
   secure: true,
   auth: {
