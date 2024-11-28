@@ -195,7 +195,7 @@ export const getEntryforReceipt = async (req: Request, res: Response) => {
       where: {
         id: cashierId,
       },
-      attributes: ["id", "name", "credit", "createdAt"],
+      attributes: ["id", "name", "credit", "createdAt","comment"],
     });
 
     if (!cashierEntry) {
