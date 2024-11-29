@@ -7,9 +7,9 @@ export interface CashTicketAttributes {
   staffName: string;
   amount: number;
   productId: string;
-  departmentId:string;
-  item:string;
-  comments:string;
+  departmentId: string;
+  item: string;
+  comments: string;
   creditOrDebit: string;
   status: "pending" | "approved" | "rejected" | "completed";
   raisedByAdminId: string | null;
@@ -18,11 +18,6 @@ export interface CashTicketAttributes {
 }
 
 class CashTicket extends Model<CashTicketAttributes> {
-  /**
-   * Helper method for defining associations.
-   * This method is not a part of Sequelize lifecycle.
-   * The `models/index` file will call this method automatically.
-   */
   static associate(models: any) {
     CashTicket.belongsTo(models.Role, {
       foreignKey: "raisedByAdminId",
@@ -34,11 +29,11 @@ class CashTicket extends Model<CashTicketAttributes> {
     });
     CashTicket.belongsTo(models.Departments, {
       foreignKey: "departmentId",
-      as: "department", // Alias for the association
+      as: "department",
     });
     CashTicket.belongsTo(models.Products, {
       foreignKey: "productId",
-      as: "product", // Alias for the association
+      as: "product",
     });
   }
 }
