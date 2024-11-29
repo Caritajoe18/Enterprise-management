@@ -15,7 +15,7 @@ export interface ProductsAttributes {
   category: "For Sale" | "For Purchase";
   price: IProduct[];
   pricePlan?: Plan[];
-  departmentId: string ;
+  departmentId: string;
 }
 
 export class Products extends Model<ProductsAttributes> {
@@ -38,7 +38,7 @@ export class Products extends Model<ProductsAttributes> {
     });
     Products.hasOne(models.DepartmentStore, {
       foreignKey: "productId",
-      as: "stores",  // Alias should match what you use in queries
+      as: "stores", // Alias should match what you use in queries
     });
     Products.hasMany(models.SupplierLedger, {
       foreignKey: "productId",
@@ -47,6 +47,10 @@ export class Products extends Model<ProductsAttributes> {
     Products.hasMany(models.LPO, {
       foreignKey: "rawMaterial",
       as: "lpo",
+    });
+    Products.hasMany(models.CashTicket, {
+      foreignKey: "productId",
+      as: "cash",
     });
   }
 }
