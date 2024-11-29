@@ -32,6 +32,10 @@ export class Customer extends Model<CustomerAttributes> {
       foreignKey: "customerId",
       as: "weigh",
     });
+    Customer.hasMany(models.CashTicket, {
+      foreignKey: "customerId",
+      as: "cash",
+    });
   }
 }
 

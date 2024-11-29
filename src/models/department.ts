@@ -18,6 +18,10 @@ export interface DeptAttributes {
         foreignKey: "departmentId", 
         as: "products",
       }); 
+      Departments.hasMany(models.CashTicket, {
+        foreignKey: "departmentId", 
+        as: "cash",
+      }); 
     }
   }
  Departments.init({
