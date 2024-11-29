@@ -13,12 +13,12 @@ module.exports = {
       adminId: {
         type: DataTypes.UUID,
         allowNull: true,
-        references: {
-          model: "Admins",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
-        onDelete: "CASCADE",
+        // references: {
+        //   model: "Admins",
+        //   key: "id",
+        // },
+        // onUpdate: "CASCADE",
+        // onDelete: "CASCADE",
       },
       ticketId: {
         type: DataTypes.STRING,
