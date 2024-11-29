@@ -13,10 +13,10 @@ interface NotificationAttributes {
 
 class Notify extends Model<NotificationAttributes> {
   static associate(models: any) {
-    Notify.hasMany(models.Admins, {
-      foreignKey: "adminId",
-      as: "notification",
-    });
+    // Notify.hasMany(models.Admins, {
+    //   foreignKey: "adminId",
+    //   as: "notification",
+    // });
   }
 }
 
@@ -30,12 +30,12 @@ Notify.init(
     adminId: {
       type: DataTypes.UUID,
       allowNull: true,
-      references: {
-        model: "Admins",
-        key: "id",
-      },
-      onUpdate: "CASCADE",
-      onDelete: "CASCADE",
+      // references: {
+      //   model: "Admins",
+      //   key: "id",
+      // },
+      // onUpdate: "CASCADE",
+      // onDelete: "CASCADE",
     },
     ticketId: {
       type: DataTypes.STRING,
