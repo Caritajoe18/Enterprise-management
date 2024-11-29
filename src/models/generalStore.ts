@@ -9,7 +9,12 @@ export interface GeneralAttributes {
   thresholdValue: number;
 }
 export class GeneralStore extends Model<GeneralAttributes> {
-  static associate(models: any) {}
+  static associate(models: any) {
+    GeneralStore.hasMany(models.GeneralOrder, {
+      foreignKey: "productId",
+      as: "product",
+    });
+  }
   get status(): string {
     const quantity = this.getDataValue('quantity');
     const thresholdValue = this.getDataValue('thresholdValue');

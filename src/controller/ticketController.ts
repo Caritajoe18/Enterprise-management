@@ -720,6 +720,7 @@ export const getStoreAuth = async (req: Request, res: Response) => {
   try {
     const records = await CollectFromGenStore.findAll({
       order: [["createdAt", "DESC"]],
+      
     });
 
     if (records.length === 0) {

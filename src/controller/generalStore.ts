@@ -164,10 +164,17 @@ export const viewGenOrder = async (req: Request, res: Response) => {
   try {
     const stores = await GeneralOrder.findAll({
       order: [["createdAt", "DESC"]],
+      include:[
+        {
+          model: GeneralStore,
+          as: "store",
+          attributes: ["name"],
+        }
+      ]
     });
 
     if (stores.length === 0) {
-      return res.status(404).json({ message: "No Orders found" });
+      return res.status(404).json({ message: "No Orders found",stores });
     }
 
     res.status(200).json({
