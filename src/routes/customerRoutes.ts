@@ -78,7 +78,7 @@ import { createOfficialReceipt, getAllReceipt, getEntryforReceipt, getReceipt } 
 const router = express.Router();
 
 router.post("/reg-customer", authorize(), createCustomer);
-router.get("/get-customers", authorize(), getAllCustomers);
+router.get("/get-customers", getAllCustomers);
 router.get("/get-customer/:id", getCustomer);
 router.patch("/edit-customer/:id", authorize(), updateCustomer);
 router.delete("/delete-customer/:id", authorize(), deleteCustomer);
