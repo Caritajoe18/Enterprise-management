@@ -8,10 +8,9 @@ import {
 dotenv.config();
 
 import app from "../app/index";
-//import webpush from "web-push"
 import WebSocket from "ws";
 
-//import sequelize from "../db";
+
 import { sequelize } from "../models/index";
 const server = createServer(app);
 const port = process.env.PORT ?? 5000;
@@ -40,5 +39,3 @@ server.listen(port, () => {
   console.log(`Server running on port: ${port} `);
 });
 
-// const vapidKeys = webpush.generateVAPIDKeys();
-// console.log(vapidKeys);

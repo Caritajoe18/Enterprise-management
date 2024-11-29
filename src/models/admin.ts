@@ -25,7 +25,6 @@ export interface AdminAttributes {
   resetPasswordToken?: string | null;
   resetPasswordTokenExpiry: number | null;
   isAdmin?: boolean;
-  isVerified: boolean;
   password: string;
   active: boolean;
 }
@@ -98,15 +97,11 @@ Admins.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    verificationToken: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
+
     address: {
       type: DataTypes.STRING,
       allowNull: true,
     },
-
     resetPasswordToken: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -115,11 +110,7 @@ Admins.init(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    isVerified: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-      allowNull: true,
-    },
+
     isAdmin: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,

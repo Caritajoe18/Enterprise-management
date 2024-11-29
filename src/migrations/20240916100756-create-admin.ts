@@ -54,13 +54,10 @@ module.exports = {
         onDelete: "SET NULL",
       },
       pushSubscription: {
-        type: DataTypes.JSON, 
-        allowNull: true, 
-      },
-      verificationToken: {
-        type: Sequelize.STRING,
+        type: DataTypes.JSON,
         allowNull: true,
       },
+
       address: {
         type: Sequelize.STRING,
         allowNull: true,
@@ -76,11 +73,6 @@ module.exports = {
       },
       resetPasswordTokenExpiry: {
         type: Sequelize.DATE,
-        allowNull: true,
-      },
-      isVerified: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false,
         allowNull: true,
       },
       createdAt: {
