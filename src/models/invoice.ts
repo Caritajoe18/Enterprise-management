@@ -141,6 +141,7 @@ Invoice.init(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       allowNull: false,
+      unique: true,
     },
     createdAt: {
       type: DataTypes.DATE,
