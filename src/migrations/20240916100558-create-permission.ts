@@ -18,7 +18,7 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
       },
-      isAssigned:{
+      isAssigned: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
       },
@@ -38,7 +38,6 @@ module.exports = {
       slug: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
       },
       url: {
         type: Sequelize.STRING,
