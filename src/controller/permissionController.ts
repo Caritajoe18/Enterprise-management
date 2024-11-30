@@ -12,11 +12,11 @@ export const createPermissions = async (req: Request, res: Response) => {
   try {
     const slug = name.toLowerCase().replace(/ /g, "-");
 
-    const existingPermission = await Permission.findOne({ where: { slug } });
+    const existingPermission = await Permission.findOne({ where: { url } });
     if (existingPermission) {
       return res
         .status(400)
-        .json({ message: "Permission name already exists" });
+        .json({ message: "Permission already exists" });
     }
     let navParent = null;
 
