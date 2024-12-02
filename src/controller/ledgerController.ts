@@ -8,17 +8,16 @@ import Customer from "../models/customers";
 import Products from "../models/products";
 import Decimal from "decimal.js";
 import SupplierLedger from "../models/supplierLedger";
-import Departments from "../models/department";
+
 import { Op, Transaction } from "sequelize";
-import DepartmentLedger from "../models/departmentLedger";
+
 import {
   calculateNewBalance,
   createAccountBookEntry,
   createDepartmentLedgerEntry,
 } from "../utilities/modules";
 import Supplier from "../models/suppliers";
-import { AuthRequest } from "../middleware/staffPermissions";
-import Admins from "../models/admin";
+
 import CustomerOrder from "../models/customerOrder";
 import AuthToWeigh from "../models/AuthToWeigh";
 import Weigh from "../models/weigh";
@@ -440,7 +439,7 @@ export const generateLedgerSummary = async (req: Request, res: Response) => {
     const previousEntries = await Ledger.findAll({
       where: {
         customerId,
-        createdAt: { [Op.lt]: ledger.dataValues.createdAt }, 
+        createdAt: { [Op.lt]: ledger.dataValues.createdAt },
       },
       order: [["createdAt", "DESC"]],
       limit: 2,
@@ -475,16 +474,18 @@ export const generateLedgerSummary = async (req: Request, res: Response) => {
       }
     } else if (previousEntries.length == 1) {
       //prevBalance = previousEntries[0].dataValues.balance;
-      const singleEntry = previousEntries[0]
+      const singleEntry = previousEntries[0];
       if (singleEntry.dataValues.credit) {
         credit = singleEntry.dataValues.credit;
-        const accountBook = singleEntry.get("accountBook") as AccountBook | null;
-        bankName = accountBook?.dataValues.bankName || null; 
+        const accountBook = singleEntry.get(
+          "accountBook"
+        ) as AccountBook | null;
+        bankName = accountBook?.dataValues.bankName || null;
       } else {
-        credit = null; 
-        bankName = null; 
+        credit = null;
+        bankName = null;
       }
-    
+
       prevBalance = singleEntry.dataValues.balance;
     }
     const order = await CustomerOrder.findByPk(tranxId, {

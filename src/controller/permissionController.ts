@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import Permission from "../models/permission";
 import Role from "../models/role";
 import RolePermission from "../models/rolepermission";
-import { Op, ValidationError } from "sequelize";
+import { ValidationError } from "sequelize";
 import NavParent from "../models/navparent";
 import { sequelize } from "../models/index";
 

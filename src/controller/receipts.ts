@@ -7,10 +7,8 @@ import AccountBook from "../models/accountBook";
 import Customer from "../models/customers";
 import Products from "../models/products";
 import AuthToWeigh from "../models/AuthToWeigh";
-import Weigh from "../models/weigh";
 import Invoice from "../models/invoice";
 import { Op } from "sequelize";
-import { generatePdf } from "../utilities/generatePdf";
 import Role from "../models/role";
 import { approveReceipt, updateTicketStatus } from "../utilities/modules";
 import Notify from "../models/notification";
@@ -81,7 +79,7 @@ export const generateInvoice = async (req: AuthRequest, res: Response) => {
         credit = lastEntry.dataValues.credit;
         balanceBeforeDebit = lastEntry.dataValues.balance;
         const accountBook = lastEntry.get("accountBook") as AccountBook | null;
-        console.log("acct", accountBook);
+        //console.log("acct", accountBook);
         bankName = accountBook?.dataValues.bankName;
 
         prevBalance = secondLastEntry.dataValues.balance;

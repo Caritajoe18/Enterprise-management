@@ -6,7 +6,7 @@ import RolePermission from "../models/rolepermission";
 import Admins from "../models/admin";
 
 export const createNavParent = async (req: Request, res: Response) => {
-  const { name, iconUrl } = req.body;
+  const { name} = req.body;
 
   try {
     const slug = name.toLowerCase().replace(/ /g, "-");

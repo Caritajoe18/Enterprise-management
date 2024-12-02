@@ -6,7 +6,6 @@ import {
 } from "../validations/productValidations";
 import { option } from "../validations/adminValidation";
 import { Op } from "sequelize";
-import { toPascalCase } from "../utilities/auths";
 import Departments from "../models/department";
 
 export const createProducts = async (req: Request, res: Response) => {

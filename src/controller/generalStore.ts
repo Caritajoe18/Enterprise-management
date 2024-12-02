@@ -10,8 +10,6 @@ import {
   addQuantityToStore,
   removeQuantityFromStore,
 } from "../utilities/modules";
-import Products from "../models/products";
-
 export const createGenStore = async (req: Request, res: Response) => {
   try {
     const { name } = req.body;

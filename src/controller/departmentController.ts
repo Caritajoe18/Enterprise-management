@@ -4,7 +4,6 @@ import {
   createDepartmentSchema,
   editDepartmentSchema,
 } from "../validations/productValidations";
-import { option } from "../validations/adminValidation";
 import { toPascalCase } from "../utilities/auths";
 import Products from "../models/products";
 import { Op } from "sequelize";
