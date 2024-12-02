@@ -26,6 +26,6 @@ module.exports = {
   },
 
   async down(queryInterface: QueryInterface) {
-    await queryInterface.bulkDelete("Admins", {}, {});
+    await queryInterface.bulkDelete("NavParents", {}, {});
   },
 };
