@@ -19,7 +19,6 @@ import {
   generateTokenEmailHTML,
   generateVerificationEmailHTML,
 } from "../utilities/htmls";
-import { Op } from "sequelize";
 import { JwtPayload } from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
@@ -36,7 +35,7 @@ export const signupAdmin = async (req: Request, res: Response) => {
         .json({ error: validationResult.error.details[0].message });
     }
 
-    let { email, password, roleId, firstname, lastname, isAdmin, department } =
+    let { email, password, roleId, firstname, lastname, department } =
       req.body;
 
     firstname = toPascalCase(firstname);

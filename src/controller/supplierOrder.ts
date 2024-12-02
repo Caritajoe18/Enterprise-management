@@ -1,4 +1,4 @@
-import { Response, Request } from "express";
+import { Response } from "express";
 import { AuthRequest } from "../middleware/adminAuth";
 import Admins from "../models/admin";
 import { supplierOrderSchema } from "../validations/customerValid";

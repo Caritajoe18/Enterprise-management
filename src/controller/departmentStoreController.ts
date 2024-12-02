@@ -1,11 +1,8 @@
 import { Request, Response } from "express";
 import {
-  createDeptOrderValidationSchema,
   deptOrderValidationSchema,
   deptstoreValidationSchema,
   editDepteptstoreValidationSchema,
-  editGenStoreValidationSchema,
-  genStoreValidationSchema,
 } from "../validations/productValidations";
 import DepartmentStore from "../models/departmentStore";
 import Departments from "../models/department";
@@ -13,7 +10,10 @@ import Products from "../models/products";
 import DepartmentOrder from "../models/departmentOrders";
 import { AuthRequest } from "../middleware/adminAuth";
 import Admins from "../models/admin";
-import { addQuantityToStore, removeQuantityFromStore } from "../utilities/modules";
+import {
+  addQuantityToStore,
+  removeQuantityFromStore,
+} from "../utilities/modules";
 
 export const createDeptStore = async (req: AuthRequest, res: Response) => {
   try {
@@ -50,7 +50,10 @@ export const createDeptStore = async (req: AuthRequest, res: Response) => {
     if (exist) {
       return res.status(409).json({ message: "Product already exists" });
     }
-    const store = await DepartmentStore.create({...value, createdBy: adminId});
+    const store = await DepartmentStore.create({
+      ...value,
+      createdBy: adminId,
+    });
     const storeData = {
       ...store.get(),
       status: store.status,
@@ -69,10 +72,10 @@ export const createDeptStore = async (req: AuthRequest, res: Response) => {
 
 export const getDeptStoreForSale = async (req: AuthRequest, res: Response) => {
   const admin = req.admin as Admins;
-  const { roleId : adminId, isAdmin} = admin.dataValues;
+  const { roleId: adminId, isAdmin } = admin.dataValues;
   try {
     const stores = await DepartmentStore.findAll({
-      where: isAdmin ? {} : { createdBy: adminId }, 
+      where: isAdmin ? {} : { createdBy: adminId },
       order: [["createdAt", "DESC"]],
       include: [
         {
@@ -119,7 +122,7 @@ export const getDeptStoreForPurchase = async (
   const { roleId: adminId, isAdmin } = admin.dataValues;
   try {
     const stores = await DepartmentStore.findAll({
-      where: isAdmin ? {} : { createdBy: adminId }, 
+      where: isAdmin ? {} : { createdBy: adminId },
       order: [["createdAt", "DESC"]],
       include: [
         {
@@ -162,9 +165,12 @@ export const getDeptStoreForPurchase = async (
 export const editDeptStore = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { error, value } = editDepteptstoreValidationSchema.validate(req.body, {
-      abortEarly: false,
-    });
+    const { error, value } = editDepteptstoreValidationSchema.validate(
+      req.body,
+      {
+        abortEarly: false,
+      }
+    );
 
     if (error) {
       const errors = error.details.map((detail) => detail.message);
@@ -271,7 +277,7 @@ export const viewDeptOrder = async (req: AuthRequest, res: Response) => {
   const { roleId: adminId, isAdmin } = admin.dataValues;
   try {
     const stores = await DepartmentOrder.findAll({
-      where: isAdmin ? {} : { createdBy: adminId }, 
+      where: isAdmin ? {} : { createdBy: adminId },
       order: [["createdAt", "DESC"]],
     });
 
@@ -289,15 +295,16 @@ export const viewDeptOrder = async (req: AuthRequest, res: Response) => {
   }
 };
 
-
-export const addQuantityToDepartmentStore = async (req: Request, res: Response) => {
+export const addQuantityToDepartmentStore = async (
+  req: Request,
+  res: Response
+) => {
   return addQuantityToStore(req, res, DepartmentStore);
 };
 
-export const removeQuantityFromDepartmentStore = async (req: Request, res: Response) => {
+export const removeQuantityFromDepartmentStore = async (
+  req: Request,
+  res: Response
+) => {
   return removeQuantityFromStore(req, res, DepartmentStore);
 };
-
-
-
-

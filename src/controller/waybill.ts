@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { Op } from "sequelize";
 import { AuthRequest } from "../middleware/adminAuth";
 import Admins from "../models/admin";
 import Ledger from "../models/ledger";
@@ -9,7 +8,6 @@ import Products from "../models/products";
 import Invoice from "../models/invoice";
 import Customer from "../models/customers";
 import Waybill from "../models/waybill";
-import { generatePdf } from "../utilities/generatePdf";
 import { approveReceipt, updateTicketStatus } from "../utilities/modules";
 import { getAdminConnection } from "../utilities/web-push";
 import Notify from "../models/notification";

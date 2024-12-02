@@ -16,7 +16,6 @@ module.exports = {
           email: "admin3@example.com",
           phoneNumber: +234801111,
           password: hashedPassword,
-          //confirmPassword:"Pass12345",
           isAdmin: true,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -27,6 +26,6 @@ module.exports = {
   },
 
   async down(queryInterface: QueryInterface) {
-    await queryInterface.bulkDelete("NavParents", {}, {});
+    await queryInterface.bulkDelete("Admins", {}, {});
   },
 };

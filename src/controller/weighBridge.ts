@@ -3,9 +3,8 @@ import AuthToWeigh from "../models/AuthToWeigh";
 import CustomerOrder from "../models/customerOrder";
 import Customer from "../models/customers";
 import { Transaction } from "sequelize";
-import Decimal from "decimal.js";
+
 import db from "../db";
-import { AuthRequest } from "../middleware/adminAuth";
 import Ledger from "../models/ledger";
 import Weigh from "../models/weigh";
 import Role from "../models/role";
@@ -32,7 +31,6 @@ export const getAuthToWeighDetails = async (req: Request, res: Response) => {
               as: "corder",
               attributes: ["firstname", "lastname"],
             },
-           
           ],
         },
       ],
@@ -167,7 +165,7 @@ export const viewWeigh = async (req: Request, res: Response) => {
 export const viewAllWeigh = async (req: Request, res: Response) => {
   try {
     const weighRecords = await Weigh.findAll({
-      order:[["createdAt", "DESC"]],
+      order: [["createdAt", "DESC"]],
       include: [
         {
           model: CustomerOrder,
@@ -181,8 +179,6 @@ export const viewAllWeigh = async (req: Request, res: Response) => {
         },
       ],
     });
-
-
 
     if (weighRecords.length === 0) {
       return res
