@@ -197,11 +197,9 @@ export const approveCashTicket = async (req: AuthRequest, res: Response) => {
     //   );
     // }
 
-    return res
-      .status(200)
-      .json({
-        message: `Ticket approved successfully and sent to the cashier`,
-      });
+    return res.status(200).json({
+      message: `Ticket approved successfully and sent to the cashier`,
+    });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
@@ -503,7 +501,7 @@ export const sendStoreCollectionAdmin = async (req: Request, res: Response) => {
     await Notify.create({
       ...req.body,
       adminId,
-      message: `A new Authority to collect from General Store has sent to you.`,
+      message: `A new Authority to collect from General Store has been sent to you.`,
       type: "store",
       ticketId: Id,
     });
@@ -552,7 +550,7 @@ export const sendAuthtoweigh = async (req: Request, res: Response) => {
     if (adminWs) {
       adminWs.send(
         JSON.stringify({
-          message: `A new Authority to weight has been sent to you.`,
+          message: `A new Authority to weigh has been sent to you.`,
           ticket,
         })
       );
@@ -720,7 +718,6 @@ export const getStoreAuth = async (req: Request, res: Response) => {
   try {
     const records = await CollectFromGenStore.findAll({
       order: [["createdAt", "DESC"]],
-      
     });
 
     if (records.length === 0) {
@@ -767,7 +764,7 @@ export const getAStoreAuth = async (req: Request, res: Response) => {
 
     if (!record) {
       return res.status(404).json({
-        message: `Authority to collect from General Store with ID ${id} not found.`,
+        message: `Authority to collect from General Store not found.`,
       });
     }
 
@@ -780,7 +777,7 @@ export const getAStoreAuth = async (req: Request, res: Response) => {
     };
 
     res.status(200).json({
-      message: `Successfully retrieved Authorities to collects from General store`,
+      message: `Successfully retrieved Authorities to collect from General store`,
       records: parsedRecord,
     });
   } catch (error: unknown) {
@@ -823,9 +820,19 @@ export const approveStoreAuth = async (req: AuthRequest, res: Response) => {
     }
 
     // Update ticket status and save
-    ticket.dataValues.status = "approved";
-    ticket.dataValues.approvedBySuperAdminId = id;
-    await ticket.save({ transaction });
+    await ticket.update(
+      {
+        status: "approved",
+        approvedBySuperAdminId: id
+      },
+      { transaction }
+    );
+    
+    const notification = await Notify.findOne({ where: { ticketId } });
+    
+    if (notification && !notification.dataValues.read) {
+      await notification.update({ read: true }, { transaction });
+    }
 
     // Create notification for the admin who raised the ticket
     await Notify.create(
@@ -866,11 +873,9 @@ export const approveStoreAuth = async (req: AuthRequest, res: Response) => {
     // Commit transaction
     await transaction.commit();
 
-    return res
-      .status(200)
-      .json({
-        message: "Authority to collect from Store approved successfully",
-      });
+    return res.status(200).json({
+      message: "Authority to collect from Store approved successfully", ticket
+    });
   } catch (error: unknown) {
     await transaction.rollback();
     if (error instanceof Error) {
@@ -893,9 +898,12 @@ export const approveAuthToWeigh = async (req: AuthRequest, res: Response) => {
     }
 
     // Update ticket status and save
-    ticket.dataValues.status = "approved";
-    ticket.dataValues.approvedBySuperAdminId = id;
-    await ticket.save();
+    await ticket.update(
+      {
+        status: "approved",
+        approvedBySuperAdminId: id
+      },
+    );
 
     // Update existing notification if unread
     const notification = await Notify.findOne({ where: { ticketId } });
