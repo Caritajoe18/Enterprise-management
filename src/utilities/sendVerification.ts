@@ -21,6 +21,7 @@ export const sendVerificationMail = async (
   item: number | string,
   fullname: string,
   htmlGenerator: (fullname: string, item: number | string) => string
+  //randomPassword: string
 ) => {
   const transporter = nodemailer.createTransport(MAIL_SETTINGS);
   const htmlContent = htmlGenerator(fullname, item);

@@ -56,7 +56,8 @@ export const signupStaff = async (req: Request, res: Response) => {
       email,
       loginurl,
       firstname,
-      generateVerificationEmailHTML
+      generateVerificationEmailHTML,
+      
     );
 
     return res.status(201).json({
