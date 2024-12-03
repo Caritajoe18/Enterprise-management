@@ -197,11 +197,9 @@ export const approveCashTicket = async (req: AuthRequest, res: Response) => {
     //   );
     // }
 
-    return res
-      .status(200)
-      .json({
-        message: `Ticket approved successfully and sent to the cashier`,
-      });
+    return res.status(200).json({
+      message: `Ticket approved successfully and sent to the cashier`,
+    });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
@@ -720,7 +718,6 @@ export const getStoreAuth = async (req: Request, res: Response) => {
   try {
     const records = await CollectFromGenStore.findAll({
       order: [["createdAt", "DESC"]],
-      
     });
 
     if (records.length === 0) {
@@ -823,9 +820,21 @@ export const approveStoreAuth = async (req: AuthRequest, res: Response) => {
     }
 
     // Update ticket status and save
-    ticket.dataValues.status = "approved";
-    ticket.dataValues.approvedBySuperAdminId = id;
-    await ticket.save({ transaction });
+    await ticket.update(
+      {
+        status: "approved",
+        approvedBySuperAdminId: id,
+      },
+      { transaction }
+    );
+
+    //console.log("Ticket after update:", ticket);
+
+    // Handle the notification part
+    const notification = await Notify.findOne({ where: { ticketId } });
+    if (notification && !notification.dataValues.read) {
+      await notification.update({ read: true }, { transaction });
+    }
 
     // Create notification for the admin who raised the ticket
     await Notify.create(
@@ -866,11 +875,9 @@ export const approveStoreAuth = async (req: AuthRequest, res: Response) => {
     // Commit transaction
     await transaction.commit();
 
-    return res
-      .status(200)
-      .json({
-        message: "Authority to collect from Store approved successfully",
-      });
+    return res.status(200).json({
+      message: "Authority to collect from Store approved successfully",
+    });
   } catch (error: unknown) {
     await transaction.rollback();
     if (error instanceof Error) {
@@ -893,10 +900,10 @@ export const approveAuthToWeigh = async (req: AuthRequest, res: Response) => {
     }
 
     // Update ticket status and save
-    ticket.dataValues.status = "approved";
-    ticket.dataValues.approvedBySuperAdminId = id;
-    await ticket.save();
-
+    await ticket.update({
+      status: "approved",
+      approvedBySuperAdminId: id,
+    });
     // Update existing notification if unread
     const notification = await Notify.findOne({ where: { ticketId } });
     if (notification && !notification.dataValues.read) {
