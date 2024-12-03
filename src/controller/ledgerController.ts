@@ -194,7 +194,7 @@ export const getAccountBook = async (req: Request, res: Response) => {
       ],
     });
     if (acct.length === 0) {
-      return res.status(404).json({ message: "Not found" });
+      return res.status(200).json({ message: "No Record found", acct });
     }
     return res
       .status(200)
