@@ -503,7 +503,7 @@ export const sendStoreCollectionAdmin = async (req: Request, res: Response) => {
     await Notify.create({
       ...req.body,
       adminId,
-      message: `A new Authority to collect from General Store has sent to you.`,
+      message: `A new Authority to collect from General Store has been sent to you.`,
       type: "store",
       ticketId: Id,
     });
@@ -552,7 +552,7 @@ export const sendAuthtoweigh = async (req: Request, res: Response) => {
     if (adminWs) {
       adminWs.send(
         JSON.stringify({
-          message: `A new Authority to weight has been sent to you.`,
+          message: `A new Authority to weigh has been sent to you.`,
           ticket,
         })
       );
