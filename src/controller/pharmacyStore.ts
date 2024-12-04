@@ -8,7 +8,10 @@ import {
 } from "../validations/productValidations";
 import Products from "../models/products";
 import PharmacyOrder from "../models/pharmacyOrders";
-import { addQuantityToStore, removeQuantityFromStore } from "../utilities/modules";
+import {
+  addQuantityToStore,
+  removeQuantityFromStore,
+} from "../utilities/modules";
 
 export const uploadImage = async (req: Request, res: Response) => {
   try {
@@ -18,7 +21,11 @@ export const uploadImage = async (req: Request, res: Response) => {
     const imageUpload = await cloudinary.uploader.upload(req.file.path);
     res.status(200).json({ imageUrl: imageUpload.secure_url });
   } catch (error) {
-    res.status(500).json({ error: "Image upload failed or invalid image type. Must be jpeg or png" });
+    res
+      .status(500)
+      .json({
+        error: "Image upload failed or invalid image type. Must be jpeg or png",
+      });
   }
 };
 
@@ -42,10 +49,12 @@ export const createStore = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    const exist = await PharmacyStore.findOne({where: {productId}});
+    const exist = await PharmacyStore.findOne({ where: { productId } });
     if (exist) {
-        return res.status(409).json({ message: "Product already added to store" });
-      }
+      return res
+        .status(409)
+        .json({ message: "Product already added to store" });
+    }
     const store = await PharmacyStore.create(value);
     const storeData = {
       ...store.get(),
@@ -68,7 +77,7 @@ export const getPharmStores = async (req: Request, res: Response) => {
     });
 
     if (stores.length === 0) {
-      return res.status(404).json({ message: "No stores found", stores });
+      return res.status(200).json({ message: "No stores found", stores });
     }
 
     const parsedStores = stores.map((store) => ({
@@ -86,28 +95,30 @@ export const getPharmStores = async (req: Request, res: Response) => {
   }
 };
 
-
 export const getStoreForSale = async (req: Request, res: Response) => {
   try {
     const stores = await PharmacyStore.findAll({
       order: [["createdAt", "DESC"]],
-      include: [{
-        model: Products,  
-        as: 'product',    
-        where: {
-          category: 'For Sale'
+      include: [
+        {
+          model: Products,
+          as: "product",
+          where: {
+            category: "For Sale",
+          },
+          attributes: ["id", "name"],
         },
-        attributes: ['id', 'name']
-      }]
+      ],
     });
 
-
-    if (!stores.length) {
-      return res.status(404).json({ message: "No stores found for sale", stores });
+    if (stores.length == 0) {
+      return res
+        .status(200)
+        .json({ message: "No stores found for sale", stores });
     }
     const parsedStores = stores.map((store) => ({
       ...store.toJSON(),
-      status: store.status, 
+      status: store.status,
     }));
 
     res.status(200).json({
@@ -126,23 +137,26 @@ export const getStoreForPurchase = async (req: Request, res: Response) => {
   try {
     const stores = await PharmacyStore.findAll({
       order: [["createdAt", "DESC"]],
-      include: [{
-        model: Products,  
-        as: 'product',    
-        where: {
-          category: 'For Purchase'
+      include: [
+        {
+          model: Products,
+          as: "product",
+          where: {
+            category: "For Purchase",
+          },
+          attributes: ["id", "name"],
         },
-        attributes: ['id', 'name']
-      }]
+      ],
     });
 
-
     if (!stores.length) {
-      return res.status(404).json({ message: "No stores found for raw materils", stores });
+      return res
+        .status(200)
+        .json({ message: "No stores found for raw materials", stores });
     }
     const parsedStores = stores.map((store) => ({
       ...store.toJSON(),
-      status: store.status, 
+      status: store.status,
     }));
 
     res.status(200).json({
@@ -156,7 +170,6 @@ export const getStoreForPurchase = async (req: Request, res: Response) => {
     });
   }
 };
-
 
 export const editStore = async (req: Request, res: Response) => {
   try {
@@ -192,15 +205,12 @@ export const editStore = async (req: Request, res: Response) => {
   }
 };
 
-
-
 export const createOrder = async (req: Request, res: Response) => {
   try {
     const { orders } = req.body;
     if (!Array.isArray(orders) || orders.length === 0) {
       return res.status(400).json({ message: "Orders array cannot be empty." });
     }
-
 
     const rawMaterial = new Set();
     const validatedOrders = [];
@@ -225,10 +235,12 @@ export const createOrder = async (req: Request, res: Response) => {
         where: { id: value.rawMaterial },
       });
 
-    if (!product) {
-      return res.status(404).json({ message: "Product or products not found" });
-    }
-    validatedOrders.push(value);
+      if (!product) {
+        return res
+          .status(404)
+          .json({ message: "Product or products not found" });
+      }
+      validatedOrders.push(value);
     }
 
     const newOrders = await PharmacyOrder.bulkCreate(
@@ -253,16 +265,15 @@ export const createOrder = async (req: Request, res: Response) => {
   }
 };
 
-export const viewOrder = async (req: Request, res: Response) =>{
+export const viewOrder = async (req: Request, res: Response) => {
   try {
     const stores = await PharmacyOrder.findAll({
       order: [["createdAt", "DESC"]],
     });
 
     if (stores.length === 0) {
-      return res.status(404).json({ message: "No stores found", stores });
+      return res.status(200).json({ message: "No stores found", stores });
     }
-
 
     res.status(200).json({
       message: "Ordes retrieved successfully",
@@ -271,8 +282,8 @@ export const viewOrder = async (req: Request, res: Response) =>{
   } catch (error) {
     console.error("Error retrieving stores:", error);
     return res.status(500).json({ error: "Failed to retrieve stores" });
-  } 
-}
+  }
+};
 
 export const deletePharmStore = async (req: Request, res: Response) => {
   try {
@@ -297,10 +308,16 @@ export const deletePharmStore = async (req: Request, res: Response) => {
   }
 };
 
-export const addQuantityToPharmacyStore = async (req: Request, res: Response) => {
+export const addQuantityToPharmacyStore = async (
+  req: Request,
+  res: Response
+) => {
   return addQuantityToStore(req, res, PharmacyStore);
 };
 
-export const removeQuantityFromPharmacyStore = async (req: Request, res: Response) => {
+export const removeQuantityFromPharmacyStore = async (
+  req: Request,
+  res: Response
+) => {
   return removeQuantityFromStore(req, res, PharmacyStore);
 };

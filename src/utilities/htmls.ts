@@ -3,7 +3,8 @@ dotenv.config();
 const resetPasswordURL = process.env.RESET_PASSWORD_URL;
 export const generateVerificationEmailHTML = (
   fullname: string,
-  item: number | string
+  item: number | string,
+  randomPassword: string| undefined
 ) => {
   return `
     <!DOCTYPE html>
@@ -74,7 +75,7 @@ export const generateVerificationEmailHTML = (
             <h1>Your Login</h1>
           </div>
           <div class="content">
-            <p>Hi ${fullname},</p>
+            <p>Welcome ${fullname},</p>
             <p>
               You have been registered as a staff, Please use link
               below to login and complete the verification process:
@@ -82,6 +83,11 @@ export const generateVerificationEmailHTML = (
             <p><button style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
             <a href="${item}" style="color: white; text-decoration: none;">Login</a>
           </button></p>
+          ${
+            randomPassword
+              ? `<p>Your temporary password is: <strong>${randomPassword}</strong></p>`
+              : ""
+          }
             <p>If you did not request this, please ignore this email.</p>
           </div>
           <div class="footer">
@@ -171,7 +177,7 @@ export const generateTokenEmailHTML = (
             <h1>Reset Password</h1>
           </div>
           <div class="content">
-            <p>Hi ${fullname},</p>
+            <p>Welcome ${fullname},</p>
             <p>Thank you for registering with us. Please click the button below to reset your password:</p>
             <p>
             <button style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">

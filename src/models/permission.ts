@@ -13,7 +13,6 @@ export interface PermissionAttributes {
   slug: string;
 }
 
-
 class Permission extends Model<PermissionAttributes> {
   public navParent?: NavParent;
   static associate(models: any) {

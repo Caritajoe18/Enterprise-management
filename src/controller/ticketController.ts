@@ -12,7 +12,6 @@ import { LPO } from "../models/lpo";
 import CollectFromGenStore from "../models/collectFromGenStore";
 import AuthToWeigh from "../models/AuthToWeigh";
 import {
-  approveReceipt,
   approveTicket,
   calculateNewBalance,
   getRecords,
@@ -150,10 +149,10 @@ export const approveCashTicket = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: "Ticket not found" });
     }
 
-    ticket.dataValues.status = "approved";
-    ticket.dataValues.approvedBySuperAdminId = id;
-
-    await ticket.save();
+    await ticket.update({
+      status: "approved",
+      approvedBySuperAdminId: id,
+    });
     const notification = await Notify.findOne({ where: { ticketId } });
     if (notification && !notification.dataValues.read) {
       await notification.update({ read: true });
@@ -187,16 +186,6 @@ export const approveCashTicket = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // const adminWs = getAdminConnection(adminId);
-    // if (adminWs) {
-    //   adminWs.send(
-    //     JSON.stringify({
-    //       message: `A new ticket for cash has been approved.`,
-    //       ticket,
-    //     })
-    //   );
-    // }
-
     return res.status(200).json({
       message: `Ticket approved successfully and sent to the cashier`,
     });
@@ -218,9 +207,9 @@ export const rejectCashTicket = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Ticket not found" });
     }
 
-    ticket.dataValues.status = "rejected";
-
-    await ticket.save();
+    await ticket.update({
+      status: "rejected",
+    });
     const notification = await Notify.findOne({ where: { ticketId } });
     if (notification && !notification.dataValues.read) {
       await notification.update({ read: true });
@@ -272,6 +261,7 @@ export const recieveCashTicket = async (req: AuthRequest, res: Response) => {
       creditOrDebit,
       amount,
       comments,
+      productId
     } = ticket.dataValues;
     const isCredit = creditOrDebit === "credit";
     const isLedgerCredit = creditOrDebit === "debit";
@@ -320,6 +310,9 @@ export const recieveCashTicket = async (req: AuthRequest, res: Response) => {
         {
           ...req.body,
           customerId,
+          quantity:0,
+          productId,
+          unit:"",
           credit: isCredit ? amount : 0,
           debit: isCredit ? 0 : amount,
           balance: newLedgerBalance.toNumber(),
@@ -823,13 +816,15 @@ export const approveStoreAuth = async (req: AuthRequest, res: Response) => {
     await ticket.update(
       {
         status: "approved",
-        approvedBySuperAdminId: id
+        approvedBySuperAdminId: id,
       },
       { transaction }
     );
-    
+
+    //console.log("Ticket after update:", ticket);
+
+    // Handle the notification part
     const notification = await Notify.findOne({ where: { ticketId } });
-    
     if (notification && !notification.dataValues.read) {
       await notification.update({ read: true }, { transaction });
     }
@@ -874,7 +869,7 @@ export const approveStoreAuth = async (req: AuthRequest, res: Response) => {
     await transaction.commit();
 
     return res.status(200).json({
-      message: "Authority to collect from Store approved successfully", ticket
+      message: "Authority to collect from Store approved successfully",
     });
   } catch (error: unknown) {
     await transaction.rollback();
@@ -898,13 +893,10 @@ export const approveAuthToWeigh = async (req: AuthRequest, res: Response) => {
     }
 
     // Update ticket status and save
-    await ticket.update(
-      {
-        status: "approved",
-        approvedBySuperAdminId: id
-      },
-    );
-
+    await ticket.update({
+      status: "approved",
+      approvedBySuperAdminId: id,
+    });
     // Update existing notification if unread
     const notification = await Notify.findOne({ where: { ticketId } });
     if (notification && !notification.dataValues.read) {

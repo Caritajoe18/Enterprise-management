@@ -57,8 +57,8 @@ export const getAllCustomers = async (req: Request, res: Response) => {
     const customers = await Customer.findAll({
       order: [["createdAt", "DESC"]],
     });
-    if (customers.length === 0) {
-      return res.status(204).json({messege: "No Customers Found"});
+    if (customers.length == 0) {
+      return res.status(200).json({messege: "No Customers Found",customers});
     }
     res.status(200).json({
       message: "successfully retrieved your customers",
