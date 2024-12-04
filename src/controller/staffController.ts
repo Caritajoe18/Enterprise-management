@@ -40,7 +40,7 @@ export const signupStaff = async (req: Request, res: Response) => {
     if (!role) {
       return res.status(400).json({ error: "Role does not exist" });
     }
-    const randomPassword = crypto.randomBytes(8).toString("hex");
+    const randomPassword =  crypto.randomBytes(3).toString("hex").slice(0,5);
 
     const passwordHashed = await bcryptEncode({ value: randomPassword });
 
