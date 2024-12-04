@@ -78,8 +78,15 @@ export const signupStaff = async (req: Request, res: Response) => {
 export const updateStaff = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    let { firstname, lastname, phoneNumber, department, roleId, address } =
-      req.body;
+    let {
+      firstname,
+      lastname,
+      phoneNumber,
+      department,
+      roleId,
+      address,
+      password,
+    } = req.body;
 
     firstname = firstname ? toPascalCase(firstname) : firstname;
 
@@ -96,8 +103,20 @@ export const updateStaff = async (req: Request, res: Response) => {
     if (!staff) {
       return res.status(404).json({ error: "staff not found" });
     }
+    let passwordHashed = null;
+    if (password) {
+      passwordHashed = await bcryptEncode({ value: password });
+    }
     const updatedStaff = await staff.update(
-      { firstname, lastname, phoneNumber, department, address, roleId },
+      {
+        firstname,
+        lastname,
+        phoneNumber,
+        department,
+        address,
+        roleId,
+        ...(passwordHashed && { password: passwordHashed }),
+      },
       { where: { id } }
     );
     res
