@@ -7,7 +7,7 @@ import {
   updateStaffSchema,
 } from "../validations/adminValidation";
 import { bcryptEncode, toPascalCase } from "../utilities/auths";
-
+import crypto from "crypto";
 import { sendVerificationMail } from "../utilities/sendVerification";
 import { generateVerificationEmailHTML } from "../utilities/htmls";
 import { Op } from "sequelize";
@@ -40,7 +40,9 @@ export const signupStaff = async (req: Request, res: Response) => {
     if (!role) {
       return res.status(400).json({ error: "Role does not exist" });
     }
-    const passwordHashed = await bcryptEncode({ value: password });
+    const randomPassword =  crypto.randomBytes(3).toString("hex").slice(0,5);
+
+    const passwordHashed = await bcryptEncode({ value: randomPassword });
 
     const user = await AdminInstance.create({
       ...req.body,
@@ -56,7 +58,8 @@ export const signupStaff = async (req: Request, res: Response) => {
       email,
       loginurl,
       firstname,
-      generateVerificationEmailHTML
+      generateVerificationEmailHTML,
+      randomPassword
     );
 
     return res.status(201).json({
@@ -75,8 +78,15 @@ export const signupStaff = async (req: Request, res: Response) => {
 export const updateStaff = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    let { firstname, lastname, phoneNumber, department, roleId, address } =
-      req.body;
+    let {
+      firstname,
+      lastname,
+      phoneNumber,
+      department,
+      roleId,
+      address,
+      password,
+    } = req.body;
 
     firstname = firstname ? toPascalCase(firstname) : firstname;
 
@@ -93,8 +103,20 @@ export const updateStaff = async (req: Request, res: Response) => {
     if (!staff) {
       return res.status(404).json({ error: "staff not found" });
     }
+    let passwordHashed = null;
+    if (password) {
+      passwordHashed = await bcryptEncode({ value: password });
+    }
     const updatedStaff = await staff.update(
-      { firstname, lastname, phoneNumber, department, address, roleId },
+      {
+        firstname,
+        lastname,
+        phoneNumber,
+        department,
+        address,
+        roleId,
+        ...(passwordHashed && { password: passwordHashed }),
+      },
       { where: { id } }
     );
     res

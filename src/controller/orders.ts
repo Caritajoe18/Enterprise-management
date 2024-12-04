@@ -225,6 +225,11 @@ export const getAllOrders = async (req: AuthRequest, res: Response) => {
       where: isAdmin ? {} : { createdBy: adminId },
       order: [["createdAt", "DESC"]],
     });
+    if(orders.length == 0){
+      return res
+        .status(200)
+        .json({ message: "No orders found", orders }); 
+    }
 
     return res.status(200).json(orders);
   } catch (error: unknown) {
@@ -263,8 +268,8 @@ export const getOrdersByCustomer = async (req: AuthRequest, res: Response) => {
 
     if (orders.length === 0) {
       return res
-        .status(404)
-        .json({ message: "No orders found for this customer" });
+        .status(200)
+        .json({ message: "No orders found for this customer",orders });
     }
 
     return res.status(200).json(orders);

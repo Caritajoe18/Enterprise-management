@@ -19,13 +19,14 @@ import {
   generateTokenEmailHTML,
   generateVerificationEmailHTML,
 } from "../utilities/htmls";
+import crypto from "crypto"; 
 import { JwtPayload } from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
 
 export const loginurl =
   process.env.LOGIN_URL || "https://polema.bookbank.com.ng";
-
+  
 export const signupAdmin = async (req: Request, res: Response) => {
   try {
     const validationResult = signUpSchema.validate(req.body, option);
@@ -35,7 +36,7 @@ export const signupAdmin = async (req: Request, res: Response) => {
         .json({ error: validationResult.error.details[0].message });
     }
 
-    let { email, password, roleId, firstname, lastname, department } =
+    let { email, roleId, firstname, lastname, isAdmin, department } =
       req.body;
 
     firstname = toPascalCase(firstname);
@@ -46,8 +47,8 @@ export const signupAdmin = async (req: Request, res: Response) => {
     if (exist) {
       return res.status(400).json({ error: "Email already exists" });
     }
-
-    const passwordHashed = await bcryptEncode({ value: password });
+    const randomPassword =  crypto.randomBytes(3).toString("hex").slice(0,5);
+    const passwordHashed = await bcryptEncode({ value: randomPassword });
 
     const admin = await AdminInstance.create({
       ...req.body,
@@ -65,7 +66,8 @@ export const signupAdmin = async (req: Request, res: Response) => {
       email,
       loginurl,
       firstname,
-      generateVerificationEmailHTML
+      generateVerificationEmailHTML,
+      randomPassword
     );
 
     // Return response

@@ -9,14 +9,14 @@ export const option = {
   },
 };
 
-
 const passwordSchema = Joi.string()
   .min(5)
-  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{5,}$/)
+  .regex(/^(?=.*[A-Za-z])(?=.*\d).{5,}$/)
   .message(
-    "Password must be at least 5 characters long, contain at least one lowercase letter, one uppercase letter and one digit"
+    "Password must be at least 5 characters long, contain at least one letter, and one digit"
   )
   .required();
+
 
 export const signUpSchema = Joi.object({
   firstname: Joi.string().min(2).max(30).required().messages({
@@ -40,20 +40,10 @@ export const signUpSchema = Joi.object({
     .required()
     .messages({
       "string.empty": "Phone number is required",
-      
     }),
   department: Joi.array().items(Joi.string()).min(1).max(5),
-  profilePic:Joi.string(),
+  profilePic: Joi.string(),
   roleId: Joi.string().min(2).max(50).optional(),
-  password: passwordSchema,
-  confirmPassword: Joi.any()
-    .equal(Joi.ref("password"))
-    .required()
-    .label("Confirm password")
-    .messages({
-      "any.only": "Passwords do not match",
-      "any.required": "Password confirmation is required",
-    }),
 });
 
 export const loginSchema = Joi.object({
@@ -79,7 +69,6 @@ export const sendVerification = Joi.object().keys({
   email: Joi.string().trim().lowercase().email().required(),
 });
 
-
 export const updateStaffSchema = Joi.object({
   firstname: Joi.string().min(2).max(30).messages({
     "string.min": "firstname should have a minimum length of {#limit}",
@@ -98,18 +87,12 @@ export const updateStaffSchema = Joi.object({
     .messages({
       "string.length": "phone number should have the length of {#limit}",
     }),
-    department: Joi.array().items(Joi.string()).min(1).max(5),
+  department: Joi.array().items(Joi.string()).min(1).max(5),
   address: Joi.string().messages({
     "string.length": "phone number should have the length of {#limit}",
   }),
   roleId: Joi.string().min(2).max(50).optional(),
-  password: Joi.string()
-  .min(5)
-  .max(15)
-  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{5,15}$/)
-  .message(
-    "Password must be between 5 and 15 characters, contain at least one lowercase letter, one uppercase letter and one digit"
-  ),
+  password: passwordSchema,
   confirmPassword: Joi.any()
     .equal(Joi.ref("password"))
     .label("Confirm password")
@@ -123,11 +106,9 @@ export const createRoleSchema = Joi.object({
     "string.min": "firstname should have a minimum length of {#limit}",
     "string.max": "firstname should have a maximum length of {#limit}",
     "string.empty": "name is required",
-    
   }),
   permissionsId: Joi.array(),
 });
-
 
 export const changePasswordSchema = Joi.object({
   password: passwordSchema,
@@ -143,26 +124,19 @@ export const changePasswordSchema = Joi.object({
 });
 
 export const permissionValidationSchema = Joi.object({
-  isNav: Joi.boolean()
-    .optional()
-    .default(false),
+  isNav: Joi.boolean().optional().default(false),
   navParentId: Joi.string()
-    .guid({ version: ['uuidv4'] })
+    .guid({ version: ["uuidv4"] })
     .allow(null)
     .optional(),
-  url: Joi.string()
-    .required()
-    .messages({
-      'string.empty': 'URL is required',
-    }),
-  name: Joi.string()
-    .min(3)
-    .max(255)
-    .messages({
-      'string.empty': 'name is required',
-      'string.min': 'name should be at least 3 characters',
-      'string.max': 'name should not exceed 255 characters',
-    }),
+  url: Joi.string().required().messages({
+    "string.empty": "URL is required",
+  }),
+  name: Joi.string().min(3).max(255).messages({
+    "string.empty": "name is required",
+    "string.min": "name should be at least 3 characters",
+    "string.max": "name should not exceed 255 characters",
+  }),
 });
 
 export const updateRoleSchema = Joi.object({

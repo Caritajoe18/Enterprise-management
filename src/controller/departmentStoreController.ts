@@ -94,8 +94,8 @@ export const getDeptStoreForSale = async (req: AuthRequest, res: Response) => {
       ],
     });
 
-    if (!stores.length) {
-      return res.status(404).json({ message: "No stores found for sale" });
+    if (stores.length == 0) {
+      return res.status(200).json({ message: "No stores found for sale", stores });
     }
 
     const parsedStores = stores.map((store) => ({
@@ -141,8 +141,8 @@ export const getDeptStoreForPurchase = async (
       ],
     });
 
-    if (!stores.length) {
-      return res.status(404).json({ message: "No stores found for sale" });
+    if (stores.length == 0 ) {
+      return res.status(200).json({ message: "No stores found for sale", stores });
     }
 
     const parsedStores = stores.map((store) => ({
@@ -282,7 +282,7 @@ export const viewDeptOrder = async (req: AuthRequest, res: Response) => {
     });
 
     if (stores.length === 0) {
-      return res.status(404).json({ message: "No Orders found" });
+      return res.status(200).json({ message: "No Orders found", stores });
     }
 
     res.status(200).json({

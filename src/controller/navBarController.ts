@@ -216,7 +216,13 @@ export const getUserNavPermissions = async (
       }
     });
 
-    const result = Object.values(navParentMap);
+    // const result = Object.values(navParentMap);
+    const result = Object.values(navParentMap).map((navParent: any) => {
+      if (!navParent.permissions.length && navParentIds.includes(navParent.navParentId)) {
+        navParent.permissions = []; 
+      }
+      return navParent;
+    });
     return res.status(200).json({ navParentsWithPermissions: result });
   } catch (error: unknown) {
     if (error instanceof Error) {

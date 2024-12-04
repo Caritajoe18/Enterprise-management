@@ -77,7 +77,7 @@ export const getCashierEntry = async (req: Request, res: Response) => {
     });
 
     if (entries.length === 0) {
-      return res.status(204).json({ messege: "No Cashier Found", entries });
+      return res.status(200).json({ messege: "No Cashier Entries Found", entries });
     }
     res.status(200).json({
       message: "successfully retrieved Cashier entries",
