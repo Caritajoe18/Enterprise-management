@@ -149,10 +149,10 @@ export const approveCashTicket = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: "Ticket not found" });
     }
 
-    ticket.dataValues.status = "approved";
-    ticket.dataValues.approvedBySuperAdminId = id;
-
-    await ticket.save();
+    await ticket.update({
+      status: "approved",
+      approvedBySuperAdminId: id,
+    });
     const notification = await Notify.findOne({ where: { ticketId } });
     if (notification && !notification.dataValues.read) {
       await notification.update({ read: true });
@@ -186,7 +186,6 @@ export const approveCashTicket = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    
     return res.status(200).json({
       message: `Ticket approved successfully and sent to the cashier`,
     });
@@ -208,9 +207,9 @@ export const rejectCashTicket = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Ticket not found" });
     }
 
-    ticket.dataValues.status = "rejected";
-
-    await ticket.save();
+    await ticket.update({
+      status: "rejected",
+    });
     const notification = await Notify.findOne({ where: { ticketId } });
     if (notification && !notification.dataValues.read) {
       await notification.update({ read: true });
