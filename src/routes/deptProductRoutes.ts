@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.post("/create-department", authorize(), createDepartment);
 router.patch("/edit-department/:id", authorize(), editDepartment);
-router.get("/view-department", authorize(), getAllDepartments);
+router.get("/view-department", getAllDepartments);
 router.get("/get-department", getDepartments);
 router.delete("/delete-department/:id", authorize(), deleteDept);
 
