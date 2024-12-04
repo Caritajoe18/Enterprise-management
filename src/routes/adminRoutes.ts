@@ -142,7 +142,7 @@ router.get("/cashier-ledger", authorize(), getCashierEntry);
 
 //tickets
 router.post("/cash-ticket", authorize(), raiseCashTicket);
-router.post("/recieve-cash-ticket/ticketId", authorize(), recieveCashTicket);
+router.post("/recieve-cash-ticket/:ticketId", authorize(), recieveCashTicket);
 router.post("/raise-lpo", authorize(), raiseLPO);
 router.post(
   "/raise-store-collection",
