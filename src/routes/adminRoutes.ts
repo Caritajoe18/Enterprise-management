@@ -99,7 +99,7 @@ router.get("/get-permissions", authorize(), getAllPermissions);
 //products
 router.post("/add-product", authorize(), createProducts);
 router.patch("/edit-product/:id", authorize(), updateProducts);
-router.get("/get-products", authorize(), getProducts);
+router.get("/get-products", getProducts);
 router.get("/get-raw-materials", getRawMaterials);
 router.get("/search-products", authorize(), searchProducts);
 router.delete("/delete-product/:id", authorize(), deleteProduct);
