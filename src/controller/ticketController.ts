@@ -12,7 +12,6 @@ import { LPO } from "../models/lpo";
 import CollectFromGenStore from "../models/collectFromGenStore";
 import AuthToWeigh from "../models/AuthToWeigh";
 import {
-  approveReceipt,
   approveTicket,
   calculateNewBalance,
   getRecords,
@@ -187,16 +186,7 @@ export const approveCashTicket = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // const adminWs = getAdminConnection(adminId);
-    // if (adminWs) {
-    //   adminWs.send(
-    //     JSON.stringify({
-    //       message: `A new ticket for cash has been approved.`,
-    //       ticket,
-    //     })
-    //   );
-    // }
-
+    
     return res.status(200).json({
       message: `Ticket approved successfully and sent to the cashier`,
     });

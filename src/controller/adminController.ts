@@ -19,35 +19,14 @@ import {
   generateTokenEmailHTML,
   generateVerificationEmailHTML,
 } from "../utilities/htmls";
-import { Op } from "sequelize";
+import crypto from "crypto"; 
 import { JwtPayload } from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
 
 export const loginurl =
   process.env.LOGIN_URL || "https://polema.bookbank.com.ng";
-  export const generatePassword = () => {
-    const lower = "abcdefghijklmnopqrstuvwxyz";
-    const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const digits = "0123456789";
-    const allChars = lower + upper + digits;
   
-    // Ensure the password meets all schema criteria
-    const password = [
-      lower[Math.floor(Math.random() * lower.length)], // At least one lowercase letter
-      upper[Math.floor(Math.random() * upper.length)], // At least one uppercase letter
-      digits[Math.floor(Math.random() * digits.length)], // At least one digit
-    ];
-  
-    // Fill the rest of the password with random characters
-    for (let i = 3; i < 8; i++) {
-      password.push(allChars[Math.floor(Math.random() * allChars.length)]);
-    }
-  
-    // Shuffle the array to randomize the character order
-    return password.sort(() => Math.random() - 0.5).join("");
-  };
-
 export const signupAdmin = async (req: Request, res: Response) => {
   try {
     const validationResult = signUpSchema.validate(req.body, option);
@@ -57,7 +36,7 @@ export const signupAdmin = async (req: Request, res: Response) => {
         .json({ error: validationResult.error.details[0].message });
     }
 
-    let { email, password, roleId, firstname, lastname, isAdmin, department } =
+    let { email, roleId, firstname, lastname, isAdmin, department } =
       req.body;
 
     firstname = toPascalCase(firstname);
@@ -68,9 +47,8 @@ export const signupAdmin = async (req: Request, res: Response) => {
     if (exist) {
       return res.status(400).json({ error: "Email already exists" });
     }
-    const randomPassword = generatePassword();
-
-    const passwordHashed = await bcryptEncode({ value: password });
+    const randomPassword =  crypto.randomBytes(8).toString("hex");
+    const passwordHashed = await bcryptEncode({ value: randomPassword });
 
     const admin = await AdminInstance.create({
       ...req.body,
