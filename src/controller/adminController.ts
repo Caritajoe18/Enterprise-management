@@ -47,7 +47,7 @@ export const signupAdmin = async (req: Request, res: Response) => {
     if (exist) {
       return res.status(400).json({ error: "Email already exists" });
     }
-    const randomPassword =  crypto.randomBytes(8).toString("hex");
+    const randomPassword =  crypto.randomBytes(3).toString("hex");
     const passwordHashed = await bcryptEncode({ value: randomPassword });
 
     const admin = await AdminInstance.create({
