@@ -7,9 +7,7 @@ import NavParent from "../models/navparent";
 module.exports = {
   async up(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
     const navParents = await NavParent.findAll();
-    // Fetch all NavParent records
 
-    // Check if navParents are successfully retrieved
     if (!navParents || navParents.length === 0) {
       throw new Error("NavParent records are empty or not found!");
     }
@@ -18,9 +16,9 @@ module.exports = {
     }
 
     const navParentsMap: NavParentMap = navParents.reduce((acc, parent) => {
-      const parentName = parent.dataValues.name; // Assuming "name" is the key to use
-      const parentId = parent.dataValues.id; // Assuming "id" is the key for the ID
-      acc[parentName] = parentId; // Map name to id
+      const parentName = parent.dataValues.name;
+      const parentId = parent.dataValues.id;
+      acc[parentName] = parentId;
       return acc;
     }, {} as NavParentMap);
     await queryInterface.bulkInsert(
