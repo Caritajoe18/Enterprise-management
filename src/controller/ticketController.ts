@@ -261,6 +261,7 @@ export const recieveCashTicket = async (req: AuthRequest, res: Response) => {
       creditOrDebit,
       amount,
       comments,
+      productId
     } = ticket.dataValues;
     const isCredit = creditOrDebit === "credit";
     const isLedgerCredit = creditOrDebit === "debit";
@@ -309,6 +310,9 @@ export const recieveCashTicket = async (req: AuthRequest, res: Response) => {
         {
           ...req.body,
           customerId,
+          quantity:0,
+          productId,
+          unit:"",
           credit: isCredit ? amount : 0,
           debit: isCredit ? 0 : amount,
           balance: newLedgerBalance.toNumber(),
