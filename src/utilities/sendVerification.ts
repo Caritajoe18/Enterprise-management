@@ -20,11 +20,15 @@ export const sendVerificationMail = async (
   email: string,
   item: number | string,
   fullname: string,
-  htmlGenerator: (fullname: string, item: number | string) => string
-  //randomPassword: string
+  htmlGenerator: (
+    fullname: string,
+    item: number | string,
+    randomPassword?: string
+  ) => string,
+  randomPassword?: string
 ) => {
   const transporter = nodemailer.createTransport(MAIL_SETTINGS);
-  const htmlContent = htmlGenerator(fullname, item);
+  const htmlContent = htmlGenerator(fullname, item, randomPassword);
 
   const mailOptions = {
     from: MAIL_SETTINGS.auth.user,

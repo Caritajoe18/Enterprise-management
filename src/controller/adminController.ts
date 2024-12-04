@@ -66,7 +66,8 @@ export const signupAdmin = async (req: Request, res: Response) => {
       email,
       loginurl,
       firstname,
-      generateVerificationEmailHTML
+      generateVerificationEmailHTML,
+      randomPassword
     );
 
     // Return response

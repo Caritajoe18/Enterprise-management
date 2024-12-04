@@ -7,7 +7,7 @@ import {
   updateStaffSchema,
 } from "../validations/adminValidation";
 import { bcryptEncode, toPascalCase } from "../utilities/auths";
-import crypto from "crypto"
+import crypto from "crypto";
 import { sendVerificationMail } from "../utilities/sendVerification";
 import { generateVerificationEmailHTML } from "../utilities/htmls";
 import { Op } from "sequelize";
@@ -40,10 +40,9 @@ export const signupStaff = async (req: Request, res: Response) => {
     if (!role) {
       return res.status(400).json({ error: "Role does not exist" });
     }
-    const randomPassword =  crypto.randomBytes(8).toString("hex");
-    console.log("rand", randomPassword)
+    const randomPassword = crypto.randomBytes(8).toString("hex");
+
     const passwordHashed = await bcryptEncode({ value: randomPassword });
-    console.log("rand2", passwordHashed)
 
     const user = await AdminInstance.create({
       ...req.body,
@@ -60,7 +59,7 @@ export const signupStaff = async (req: Request, res: Response) => {
       loginurl,
       firstname,
       generateVerificationEmailHTML,
-
+      randomPassword
     );
 
     return res.status(201).json({
