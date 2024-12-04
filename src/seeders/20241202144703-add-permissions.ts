@@ -1,11 +1,28 @@
 import { QueryInterface, DataTypes } from "sequelize";
 import { v4 as uuidv4 } from "uuid";
+import NavParent from "../models/navparent";
 
 /** @type {import('sequelize-cli').Migration} */
 
-
 module.exports = {
   async up(queryInterface: QueryInterface, Sequelize: typeof DataTypes) {
+    const navParents = await NavParent.findAll();
+    // Fetch all NavParent records
+
+    // Check if navParents are successfully retrieved
+    if (!navParents || navParents.length === 0) {
+      throw new Error("NavParent records are empty or not found!");
+    }
+    interface NavParentMap {
+      [key: string]: string;
+    }
+
+    const navParentsMap: NavParentMap = navParents.reduce((acc, parent) => {
+      const parentName = parent.dataValues.name; // Assuming "name" is the key to use
+      const parentId = parent.dataValues.id; // Assuming "id" is the key for the ID
+      acc[parentName] = parentId; // Map name to id
+      return acc;
+    }, {} as NavParentMap);
     await queryInterface.bulkInsert(
       "Permissions",
       [
@@ -13,7 +30,7 @@ module.exports = {
           id: uuidv4(),
           name: "Add",
           slug: "add",
-          navParentId: "9a4bfd18-a022-4c8f-90e7-288e9b8880b8",
+          navParentId: navParentsMap["Account Book"],
           url: "create-account",
           orderIndex: 1,
           isNav: true,
@@ -314,7 +331,7 @@ module.exports = {
           navParentId: "7c886cc6-aecb-42a7-939f-e2ba93101733",
           url: "delete-genstore",
           orderIndex: 6,
-          isNav:false,
+          isNav: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -325,7 +342,7 @@ module.exports = {
           navParentId: "2fd84812-a648-4988-9062-1fe375fd74af",
           url: "create-dept-store",
           orderIndex: 1,
-          isNav:true,
+          isNav: true,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -336,7 +353,7 @@ module.exports = {
           navParentId: "2fd84812-a648-4988-9062-1fe375fd74af",
           url: "view-deptstore-prod",
           orderIndex: 2,
-          isNav:true,
+          isNav: true,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -347,7 +364,7 @@ module.exports = {
           navParentId: "2fd84812-a648-4988-9062-1fe375fd74af",
           url: "view-deptstore-raw",
           orderIndex: 3,
-          isNav:false,
+          isNav: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -358,7 +375,7 @@ module.exports = {
           navParentId: "2fd84812-a648-4988-9062-1fe375fd74af",
           url: "create-deptstore-order",
           orderIndex: 4,
-          isNav:true,
+          isNav: true,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -369,7 +386,7 @@ module.exports = {
           navParentId: "2fd84812-a648-4988-9062-1fe375fd74af",
           url: "view-deptstore-order",
           orderIndex: 5,
-          isNav:true,
+          isNav: true,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -380,7 +397,7 @@ module.exports = {
           navParentId: "2fd84812-a648-4988-9062-1fe375fd74af",
           url: "edit-deptstore",
           orderIndex: 6,
-          isNav:false,
+          isNav: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -391,7 +408,7 @@ module.exports = {
           navParentId: "2fd84812-a648-4988-9062-1fe375fd74af",
           url: "delete-deptstore",
           orderIndex: 7,
-          isNav:false,
+          isNav: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -402,7 +419,7 @@ module.exports = {
           navParentId: "91b48a90-258e-4293-87c0-b2f609569801",
           url: "cash-ticket",
           orderIndex: 1,
-          isNav:false,
+          isNav: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -413,7 +430,7 @@ module.exports = {
           navParentId: "91b48a90-258e-4293-87c0-b2f609569801",
           url: "view-cash-ticket",
           orderIndex: 2,
-          isNav:true,
+          isNav: true,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -424,7 +441,7 @@ module.exports = {
           navParentId: "91b48a90-258e-4293-87c0-b2f609569801",
           url: "raise-auth-weigh",
           orderIndex: 7,
-          isNav:false,
+          isNav: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -435,7 +452,7 @@ module.exports = {
           navParentId: "91b48a90-258e-4293-87c0-b2f609569801",
           url: "view-all-auth-weigh",
           orderIndex: 8,
-          isNav:true,
+          isNav: true,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -446,7 +463,7 @@ module.exports = {
           navParentId: "91b48a90-258e-4293-87c0-b2f609569801",
           url: "raise-lpo",
           orderIndex: 3,
-          isNav:false,
+          isNav: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -457,7 +474,7 @@ module.exports = {
           navParentId: "91b48a90-258e-4293-87c0-b2f609569801",
           url: "view-lpo",
           orderIndex: 4,
-          isNav:true,
+          isNav: true,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -468,7 +485,7 @@ module.exports = {
           navParentId: "91b48a90-258e-4293-87c0-b2f609569801",
           url: "raise-store-collection",
           orderIndex: 5,
-          isNav:false,
+          isNav: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -479,7 +496,7 @@ module.exports = {
           navParentId: "91b48a90-258e-4293-87c0-b2f609569801",
           url: "view-store-auth",
           orderIndex: 6,
-          isNav:true,
+          isNav: true,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -490,7 +507,7 @@ module.exports = {
           navParentId: "18cc0cea-661e-42e6-93af-38be6e67ac1c",
           url: "recieve-cash-ticket",
           orderIndex: 3,
-          isNav:false,
+          isNav: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -501,7 +518,7 @@ module.exports = {
           navParentId: "5a6f9cad-0673-43ac-88be-cb48f6698c9b",
           url: "create-invoice",
           orderIndex: 1,
-          isNav:false,
+          isNav: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -512,7 +529,7 @@ module.exports = {
           navParentId: "e837484c-713a-4526-bb9e-8a8434c82828",
           url: "create-invoice",
           orderIndex: 7,
-          isNav:false,
+          isNav: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -523,7 +540,7 @@ module.exports = {
           navParentId: "5a6f9cad-0673-43ac-88be-cb48f6698c9b",
           url: "create-invoice",
           orderIndex: 1,
-          isNav:false,
+          isNav: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -534,7 +551,7 @@ module.exports = {
           navParentId: "5a6f9cad-0673-43ac-88be-cb48f6698c9b",
           url: "create-invoice",
           orderIndex: 1,
-          isNav:false,
+          isNav: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -545,7 +562,7 @@ module.exports = {
           navParentId: "5a6f9cad-0673-43ac-88be-cb48f6698c9b",
           url: "create-invoice",
           orderIndex: 1,
-          isNav:false,
+          isNav: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -556,7 +573,7 @@ module.exports = {
           navParentId: "5a6f9cad-0673-43ac-88be-cb48f6698c9b",
           url: "create-invoice",
           orderIndex: 1,
-          isNav:false,
+          isNav: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -567,7 +584,7 @@ module.exports = {
           navParentId: "5a6f9cad-0673-43ac-88be-cb48f6698c9b",
           url: "create-invoice",
           orderIndex: 1,
-          isNav:false,
+          isNav: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -578,7 +595,7 @@ module.exports = {
           navParentId: "5a6f9cad-0673-43ac-88be-cb48f6698c9b",
           url: "create-invoice",
           orderIndex: 1,
-          isNav:false,
+          isNav: false,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
