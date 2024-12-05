@@ -19,7 +19,7 @@ module.exports = {
         },
       },
       customerId: {
-       type: DataTypes.UUID, 
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: "Customers",
@@ -69,7 +69,7 @@ module.exports = {
         allowNull: true,
       },
       ledgerEntries: {
-        type: DataTypes.JSON, 
+        type: DataTypes.JSON,
         allowNull: true,
       },
       currentBalance: {
@@ -92,7 +92,7 @@ module.exports = {
         type: DataTypes.INTEGER,
         allowNull: false,
         autoIncrement: true,
-        unique: true, 
+        unique: true,
       },
       createdAt: {
         allowNull: false,

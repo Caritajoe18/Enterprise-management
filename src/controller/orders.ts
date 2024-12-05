@@ -1,6 +1,6 @@
 import CustomerOrder from "../models/customerOrder";
 import { Plan, Products } from "../models/products";
-import { Response, Request } from "express";
+import { Response} from "express";
 import { customerOrderSchema } from "../validations/customerValid";
 import { option } from "../validations/adminValidation";
 import Customer from "../models/customers";

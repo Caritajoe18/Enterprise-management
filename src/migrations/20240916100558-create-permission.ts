@@ -13,7 +13,6 @@ module.exports = {
       name: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
       },
       isNav: {
         type: Sequelize.BOOLEAN,
@@ -22,6 +21,10 @@ module.exports = {
       isAssigned: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,
+      },
+      orderIndex: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
       },
       navParentId: {
         type: Sequelize.UUID,

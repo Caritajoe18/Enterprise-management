@@ -18,10 +18,6 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true,
       },
-      rawMaterial: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
       productId: {
         type: Sequelize.UUID,
         allowNull: true,
