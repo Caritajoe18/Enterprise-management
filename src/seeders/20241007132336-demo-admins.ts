@@ -13,7 +13,7 @@ module.exports = {
           id: uuidv4(),
           firstname: "Okay",
           lastname: "Obi",
-          email: "polobi700@yahoo.com",
+          email: "polobi700@yahoo.co.uk",
           phoneNumber: +2348065208084,
           password: hashedPassword,
           isAdmin: true,
