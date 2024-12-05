@@ -125,7 +125,7 @@ router.get("/get-all-supplier-orders", authorize(), getAllSupplierOrders);
 //weigh operations
 router.post("/create-weigh/:authToWeighId", authorize(), createWeigh);
 router.get("/view-weigh/:weighId", viewWeigh);
-router.get("/view-weighs", authorize(), viewAllWeigh);
+router.get("/view-weighs", viewAllWeigh);
 
 //receipts
 router.post("/create-invoice/:tranxId", authorize(), generateInvoice);
