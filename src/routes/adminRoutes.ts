@@ -86,7 +86,7 @@ import {
 
 const router = express.Router();
 router.post("/sign-up", signupAdmin);
-router.post("/login", loginAdmin);
+router.post("/login", limiter, loginAdmin);
 
 //permissions
 router.get("/get-all-nav", getAllNavandPerm);
