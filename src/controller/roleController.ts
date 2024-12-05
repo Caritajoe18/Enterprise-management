@@ -77,8 +77,8 @@ export const getAllRoles = async (req: Request, res: Response) => {
       order: [["createdAt", "DESC"]],
     });
 
-    if (!roles.length) {
-      return res.status(404).json({ message: "No roles found" });
+    if (roles.length == 0) {
+      return res.status(200).json({ message: "No roles found",roles });
     }
 
     const rolePermissions = await RolePermission.findAll({
