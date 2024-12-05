@@ -31,7 +31,7 @@ Notify.init(
       type: DataTypes.UUID,
       allowNull: true,
       // references: {
-      //   model: "Admins",
+      //   model: "",
       //   key: "id",
       // },
       // onUpdate: "CASCADE",

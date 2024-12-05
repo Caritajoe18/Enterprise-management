@@ -5,7 +5,6 @@ export interface DepartmentLedgerAttributes {
   id: string;
   name: string;
   productName: string;
-  rawMaterial: string;
   productId: string;
   departmentId: string;
   unit: string;
@@ -39,10 +38,6 @@ DepartmentLedger.init(
       allowNull: false,
     },
     productName: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    rawMaterial: {
       type: DataTypes.STRING,
       allowNull: true,
     },

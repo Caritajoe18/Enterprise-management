@@ -6,7 +6,7 @@ import RolePermission from "../models/rolepermission";
 import Admins from "../models/admin";
 
 export const createNavParent = async (req: Request, res: Response) => {
-  const { name, iconUrl } = req.body;
+  const { name} = req.body;
 
   try {
     const slug = name.toLowerCase().replace(/ /g, "-");
@@ -216,13 +216,13 @@ export const getUserNavPermissions = async (
       }
     });
 
-    // const result = Object.values(navParentMap);
-    const result = Object.values(navParentMap).map((navParent: any) => {
-      if (!navParent.permissions.length && navParentIds.includes(navParent.navParentId)) {
-        navParent.permissions = []; 
-      }
-      return navParent;
-    });
+     const result = Object.values(navParentMap);
+    // const result = Object.values(navParentMap).map((navParent: any) => {
+    //   if (!navParent.permissions.length && navParentIds.includes(navParent.navParentId)) {
+    //     navParent.permissions = []; 
+    //   }
+    //   return navParent;
+    // });
     return res.status(200).json({ navParentsWithPermissions: result });
   } catch (error: unknown) {
     if (error instanceof Error) {

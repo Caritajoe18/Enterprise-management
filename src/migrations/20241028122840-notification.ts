@@ -16,8 +16,8 @@ module.exports = {
       },
       ticketId: {
         type: DataTypes.STRING,
-        allowNull: false
-    },
+        allowNull: false,
+      },
       message: {
         type: DataTypes.STRING,
         allowNull: false,

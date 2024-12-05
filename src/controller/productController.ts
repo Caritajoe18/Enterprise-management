@@ -6,7 +6,6 @@ import {
 } from "../validations/productValidations";
 import { option } from "../validations/adminValidation";
 import { Op } from "sequelize";
-import { toPascalCase } from "../utilities/auths";
 import Departments from "../models/department";
 
 export const createProducts = async (req: Request, res: Response) => {
@@ -116,7 +115,7 @@ export const searchProducts = async (req: Request, res: Response) => {
 
     if (products.length === 0) {
       return res
-        .status(404)
+        .status(200)
         .json({ message: "No product found matching the criteria" });
     }
 
@@ -173,7 +172,7 @@ export const getRawMaterials = async (req: Request, res: Response) => {
       order: [["createdAt", "DESC"]],
     });
     if (products.length === 0) {
-      return res.status(201).json({ message: "No Raw Materials found", products });
+      return res.status(200).json({ message: "No Raw Materials found", products });
     }
 
     const parsedProducts = products.map((product) => {
@@ -234,7 +233,7 @@ export const getDepartmentProducts = async (req: Request, res: Response) => {
     });
 
     if (products.length === 0) {
-      return res.status(404).json({ message: "No products found", products });
+      return res.status(200).json({ message: "No products found", products });
     }
 
     const parsedProducts = products.map((product) => ({
@@ -272,7 +271,7 @@ export const getDepartmentForSale = async (req: Request, res: Response) => {
     });
 
     if (products.length === 0) {
-      return res.status(404).json({ message: "No products found", products });
+      return res.status(200).json({ message: "No products found", products });
     }
 
     const parsedProducts = products.map((product) => ({
@@ -311,7 +310,7 @@ export const getDepartmentForPurchase = async (req: Request, res: Response) => {
 
     if (products.length === 0) {
       return res
-        .status(404)
+        .status(200)
         .json({ message: "No raw materials found", products });
     }
 

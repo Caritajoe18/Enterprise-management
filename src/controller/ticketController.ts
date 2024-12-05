@@ -757,7 +757,7 @@ export const getAStoreAuth = async (req: Request, res: Response) => {
 
     if (!record) {
       return res.status(404).json({
-        message: `Authority to collect from General Store with ID ${id} not found.`,
+        message: `Authority to collect from General Store not found.`,
       });
     }
 
@@ -770,7 +770,7 @@ export const getAStoreAuth = async (req: Request, res: Response) => {
     };
 
     res.status(200).json({
-      message: `Successfully retrieved Authorities to collects from General store`,
+      message: `Successfully retrieved Authorities to collect from General store`,
       records: parsedRecord,
     });
   } catch (error: unknown) {
