@@ -214,7 +214,7 @@ export const getAllStaff = async (req: AuthRequest, res: Response) => {
     });
     if (staffList.length === 0) {
       return res
-        .status(404)
+        .status(200)
         .json({ message: "No staff found in the database", staffList });
     }
     res
@@ -235,7 +235,7 @@ export const getAdmin = async (req: AuthRequest, res: Response) => {
     });
     if (staffList.length === 0) {
       return res
-        .status(204)
+        .status(200)
         .json({ message: "No admin found in the database", staffList });
     }
     res
@@ -257,7 +257,9 @@ export const getSuspendedStaff = async (req: Request, res: Response) => {
     });
 
     if (suspendedStaffList.length === 0) {
-      return res.status(404).json({ message: "No suspended staff found" });
+      return res
+        .status(200)
+        .json({ message: "No staff found in the database", suspendedStaffList });;
     }
 
     res.status(200).json({
@@ -297,8 +299,8 @@ export const searchStaff = async (req: Request, res: Response) => {
 
     if (staffList.length == 0) {
       return res
-        .status(404)
-        .json({ message: "No staff found matching the criteria" });
+        .status(200)
+        .json({ message: "No staff found matching the criteria", staffList });
     }
 
     res
@@ -320,7 +322,7 @@ export const orderStaffFirstname = async (req: Request, res: Response) => {
     });
 
     if (customerList.length === 0) {
-      return res.status(404).json({ message: "No Staff found" });
+      return res.status(200).json({ message: "No Staff found", customerList });
     }
 
     res

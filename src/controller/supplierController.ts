@@ -63,7 +63,7 @@ export const getAllSuppliers = async (req: Request, res: Response) => {
       order: [["createdAt", "DESC"]],
     });
     if (customers.length === 0) {
-      return res.status(204).send();
+      return res.status(200).json({ message: "No supplier found", customers });
     }
     res.status(200).json({
       message: "successfully retrieved your Suppliers",
@@ -194,8 +194,8 @@ export const searchSupplier = async (req: Request, res: Response) => {
 
     if (customerList.length == 0) {
       return res
-        .status(404)
-        .json({ message: "No supplier found matching the criteria" });
+        .status(200)
+        .json({ message: "No supplier found matching the criteria", customerList });
     }
 
     res
@@ -217,7 +217,7 @@ export const orderSupplierFirstname = async (req: Request, res: Response) => {
     });
 
     if (customerList.length === 0) {
-      return res.status(404).json({ message: "No customers found" });
+      return res.status(200).json({ message: "No suppliers found",customerList });
     }
 
     res
