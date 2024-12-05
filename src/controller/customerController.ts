@@ -188,8 +188,8 @@ export const searchCustomer = async (req: Request, res: Response) => {
 
     if (customerList.length == 0) {
       return res
-        .status(404)
-        .json({ message: "No customer found matching the criteria" });
+        .status(200)
+        .json({ message: "No customer found matching the criteria", customerList });
     }
 
     res
@@ -213,8 +213,8 @@ export const orderCustomersFirstname = async (req: Request, res: Response) => {
 
     if (customerList.length === 0) {
       return res
-        .status(404)
-        .json({ message: "No customers found" });
+        .status(200)
+        .json({ message: "No customers found" , customerList});
     }
 
     res

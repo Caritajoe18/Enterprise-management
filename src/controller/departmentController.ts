@@ -99,6 +99,12 @@ export const getAllDepartments = async (req: Request, res: Response) => {
       ],
     });
 
+    if (departments.length === 0) {
+      return res
+        .status(200)
+        .json({ message: "No departments found", departments });
+    }
+
     return res.status(200).json({ departments });
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -112,6 +118,11 @@ export const getDepartments = async (req: Request, res: Response) => {
     const departments = await Departments.findAll({
       order: [["name", "ASC"]],
     });
+    if (departments.length === 0) {
+      return res
+        .status(200)
+        .json({ message: "No departments found", departments });
+    }
 
     return res.status(200).json({ departments });
   } catch (error: unknown) {
@@ -134,7 +145,9 @@ export const getDepartmentsLikePharm = async (req: Request, res: Response) => {
     });
 
     if (departments.length === 0) {
-      return res.status(404).json({ message: "No departments found" });
+      return res
+        .status(200)
+        .json({ message: "No departments found", departments });
     }
 
     // const serializedDepartments = departments.map(dept => ({
@@ -190,13 +203,11 @@ export const getDepartmentLedgerByDepartmentId = async (
       order: [["createdAt", "DESC"]],
     });
 
-    if (!departmentLedgerEntries.length) {
-      return res
-        .status(404)
-        .json({
-          message: "No entries found for this department",
-          departmentLedgerEntries,
-        });
+    if (departmentLedgerEntries.length === 0) {
+      return res.status(200).json({
+        message: "No entries found for this department",
+        departmentLedgerEntries,
+      });
     }
 
     return res.status(200).json(departmentLedgerEntries);
