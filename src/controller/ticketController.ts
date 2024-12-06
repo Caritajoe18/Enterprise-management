@@ -40,6 +40,10 @@ export const raiseCashTicket = async (req: AuthRequest, res: Response) => {
     item,
   } = req.body;
   try {
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount)) {
+      return res.status(400).json({ message: "Amount must be a valid number." });
+    }
     const customer = customerId
       ? await Customer.findOne({ where: { id: customerId } })
       : null;
@@ -60,7 +64,7 @@ export const raiseCashTicket = async (req: AuthRequest, res: Response) => {
       ...req.body,
       customerId,
       staffName,
-      amount,
+      amount: parsedAmount,
       productId,
       creditOrDebit,
       raisedByAdminId: roleId,
