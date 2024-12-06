@@ -40,6 +40,13 @@ export const raiseCashTicket = async (req: AuthRequest, res: Response) => {
     item,
   } = req.body;
   try {
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount)) {
+      return res
+        .status(400)
+        .json({ message: "Amount must be a valid number." });
+    }
+
     const customer = customerId
       ? await Customer.findOne({ where: { id: customerId } })
       : null;
@@ -60,7 +67,7 @@ export const raiseCashTicket = async (req: AuthRequest, res: Response) => {
       ...req.body,
       customerId,
       staffName,
-      amount,
+      amount: parsedAmount,
       productId,
       creditOrDebit,
       raisedByAdminId: roleId,
@@ -261,7 +268,7 @@ export const recieveCashTicket = async (req: AuthRequest, res: Response) => {
       creditOrDebit,
       amount,
       comments,
-      productId
+      productId,
     } = ticket.dataValues;
     const isCredit = creditOrDebit === "credit";
     const isLedgerCredit = creditOrDebit === "debit";
@@ -310,9 +317,9 @@ export const recieveCashTicket = async (req: AuthRequest, res: Response) => {
         {
           ...req.body,
           customerId,
-          quantity:0,
+          quantity: 0,
           productId,
-          unit:"",
+          unit: "",
           credit: isCredit ? amount : 0,
           debit: isCredit ? 0 : amount,
           balance: newLedgerBalance.toNumber(),

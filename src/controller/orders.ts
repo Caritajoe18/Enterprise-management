@@ -156,7 +156,7 @@ export const raiseCustomerOrder = async (req: AuthRequest, res: Response) => {
       product.dataValues.name,
       `${customer.dataValues.firstname} ${customer.dataValues.lastname}`,
       totalPrice,
-      false,
+      true,
       transaction
     );
 
