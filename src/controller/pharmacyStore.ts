@@ -267,17 +267,17 @@ export const createOrder = async (req: Request, res: Response) => {
 
 export const viewOrder = async (req: Request, res: Response) => {
   try {
-    const stores = await PharmacyOrder.findAll({
+    const Orders = await PharmacyOrder.findAll({
       order: [["createdAt", "DESC"]],
     });
 
-    if (stores.length === 0) {
-      return res.status(200).json({ message: "No stores found", stores });
+    if (Orders.length === 0) {
+      return res.status(200).json({ message: "No stores found", Orders });
     }
 
     res.status(200).json({
       message: "Ordes retrieved successfully",
-      Orders: stores,
+      Orders
     });
   } catch (error) {
     console.error("Error retrieving stores:", error);
