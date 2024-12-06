@@ -354,47 +354,6 @@ export const getUserNavPermissions = async (
   }
 };
 
-// export const getUserNavPermission = async (req: AuthRequest, res: Response) => {
-//   try {
-//     const {roleId}  = req.admin? // Assuming req.user contains roleId
-
-//     // Find all permissions associated with the user's role
-//     const role = await Role.findOne({
-//       where: { id: roleId },
-//       include: [
-//         {
-//           model: Permissions,
-//           as: 'permissions', // Ensure this alias matches your associations
-//           include: [
-//             {
-//               model: NavParent,
-//               as: 'navParent', // Alias should match your associations
-//               where: { isNav: true }, // Fetch only those where isNav is true
-//             },
-//           ],
-//         },
-//       ],
-//     });
-
-//     if (!role) {
-//       return res.status(404).json({ message: 'Role not found' });
-//     }
-
-//     // Extract permissions and navParents from the role
-//     const navParentsWithPermissions = role.permissions.map((permission: any) => ({
-//       permissionName: permission.name,
-//       navParent: permission.navParent ? permission.navParent.name : null,
-//     }));
-
-//     return res.status(200).json({
-//       navParentsWithPermissions,
-//     });
-//   } catch (error) {
-//     console.error('Error fetching navigations with permissions:', error);
-//     return res.status(500).json({ message: 'Internal Server Error' });
-//   }
-// };
-
 export const getNavParentsWithPermissions = async (
   req: Request,
   res: Response

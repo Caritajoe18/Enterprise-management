@@ -120,7 +120,7 @@ export const raiseSupplierOrder = async (req: AuthRequest, res: Response) => {
       product.dataValues.name,
       `${supplier.dataValues.firstname} ${supplier.dataValues.lastname}`,
       totalPrice,
-      false, // Setting `isCredit` to false for a debit transaction
+      false, // Setting `isCrebit` to true for a debit transaction
       transaction
     );
 
