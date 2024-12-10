@@ -34,6 +34,7 @@ export const signUpSchema = Joi.object({
     "string.empty": "Email is required",
     "string.email": "Invalid email format",
   }),
+  profilePic: Joi.string(),
 
   phoneNumber: Joi.string()
     .pattern(/^[0-9]+$/)
@@ -42,7 +43,7 @@ export const signUpSchema = Joi.object({
       "string.empty": "Phone number is required",
     }),
   department: Joi.array().items(Joi.string()).min(1).max(5),
-  profilePic: Joi.string(),
+  address: Joi.string(),
   roleId: Joi.string().min(2).max(50).optional(),
 });
 
@@ -88,9 +89,7 @@ export const updateStaffSchema = Joi.object({
       "string.length": "phone number should have the length of {#limit}",
     }),
   department: Joi.array().items(Joi.string()).min(1).max(5),
-  address: Joi.string().messages({
-    "string.length": "phone number should have the length of {#limit}",
-  }),
+  address: Joi.string(),
   roleId: Joi.string().min(2).max(50).optional(),
   password: passwordSchema,
   confirmPassword: Joi.any()
