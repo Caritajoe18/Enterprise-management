@@ -22,14 +22,7 @@ export const createCustomer = async (req: Request, res: Response) => {
     lastname = toPascalCase(lastname);
     email = email ? email.toLowerCase() : null;
 
-    //const exist = await Customer.findOne({ where: { phoneNumber } });
-    // const exist = await Customer.findOne({
-    //   where: {
-    //     phoneNumber: {
-    //       [Op.contains]: phoneNumber, // Checks for overlap in the JSON array
-    //     },
-    //   },
-    // });
+    
     const exist = await Customer.findOne({
       where: db.where(
         db.fn('JSON_CONTAINS', db.col('phoneNumber'), JSON.stringify(phoneNumber)),
@@ -82,8 +75,9 @@ export const getAllCustomers = async (req: Request, res: Response) => {
       return res.status(200).json({ messege: "No Customers Found", customers });
     }
     const parsedCustomers = customers.map((customer) => {
-      const customerData = customer.toJSON();
-      return customerData;
+      const parsedCustomer = customer.toJSON(); // Convert instance to plain object
+      parsedCustomer.phoneNumber = JSON.parse(parsedCustomer.phoneNumber as unknown as string); 
+      return parsedCustomer;
     });
     res.status(200).json({
       message: "successfully retrieved your customers",
