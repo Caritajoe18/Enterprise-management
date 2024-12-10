@@ -19,16 +19,22 @@ export const createCustomer = async (req: Request, res: Response) => {
     let { phoneNumber, firstname, lastname, email } = req.body;
     firstname = toPascalCase(firstname);
     lastname = toPascalCase(lastname);
-    email = email ? email.toLowerCase(): null;
+    email = email ? email.toLowerCase() : null;
 
-    const exist = await Customer.findOne({ where: { phoneNumber } });
-
+    //const exist = await Customer.findOne({ where: { phoneNumber } });
+    const exist = await Customer.findOne({
+      where: {
+        phoneNumber: {
+          [Op.contains]: phoneNumber, // Checks for overlap in the JSON array
+        },
+      },
+    });
     if (exist) {
       return res
         .status(400)
         .json({ error: "Customer with phone number already exists" });
     }
-    
+
     const customer = await Customer.create({
       ...req.body,
       firstname,
@@ -36,12 +42,18 @@ export const createCustomer = async (req: Request, res: Response) => {
       email,
     });
 
-    const customerTag = `PC/${String(customer.dataValues.idCount).padStart(4, '0')}`;
-    await Customer.update({ customerTag }, { where: { idCount: customer.dataValues.idCount } });
-    const newCus = await Customer.findOne({where: {customerTag}})
+    const customerTag = `PC/${String(customer.dataValues.idCount).padStart(
+      4,
+      "0"
+    )}`;
+    await Customer.update(
+      { customerTag },
+      { where: { idCount: customer.dataValues.idCount } }
+    );
+    const newCus = await Customer.findOne({ where: { customerTag } });
     return res.status(201).json({
       message: "customer created succsesfully",
-       newCus
+      newCus,
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -58,11 +70,15 @@ export const getAllCustomers = async (req: Request, res: Response) => {
       order: [["createdAt", "DESC"]],
     });
     if (customers.length == 0) {
-      return res.status(200).json({messege: "No Customers Found",customers});
+      return res.status(200).json({ messege: "No Customers Found", customers });
     }
+    const parsedCustomers = customers.map((customer) => {
+      const customerData = customer.toJSON();
+      return customerData;
+    });
     res.status(200).json({
       message: "successfully retrieved your customers",
-      customers,
+      customers: parsedCustomers,
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -75,14 +91,20 @@ export const getAllCustomers = async (req: Request, res: Response) => {
 export const getCustomer = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
- //console.log(req.path, "yyy")
+
     const customer = await Customer.findByPk(id);
     if (!customer) {
       return res.status(204).json({ message: "customer not found", customer });
     }
+    const customerData = customer.toJSON();  // Convert the Sequelize model instance to a plain object
+    const phoneNumbers = customerData.phoneNumber ? JSON.parse(customerData.phoneNumber as any) : [];  
     res
       .status(200)
-      .json({ messages: "Customer retrieved succesfully", customer });
+      .json({ messages: "Customer retrieved succesfully", customer:{
+        ...customerData, // Include other customer fields
+        phoneNumbers,    // Include parsed phoneNumbers
+      },
+    });
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
@@ -95,7 +117,7 @@ export const updateCustomer = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const { phoneNumber, firstname, lastname, address, email} = req.body;
+    const { phoneNumber, firstname, lastname, address, email } = req.body;
 
     const updatedFirstname = toPascalCase(firstname);
     const updatedLastname = toPascalCase(lastname);
@@ -126,7 +148,7 @@ export const updateCustomer = async (req: Request, res: Response) => {
       firstname: updatedFirstname,
       lastname: updatedLastname,
       address,
-      email:updatedEmail
+      email: updatedEmail,
     });
     res.status(200).json({
       message: "Customer updated succesfully",
@@ -166,7 +188,7 @@ export const deleteCustomer = async (req: Request, res: Response) => {
 
 export const searchCustomer = async (req: Request, res: Response) => {
   try {
-    const {search} = req.query 
+    const { search } = req.query;
 
     const whereClause: {
       [Op.or]?: {
@@ -187,9 +209,10 @@ export const searchCustomer = async (req: Request, res: Response) => {
     const customerList = await Customer.findAll({ where: whereClause });
 
     if (customerList.length == 0) {
-      return res
-        .status(200)
-        .json({ message: "No customer found matching the criteria", customerList });
+      return res.status(200).json({
+        message: "No customer found matching the criteria",
+        customerList,
+      });
     }
 
     res
@@ -206,15 +229,14 @@ export const searchCustomer = async (req: Request, res: Response) => {
 
 export const orderCustomersFirstname = async (req: Request, res: Response) => {
   try {
-    
     const customerList = await Customer.findAll({
-      order: [['firstname', 'ASC']],
+      order: [["firstname", "ASC"]],
     });
 
     if (customerList.length === 0) {
       return res
         .status(200)
-        .json({ message: "No customers found" , customerList});
+        .json({ message: "No customers found", customerList });
     }
 
     res

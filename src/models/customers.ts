@@ -10,7 +10,7 @@ export interface CustomerAttributes {
   date: Date;
   email: string;
   profilePic?: string;
-  phoneNumber: string;
+  phoneNumber: string[];
   address?: string;
 }
 
@@ -83,8 +83,9 @@ Customer.init(
       allowNull: true,
     },
     phoneNumber: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: DataTypes.JSON, // Use JSON data type to store multiple phone numbers
+      allowNull: true,
+      defaultValue: [], // Default to an empty array
     },
   },
   {

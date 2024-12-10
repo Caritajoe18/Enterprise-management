@@ -920,7 +920,7 @@ export const approveAuthToWeigh = async (req: AuthRequest, res: Response) => {
     });
 
     // Find admins with roles containing "weigh" (case-insensitive)
-    const weighAdmin = await Admins.findOne({
+    const weighAdmins = await Admins.findAll({
       include: {
         model: Role,
         as: "role",
@@ -930,16 +930,29 @@ export const approveAuthToWeigh = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    if (weighAdmin) {
-      await Notify.create({
+    // if (weighAdmin) {
+    //   await Notify.create({
+    //     ...req.body,
+    //     adminId: weighAdmin.dataValues.id,
+    //     message: `An Authority to weigh has been approved.`,
+    //     type: "weigh",
+    //     ticketId,
+    //   });
+    // }
+
+    if (weighAdmins && weighAdmins.length > 0) {
+      // Map through all admins and create notifications for each
+      const notifications = weighAdmins.map((admin) => ({
         ...req.body,
-        adminId: weighAdmin.dataValues.id,
+        adminId: admin.dataValues.id,
         message: `An Authority to weigh has been approved.`,
         type: "weigh",
         ticketId,
-      });
+      }));
+    
+      // Bulk create notifications
+      await Notify.bulkCreate(notifications);
     }
-
     // Return success response
     return res
       .status(200)

@@ -14,8 +14,7 @@ const passwordSchema = Joi.string()
   .regex(/^(?=.*[A-Za-z])(?=.*\d).{5,}$/)
   .message(
     "Password must be at least 5 characters long, contain at least one letter, and one digit"
-  )
-  .required();
+  );
 
 
 export const signUpSchema = Joi.object({

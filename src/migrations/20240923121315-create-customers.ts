@@ -48,7 +48,7 @@ module.exports = {
         allowNull: true,
       },
       phoneNumber: {
-        type: Sequelize.STRING,
+        type: Sequelize.JSON,
         allowNull: false,
       },
       createdAt: {

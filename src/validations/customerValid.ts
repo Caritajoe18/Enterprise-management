@@ -7,8 +7,19 @@ export const regCustomerSchema = Joi.object({
   }),
   lastname: Joi.string().required(),
   email: Joi.string().email(),
-  address: Joi.string().required(),
-  phoneNumber: Joi.string().required(),
+  address: Joi.string(),
+  phoneNumber: Joi.array()
+    .items(
+      Joi.string().required().messages({
+        "string.empty": "Phone numbers cannot be empty.",
+      })
+    )
+    .min(1)
+    .required()
+    .messages({
+      "array.base": "Phone numbers must be an array of strings.",
+      "array.min": "At least one phone number is required.",
+    }),
   profilePic: Joi.string(),
   date: Joi.date(),
 });
@@ -20,7 +31,7 @@ export const regSupplierSchema = Joi.object({
   }),
   lastname: Joi.string().required(),
   email: Joi.string().email(),
-  address: Joi.string().required(),
+  address: Joi.string(),
   phoneNumber: Joi.string().required(),
 });
 
@@ -40,7 +51,9 @@ export const updateCustomerSchema = Joi.object({
   }),
 
   address: Joi.string(),
-  phoneNumber: Joi.string(),
+  phoneNumber: Joi.array().items(Joi.string()).optional().messages({
+    "array.base": "Phone numbers must be an array of strings.",
+  }),
   date: Joi.date(),
   profilePic: Joi.string(),
 });
