@@ -99,14 +99,13 @@ export const getCustomer = async (req: Request, res: Response) => {
     if (!customer) {
       return res.status(204).json({ message: "customer not found", customer });
     }
-    const customerData = customer.toJSON();  // Convert the Sequelize model instance to a plain object
-    const phoneNumbers = customerData.phoneNumber ? JSON.parse(customerData.phoneNumber as any) : [];  
+    const customerData = customer.toJSON(); 
+    if (customerData.phoneNumber) {
+      customerData.phoneNumber = JSON.parse(customerData.phoneNumber as unknown as string);
+    } 
     res
       .status(200)
-      .json({ messages: "Customer retrieved succesfully", customer:{
-        ...customerData, // Include other customer fields
-        phoneNumbers,    // Include parsed phoneNumbers
-      },
+      .json({ messages: "Customer retrieved succesfully", customer: customerData
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
