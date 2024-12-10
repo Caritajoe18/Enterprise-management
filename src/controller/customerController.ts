@@ -7,6 +7,7 @@ import {
 import { option } from "../validations/adminValidation";
 import { toPascalCase } from "../utilities/auths";
 import { Op } from "sequelize";
+import db from "../db";
 
 export const createCustomer = async (req: Request, res: Response) => {
   try {
@@ -22,13 +23,21 @@ export const createCustomer = async (req: Request, res: Response) => {
     email = email ? email.toLowerCase() : null;
 
     //const exist = await Customer.findOne({ where: { phoneNumber } });
+    // const exist = await Customer.findOne({
+    //   where: {
+    //     phoneNumber: {
+    //       [Op.contains]: phoneNumber, // Checks for overlap in the JSON array
+    //     },
+    //   },
+    // });
     const exist = await Customer.findOne({
-      where: {
-        phoneNumber: {
-          [Op.contains]: phoneNumber, // Checks for overlap in the JSON array
-        },
-      },
+      where: db.where(
+        db.fn('JSON_CONTAINS', db.col('phoneNumber'), JSON.stringify(phoneNumber)),
+        true
+      ),
     });
+    
+    
     if (exist) {
       return res
         .status(400)
