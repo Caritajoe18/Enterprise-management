@@ -98,10 +98,10 @@ router.get("/get-permissions", authorize(), getAllPermissions);
 
 //products
 router.post("/add-product", authorize(), createProducts);
-router.patch("/edit-product/:id", authorize(), updateProducts);
+router.patch("/edit-product/:id", updateProducts);
 router.get("/get-products", getProducts);
 router.get("/get-raw-materials", getRawMaterials);
-router.get("/search-products", authorize(), searchProducts);
+router.get("/search-products", searchProducts);
 router.delete("/delete-product/:id", authorize(), deleteProduct);
 
 //staff
