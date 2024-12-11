@@ -31,7 +31,7 @@ wss.on("connection", (ws, req) => {
   }
 });
 
-sequelize.sync({ alter: true}).then(() => {
+sequelize.sync({ alter: false}).then(() => {
   console.log("Connected to MySql");
 });
 
