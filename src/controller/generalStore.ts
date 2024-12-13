@@ -10,6 +10,7 @@ import {
   addQuantityToStore,
   removeQuantityFromStore,
 } from "../utilities/modules";
+import { Op } from "sequelize";
 export const createGenStore = async (req: Request, res: Response) => {
   try {
     const { name } = req.body;
@@ -221,4 +222,31 @@ export const removeQuantityFromGeneralStore = async (
   res: Response
 ) => {
   return removeQuantityFromStore(req, res, GeneralStore);
+};
+
+export const searchGenStore = async (req: Request, res: Response) => {
+  try {
+    const { search } = req.query as { search?: string };
+
+    const whereClause =
+      search && search.trim()
+        ? { [Op.or]: [{ name: { [Op.like]: `%${search}%` } }] }
+        : {};
+
+    const shelf = await GeneralStore.findAll({ where: whereClause });
+
+    if (shelf.length === 0) {
+      return res
+        .status(200)
+        .json({ message: "No shelf found matching the criteria", shelf });
+    }
+
+    res.status(200).json({ message: "Shelf retrieved successfully", shelf });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "An unexpected error occurred" });
+    }
+  }
 };

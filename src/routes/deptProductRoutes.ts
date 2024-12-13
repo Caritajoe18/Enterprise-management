@@ -4,7 +4,7 @@ import { authorize } from "../middleware/staffPermissions";
 import { getDepartmentForPurchase, getDepartmentForSale, getDepartmentProducts } from "../controller/productController";
 import upload from "../utilities/multer";
 import { addQuantityToPharmacyStore, createOrder, createStore, deletePharmStore, editStore, getPharmStores, getStoreForPurchase, getStoreForSale, removeQuantityFromPharmacyStore, uploadImage, viewOrder } from "../controller/pharmacyStore";
-import { addQuantityToGeneralStore, createGenOrder, createGenStore, deleteGenStore, editGenStore, getGenStores, removeQuantityFromGeneralStore, viewGenOrder } from "../controller/generalStore";
+import { addQuantityToGeneralStore, createGenOrder, createGenStore, deleteGenStore, editGenStore, getGenStores, removeQuantityFromGeneralStore, searchGenStore, viewGenOrder } from "../controller/generalStore";
 import { addQuantityToDepartmentStore, createDeptOrder, createDeptStore, deleteDeptStore, editDeptStore, getDeptStoreForPurchase, getDeptStoreForSale, removeQuantityFromDepartmentStore, viewDeptOrder } from "../controller/departmentStoreController";
 import { checkDepartmentAccess } from "../middleware/deptLedgerAuth";
 
@@ -43,6 +43,7 @@ router.get("/view-gen-order",authorize(), viewGenOrder);
 router.post("/create-genstore-order",authorize(), createGenOrder);
 router.patch("/remove-quantity-gen/:Id", removeQuantityFromGeneralStore);
 router.patch("/add-quantity-gen/:Id", addQuantityToGeneralStore);
+router.get("/search-genstore", searchGenStore);
 
 //dept store
 router.post('/create-dept-store',authorize(), createDeptStore);
