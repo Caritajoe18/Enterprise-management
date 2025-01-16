@@ -14,7 +14,7 @@ module.exports = {
           firstname: "Okay",
           lastname: "Obi",
           email: "polobi700@yahoo.co.uk",
-          phoneNumber: +2348065208084,
+          phoneNumber: +23480652080845,
           password: hashedPassword,
           isAdmin: true,
           createdAt: new Date(),

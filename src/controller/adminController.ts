@@ -25,7 +25,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const loginurl =
-  process.env.LOGIN_URL || "https://polema.bookbank.com.ng";
+  process.env.LOGIN_URL || "https://polema-v2.netlify.app/";
   
 export const signupAdmin = async (req: Request, res: Response) => {
   try {
