@@ -2,5 +2,5 @@
 *.env
 /dist
 *eslint.config.mjs
-seeders/
+
 
