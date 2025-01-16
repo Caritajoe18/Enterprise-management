@@ -1,16 +1,61 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../db";
-import { validatePrices } from "../validations/productValidations";
 
+export interface IProduct {
+  unit: string;
+  amount: number;
+}
+export interface Plan {
+  category: string;
+  amount: number;
+}
 export interface ProductsAttributes {
   id: string;
   name: string;
-  prices: { [category: string]: number };
+  category: "For Sale" | "For Purchase";
+  price: IProduct[];
+  pricePlan?: Plan[];
+  departmentId: string;
 }
 
-export class ProductInstance extends Model<ProductsAttributes> {}
+export class Products extends Model<ProductsAttributes> {
+  static associate(models: any) {
+    Products.belongsTo(models.Departments, {
+      foreignKey: "departmentId",
+      as: "department",
+    });
+    Products.hasMany(models.CustomerOrder, {
+      foreignKey: "productId",
+      as: "orders",
+    });
+    Products.hasMany(models.Invoice, {
+      foreignKey: "productId",
+      as: "invoice",
+    });
+    Products.hasOne(models.PharmacyStore, {
+      foreignKey: "productId",
+      as: "store",
+    });
+    Products.hasOne(models.DepartmentStore, {
+      foreignKey: "productId",
+      as: "stores", // Alias should match what you use in queries
+    });
+    Products.hasMany(models.SupplierLedger, {
+      foreignKey: "productId",
+      as: "supplierLedgers",
+    });
+    Products.hasMany(models.LPO, {
+      foreignKey: "rawMaterial",
+      as: "lpo",
+    });
+    Products.hasMany(models.CashTicket, {
+      foreignKey: "productId",
+      as: "cash",
+    });
+  }
+}
 
-ProductInstance.init(
+Products.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -23,16 +68,32 @@ ProductInstance.init(
       allowNull: false,
       unique: true,
     },
-    prices: {
+    category: {
+      type: DataTypes.ENUM("For Sale", "For Purchase"),
+      allowNull: false,
+    },
+
+    price: {
       type: DataTypes.JSON,
       allowNull: false,
-      validate: {
-        isValid: validatePrices,
+    },
+    pricePlan: {
+      type: DataTypes.JSON,
+      defaultValue: {},
+      allowNull: true,
+    },
+    departmentId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: "Departments",
+        key: "id",
       },
+      onDelete: "CASCADE",
     },
   },
 
-  { sequelize: db, tableName: "products" }
+  { sequelize: db, modelName: "Products", tableName: "Products" }
 );
 
-export default ProductInstance;
+export default Products;

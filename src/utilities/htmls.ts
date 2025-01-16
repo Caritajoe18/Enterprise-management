@@ -1,6 +1,10 @@
+import dotenv from "dotenv";
+dotenv.config();
+const resetPasswordURL = process.env.RESET_PASSWORD_URL;
 export const generateVerificationEmailHTML = (
   fullname: string,
-  item: number | string
+  item: number | string,
+  randomPassword: string| undefined
 ) => {
   return `
     <!DOCTYPE html>
@@ -8,7 +12,7 @@ export const generateVerificationEmailHTML = (
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>OTP Verification</title>
+        <title>Polema Verification Mail</title>
         <style>
           body {
             font-family: Arial, sans-serif;
@@ -68,15 +72,22 @@ export const generateVerificationEmailHTML = (
       <body>
         <div class="container">
           <div class="header">
-            <h1>OTP Verification</h1>
+            <h1>Your Login</h1>
           </div>
           <div class="content">
-            <p>Hi ${fullname},</p>
+            <p>Welcome ${fullname},</p>
             <p>
-              We've received a request to verify your account. Please use the OTP
-              below to complete the verification process:
+              You have been registered as a staff, Please use link
+              below to login and complete the verification process:
             </p>
-            <p><a href="#" class="otp">${item}</a></p>
+            <p><button style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
+            <a href="${item}" style="color: white; text-decoration: none;">Login</a>
+          </button></p>
+          ${
+            randomPassword
+              ? `<p>Your temporary password is: <strong>${randomPassword}</strong></p>`
+              : ""
+          }
             <p>If you did not request this, please ignore this email.</p>
           </div>
           <div class="footer">
@@ -88,18 +99,21 @@ export const generateVerificationEmailHTML = (
   `;
 };
 
-export const generateTokenEmailHTML = (fullname: string, item: number | string) => {
+export const generateTokenEmailHTML = (
+  fullname: string,
+  item: number | string
+) => {
   return `
     <!DOCTYPE html>
     <html lang="en">
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Email Verification</title>
+        <title>Polema:Reset Password</title>
         <style>
           body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #000000;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -110,7 +124,7 @@ export const generateTokenEmailHTML = (fullname: string, item: number | string) 
           .container {
             max-width: 600px;
             margin: auto;
-            background-color: #fff;
+            background-color: #f4f4f4;
             border-radius: 4px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             padding: 20px;
@@ -160,14 +174,14 @@ export const generateTokenEmailHTML = (fullname: string, item: number | string) 
       <body>
         <div class="container">
           <div class="header">
-            <h1>Email Verification</h1>
+            <h1>Reset Password</h1>
           </div>
           <div class="content">
-            <p>Hi ${fullname},</p>
+            <p>Welcome ${fullname},</p>
             <p>Thank you for registering with us. Please click the button below to reset your password:</p>
             <p>
             <button style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
-            <a href="http://localhost:5000/admin/reset-password?token=${item}" style="color: white; text-decoration: none;">Verify Email</a>
+            <a href="${resetPasswordURL}?token=${item}" style="color: white; text-decoration: none;">Reset</a>
           </button>
 
 </p>

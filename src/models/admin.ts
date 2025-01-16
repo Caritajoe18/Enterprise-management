@@ -1,25 +1,49 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../db";
+import Role from "./role";
+
+interface PushSubscription {
+  endpoint: string;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
+}
+
 export interface AdminAttributes {
   id: string;
-  fullname: string;
+  firstname: string;
+  lastname: string;
   email: string;
   phoneNumber: string;
   profilePic: string;
-  department: string;
+  department: string[];
   address: string;
-  role: string;
-  products:string[];
-  verificationToken: string;
-  resetPasswordToken: string;
+  roleId: string;
+  pushSubscription: PushSubscription | null;
+  verificationToken?: string;
+  resetPasswordToken?: string | null;
+  resetPasswordTokenExpiry: number | null;
   isAdmin?: boolean;
-  isVerified: boolean;
   password: string;
   active: boolean;
 }
-export class AdminInstance extends Model<AdminAttributes> {}
 
-AdminInstance.init(
+class Admins extends Model<AdminAttributes> {
+  public role?: Role;
+  static associate(models: any) {
+    Admins.belongsTo(models.Role, {
+      foreignKey: "roleId",
+      as: "role",
+    });
+
+    //  Role.hasMany(models.Admins, {
+    //   foreignKey: 'roleId',
+    //    as: 'admins',
+    // });
+  }
+}
+Admins.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -28,7 +52,11 @@ AdminInstance.init(
       allowNull: false,
     },
 
-    fullname: {
+    firstname: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    lastname: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -41,45 +69,48 @@ AdminInstance.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    pushSubscription: {
+      type: DataTypes.JSON, // Field to store push subscription object
+      allowNull: true, // Can be null until they subscribe
+    },
 
     profilePic: {
       type: DataTypes.STRING,
       allowNull: true,
     },
     department: {
-      type: DataTypes.STRING,
+      type: DataTypes.JSON,
       allowNull: true,
     },
-    role: {
-      type: DataTypes.STRING,
-      allowNull: false,
+
+    roleId: {
+      type: DataTypes.UUID,
+      references: {
+        model: "Roles",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
     },
-    products:{
-      type: DataTypes.JSON,
-      allowNull: false,
-    },
+
     password: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    verificationToken: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
+
     address: {
       type: DataTypes.STRING,
       allowNull: true,
     },
-
     resetPasswordToken: {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    isVerified: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
+    resetPasswordTokenExpiry: {
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
+
     isAdmin: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
@@ -90,7 +121,10 @@ AdminInstance.init(
       defaultValue: true,
     },
   },
-  { sequelize: db, tableName: "admin" }
+  {
+    sequelize: db,
+    modelName: "Admins",
+    tableName: "Admins",
+  }
 );
-
-export default AdminInstance;
+export default Admins;

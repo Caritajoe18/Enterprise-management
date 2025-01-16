@@ -1,17 +1,38 @@
 import bcryptjs from "bcryptjs";
-import Jwt from "jsonwebtoken";
+import Jwt, { JwtPayload } from "jsonwebtoken";
 import dotenv from "dotenv";
+import Permission from "../models/permission";
+import rateLimit from 'express-rate-limit';
 dotenv.config();
 
-export const generateToken = async (id: string, product: string[]) => {
-  const payload = { id, product };
+ export interface AdminJwtPayload extends JwtPayload {
+  id: string;
+  roleId: string;
+  isAdmin: boolean;
+}
+
+export const generateToken = async (id: string, roleId: string,  isAdmin: boolean| undefined) => {
+  const payload = { id,roleId, isAdmin};
   return Jwt.sign(payload, process.env.JWT_SECRET as string, {
     expiresIn: "1d",
   });
 };
+const generateeToken = async (admin: any) => {
+  const permissions = admin.role.permissions.map((permission: Permission) => permission.dataValues.name);
+
+  console.log(permissions, "permissionss")
+
+  const tokenPayload = {
+    id: admin.id,
+    role: admin.role.name,
+    permissions, // Embed permissions into the token
+  };
+
+  return Jwt.sign(tokenPayload, process.env.JWT_SECRET as string, { expiresIn: '1d' });
+ };
 
 
-export const verifyToken = async (token: string) => {
+export const verifyToken = async (token: string) : Promise<string | JwtPayload >=> {
   try {
     const decoded = Jwt.verify(token, process.env.JWT_SECRET as string);
     return decoded;
@@ -44,5 +65,22 @@ export const generateOtp = ()=> {
 
   return {otp, expiry}
 };
+
+export const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 3, 
+  message: "Too many requests from this IP, please try again after 15 minutes."
+});
+export const tokenExpiry = Math.floor(Date.now() / 1000) + 900; 
+export const toPascalCase = (str: string) => {
+  return str
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
+
+
 
  

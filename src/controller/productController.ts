@@ -1,9 +1,12 @@
 import { Request, Response } from "express";
-import { ProductInstance } from "../models/products";
-import { createProductSchema } from "../validations/productValidations";
-import { option } from "../validations/userValidation";
+import { Products } from "../models/products";
+import {
+  createProductSchema,
+  updateProductSchema,
+} from "../validations/productValidations";
+import { option } from "../validations/adminValidation";
 import { Op } from "sequelize";
-import OTPInstance from "../models/otps";
+import Departments from "../models/department";
 
 export const createProducts = async (req: Request, res: Response) => {
   try {
@@ -14,20 +17,28 @@ export const createProducts = async (req: Request, res: Response) => {
         .json({ error: validationResult.error.details[0].message });
     }
 
-    const { name } = req.body;
+    const { name, price, pricePlan, departmentId } = req.body;
 
-    const exist = await ProductInstance.findOne({ where: { name } });
+    const exist = await Products.findOne({ where: { name } });
     if (exist) {
-      return res.status(400).json({ error: "Product already exists" });
+      return res.status(400).json({ message: "Product already exists" });
+    }
+    if (departmentId) {
+      const departmentExists = await Departments.findByPk(departmentId);
+      if (!departmentExists) {
+        return res.status(400).json({ message: "Department not found" });
+      }
     }
 
-    const product = await ProductInstance.create({
+    let product = await Products.create({
       ...req.body,
+      name,
+      price,
+      pricePlan: pricePlan || {},
+      departmentId: departmentId || null,
     });
 
-    res
-      .status(201)
-      .json({ message: "Raw material added successfully", product });
+    res.status(201).json({ message: "product added successfully", product });
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
@@ -39,37 +50,55 @@ export const createProducts = async (req: Request, res: Response) => {
 
 export const updateProducts = async (req: Request, res: Response) => {
   try {
+    const validationResult = updateProductSchema.validate(req.body, option);
+    if (validationResult.error) {
+      return res
+        .status(400)
+        .json({ error: validationResult.error.details[0].message });
+    }
     const { id } = req.params;
-    const { prices , name } = req.body;
+    const { price, name, pricePlan, category } = req.body;
 
-    const product = await ProductInstance.findByPk(id);
+    const product = await Products.findByPk(id);
     if (!product) {
       return res.status(404).json({ error: "product not found" });
     }
 
-    const updatedPrices = { ...product.dataValues.prices, ...prices };
-
-      const updatedProducts = await ProductInstance.update(
-      { name, prices: updatedPrices },
+    const updatedPrices = price ? price : product.dataValues.price;
+    const updatedPricePlan = pricePlan
+      ? pricePlan
+      : product.dataValues.pricePlan;
+    await Products.update(
+      { name, category, price: updatedPrices, pricePlan: updatedPricePlan },
       { where: { id } }
-      )
-    //product.dataValues.prices = { ...product.dataValues.prices, ...prices };
+    );
 
-    console.log("After update:", product.dataValues);
-    //await product.save();
+    const updatedProducts = await Products.findByPk(id);
 
-    res.status(200).json({ message: "Prices updated successfully", updatedProducts});
+    if (updatedProducts) {
+      if (typeof updatedProducts.dataValues.price == "string") {
+        updatedProducts.dataValues.price = JSON.parse(
+          updatedProducts.dataValues.price
+        );
+      }
+
+      if (typeof updatedProducts.dataValues.pricePlan == "string") {
+        updatedProducts.dataValues.pricePlan = JSON.parse(
+          updatedProducts.dataValues.pricePlan
+        );
+      }
+    }
+
+    res
+      .status(200)
+      .json({ message: "Products updated successfully", updatedProducts });
   } catch (error: unknown) {
     if (error instanceof Error) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
-    res.status(500).json({ error: "An unexpected error occurred." });
+    return res.status(500).json({ error: "An error occurred" });
   }
 };
-
-
-
-
 
 export const searchProducts = async (req: Request, res: Response) => {
   try {
@@ -82,13 +111,17 @@ export const searchProducts = async (req: Request, res: Response) => {
       whereClause.name = { [Op.like]: `%${name}%` };
     }
 
-    const products = await ProductInstance.findAll({ where: whereClause });
+    const products = await Products.findAll({ where: whereClause });
 
     if (products.length === 0) {
-      return res.status(404).json({ message: "No product found matching the criteria" });
+      return res
+        .status(200)
+        .json({ message: "No product found matching the criteria" });
     }
 
-    res.status(200).json({ message: "Company's products retrieved successfully", products });
+    res
+      .status(200)
+      .json({ message: "Company's products retrieved successfully", products });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({ error: error.message });
@@ -99,14 +132,67 @@ export const searchProducts = async (req: Request, res: Response) => {
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
-    const products = await ProductInstance.findAll();
-    if(products.length === 0){
-       return res.status(204).send()
+    const products = await Products.findAll({
+      where: { category: "For Sale" },
+      order: [["createdAt", "DESC"]],
+    });
+    if (products.length === 0) {
+      return res.status(200).json({ message: "No products found", products });
     }
 
-     res
-      .status(200)
-      .json({ message: "Company's products retrieved successfully", products });
+    const parsedProducts = products.map((product) => {
+      return {
+        ...product.toJSON(),
+        price:
+          typeof product.dataValues.price === "string"
+            ? JSON.parse(product.dataValues.price)
+            : product.dataValues.price,
+        pricePlan:
+          typeof product.dataValues.pricePlan === "string"
+            ? JSON.parse(product.dataValues.pricePlan)
+            : product.dataValues.pricePlan,
+      };
+    });
+
+    res.status(200).json({
+      message: "Company's products retrieved successfully",
+      products: parsedProducts,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred" });
+  }
+};
+export const getRawMaterials = async (req: Request, res: Response) => {
+  try {
+    const products = await Products.findAll({
+      where: { category: "For Purchase" },
+      order: [["createdAt", "DESC"]],
+    });
+    if (products.length === 0) {
+      return res.status(200).json({ message: "No Raw Materials found", products });
+    }
+
+    const parsedProducts = products.map((product) => {
+      return {
+        ...product.toJSON(),
+        price:
+          typeof product.dataValues.price === "string"
+            ? JSON.parse(product.dataValues.price)
+            : product.dataValues.price,
+        pricePlan:
+          typeof product.dataValues.pricePlan === "string"
+            ? JSON.parse(product.dataValues.pricePlan)
+            : product.dataValues.pricePlan,
+      };
+    });
+
+    res.status(200).json({
+      message: "Company's products retrieved successfully",
+      products: parsedProducts,
+    });
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
@@ -119,23 +205,135 @@ export const deleteProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const product = await ProductInstance.findByPk(id);
+    const product = await Products.findByPk(id);
     if (!product) {
       return res.status(404).json({ message: "No product found" });
     }
-    await OTPInstance.destroy({
-      where: { userId: id }
-    });
 
-    // Delete the product
     await product.destroy();
 
     res.status(200).json({ message: "Product deleted successfully" });
   } catch (error: unknown) {
     if (error instanceof Error) {
-      return res.status(500).json({error: error.message});
+      return res.status(500).json({ error: error.message });
     } else {
       return res.status(500).json({ error: "An unexpected error occurred." });
     }
+  }
+};
+
+export const getDepartmentProducts = async (req: Request, res: Response) => {
+  try {
+    const { departmentId } = req.params;
+    const products = await Products.findAll({
+      where: {
+        departmentId: departmentId,
+      },
+      order: [["createdAt", "DESC"]],
+    });
+
+    if (products.length === 0) {
+      return res.status(200).json({ message: "No products found", products });
+    }
+
+    const parsedProducts = products.map((product) => ({
+      ...product.toJSON(),
+      price:
+        typeof product.dataValues.price === "string"
+          ? JSON.parse(product.dataValues.price)
+          : product.dataValues.price,
+      pricePlan:
+        typeof product.dataValues.pricePlan === "string"
+          ? JSON.parse(product.dataValues.pricePlan)
+          : product.dataValues.pricePlan,
+    }));
+
+    res.status(200).json({
+      message: "products retrieved successfully",
+      products: parsedProducts,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred" });
+  }
+};
+export const getDepartmentForSale = async (req: Request, res: Response) => {
+  try {
+    const { departmentId } = req.params;
+    const products = await Products.findAll({
+      where: {
+        departmentId: departmentId,
+        category: "For Sale",
+      },
+      order: [["createdAt", "DESC"]],
+    });
+
+    if (products.length === 0) {
+      return res.status(200).json({ message: "No products found", products });
+    }
+
+    const parsedProducts = products.map((product) => ({
+      ...product.toJSON(),
+      price:
+        typeof product.dataValues.price === "string"
+          ? JSON.parse(product.dataValues.price)
+          : product.dataValues.price,
+      pricePlan:
+        typeof product.dataValues.pricePlan === "string"
+          ? JSON.parse(product.dataValues.pricePlan)
+          : product.dataValues.pricePlan,
+    }));
+
+    res.status(200).json({
+      message: "products retrieved successfully",
+      products: parsedProducts,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred" });
+  }
+};
+export const getDepartmentForPurchase = async (req: Request, res: Response) => {
+  try {
+    const { departmentId } = req.params;
+    const products = await Products.findAll({
+      where: {
+        departmentId: departmentId,
+        category: "For Purchase",
+      },
+      order: [["createdAt", "DESC"]],
+    });
+
+    if (products.length === 0) {
+      return res
+        .status(200)
+        .json({ message: "No raw materials found", products });
+    }
+
+    const parsedProducts = products.map((product) => ({
+      ...product.toJSON(),
+      price:
+        typeof product.dataValues.price === "string"
+          ? JSON.parse(product.dataValues.price)
+          : product.dataValues.price,
+      pricePlan:
+        typeof product.dataValues.pricePlan === "string"
+          ? JSON.parse(product.dataValues.pricePlan)
+          : product.dataValues.pricePlan,
+    }));
+
+    res.status(200).json({
+      message: "products retrieved successfully",
+      products: parsedProducts,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 };

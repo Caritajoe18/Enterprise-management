@@ -1,21 +1,45 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../db";
-import ProductInstance from "./products";
-import { validateCategory } from "../validations/productValidations";
 
 export interface CustomerAttributes {
   id: string;
-  name: string;
+  idCount: number;
+  customerTag: string;
+  firstname: string;
+  lastname: string;
   date: Date;
-  profilePic:string
-  address: string;
-  category: string;
-  description: string;
+  email: string;
+  profilePic?: string;
+  phoneNumber: string[];
+  address?: string;
 }
 
-export class CustomerInstance extends Model<CustomerAttributes> {}
+export class Customer extends Model<CustomerAttributes> {
+  static associate(models: any) {
+    Customer.hasMany(models.CustomerOrder, {
+      foreignKey: "customerId",
+      as: "orders",
+    });
+    Customer.hasMany(models.AccountBook, {
+      foreignKey: "customerId",
+      as: "accountBooks",
+    });
+    Customer.hasMany(models.Invoice, {
+      foreignKey: "customerId",
+      as: "customerInvoice",
+    });
+    Customer.hasMany(models.AuthToWeigh, {
+      foreignKey: "customerId",
+      as: "weigh",
+    });
+    Customer.hasMany(models.CashTicket, {
+      foreignKey: "customerId",
+      as: "cash",
+    });
+  }
+}
 
-CustomerInstance.init(
+Customer.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -23,9 +47,27 @@ CustomerInstance.init(
       primaryKey: true,
       allowNull: false,
     },
-    name: {
+    idCount: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      unique: true,
+    },
+    customerTag: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
+    },
+    firstname: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    lastname: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     profilePic: {
       type: DataTypes.STRING,
@@ -40,20 +82,16 @@ CustomerInstance.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    category: {
-      type: DataTypes.STRING,
+    phoneNumber: {
+      type: DataTypes.JSON, // Use JSON data type to store multiple phone numbers
       allowNull: true,
-      validate: { validateCategory },
-    },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true,
+      defaultValue: [], // Default to an empty array
     },
   },
   {
     sequelize: db,
-    tableName: "customers",
+    tableName: "Customers",
   }
 );
 
-export default CustomerInstance;
+export default Customer;

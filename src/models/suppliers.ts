@@ -1,17 +1,28 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../db";
-export interface suppliersAttributes {
+export interface SupplierAttributes {
   id: string;
-  name: string;
-  date: Date;
-  product: string;
-  credit: string;
-  debit: string;
+  idCount: number;
+  supplierTag: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  
   
 }
-export class suppliersInstance extends Model<suppliersAttributes> {}
+export class Supplier extends Model<SupplierAttributes> {
+  static associate(models: any) {
+    Supplier.hasMany(models.LPO, {
+      foreignKey: "supplierId",
+      as: "lpo",
+    });
+    
+  }
+}
 
-suppliersInstance.init(
+Supplier.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -19,33 +30,42 @@ suppliersInstance.init(
       primaryKey: true,
       allowNull: false,
     },
+    idCount:{
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      unique:true
+    },
+    supplierTag:{
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique:true
 
-    name: {
+    },
+
+    firstname: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    date: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    
-    },
-    product: {
+    lastname: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-
-    credit: {
+    email: {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    debit: {
+    
+    address: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    phoneNumber: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    
      
   },
-  { sequelize: db, tableName: "suppliers" }
+  { sequelize: db, tableName: "Suppliers", modelName: "Supplier" }
 );
 
-export default suppliersInstance;
+export default Supplier;

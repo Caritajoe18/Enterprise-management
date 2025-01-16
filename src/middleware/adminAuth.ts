@@ -1,65 +1,64 @@
-import { NextFunction, Response, Request } from "express";
+import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../utilities/auths";
-import { AdminInstance } from "../models/admin";
-import dayjs from "dayjs";
+import Admins from "../models/admin";
+import { JwtPayload } from "jsonwebtoken";
 
-interface AuthRequest extends Request {
-  products?: string[]
+export interface AuthRequest extends Request {
+  admin?: Admins;
 }
 
-export const authenticateAdmin = (products: string[]) => {
-  return async (req: AuthRequest | any , res: Response, next: NextFunction) => {
-
-    console.log("Request Object:", req);
-
+export const authenticateAdmin = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
     const authorization = req.headers["authorization"];
-
     if (!authorization) {
-      return res.status(401).json({ error: "No token provided" });
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: No token provided" });
     }
 
     const token = authorization.split(" ")[1];
     if (!token) {
-      return res.status(401).json({ error: "Invalid token format" });
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: Invalid token format" });
     }
 
-    try {
-      const verifying = await verifyToken(token);
-      if (verifying === "token expired") {
-        return res.status(401).json({ error: "Token expired" });
-      }
+    const decoded = await verifyToken(token);
+    if (typeof decoded === "string") {
+      return res.status(401).json({ message: decoded });
+    }
 
-      const { products, id, exp } = verifying as Record<string, string>;
-      const now = dayjs().unix();
+    const { id, isAdmin } = decoded as JwtPayload;
 
-      if (Number(exp) < now) {
-        return res
-          .status(401)
-          .json({ error: "Token expired, please login again" });
-      }
+    if (!id && !isAdmin) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: No user ID in token" });
+    }
 
-      const admin = (await AdminInstance.findOne({
-        where: { id },
-      })) as AdminInstance;
+    if (isAdmin) {
+      const admin = await Admins.findOne({ where: { isAdmin: true, id } });
       if (!admin) {
-        return res.status(404).json({ error: "Admin not found" });
+        return res.status(404).json({ message: "Admin not found" });
       }
-
-      if (!products.includes(products)) {
-        return res.status(403).json({ error: "Unauthorized" });
-      }
-
-      req.admin = verifying;
-      
-      console.log("Updated Request Object:", req)
-      console.log(req.admin.id); // Logs the admin's ID
-console.log(req.admin.role); // Logs the admin's role
-
-
-      next();
-    } catch (error) {
-      console.error("Authentication error:", error);
-      return res.status(500).json({ error: "Internal server error" });
+      req.admin = admin;
+      return next();
     }
-  };
+
+    // Find the admin by ID
+    const admin = await Admins.findByPk(id);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    req.admin = admin;
+    next();
+  } catch (error) {
+    console.error("Error authenticating admin:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };
